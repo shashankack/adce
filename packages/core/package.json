@@ -1,0 +1,19 @@
+{
+  "name": "@adce/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@adce/git": "workspace:*",
+    "@adce/shared": "workspace:*",
+    "@adce/storage": "workspace:*",
+    "fast-glob": "^3.3.3",
+    "ignore": "^7.0.8",
+    "zod": "^4.5.4"
+  }
+}

@@ -1,0 +1,17 @@
+﻿node_modules/
+dist/
+coverage/
+
+.env
+.env.*
+*.log
+
+ml/.venv/
+ml/models/
+__pycache__/
+*.pyc
+
+benchmarks/results/
+
+.DS_Store
+Thumbs.db
