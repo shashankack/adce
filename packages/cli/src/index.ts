@@ -1,6 +1,9 @@
 ﻿#!/usr/bin/env node
 
 import { Command } from "commander";
+import { runInit } from "./commands/init.js";
+import { runScan } from "./commands/scan.js";
+import { runStatus } from "./commands/status.js";
 
 const program = new Command();
 
@@ -12,22 +15,23 @@ program
 program
   .command("init")
   .description("Initialize ADCE in the current project")
-  .action(() => {
-    console.log("adce init - not implemented yet");
+  .action(async () => {
+    await runInit();
   });
 
 program
   .command("scan")
   .description("Scan the current project")
-  .action(() => {
-    console.log("adce scan - not implemented yet");
+  .option("--full", "Force a full scan", false)
+  .action(async (options: { full?: boolean }) => {
+    await runScan(process.cwd(), { full: options.full });
   });
 
 program
   .command("status")
   .description("Show ADCE project status")
-  .action(() => {
-    console.log("adce status - not implemented yet");
+  .action(async () => {
+    await runStatus();
   });
 
 program.parse();

@@ -1,33 +1,29 @@
 # ADCE
 
-Artifact-Driven Context Engine
-
-A temporal and conflict-aware artifact context layer for AI coding agents.
+Artifact-Driven Context Engine — a temporal and conflict-aware context layer for AI coding agents.
 
 ## Status
 
-Early development.
-
-Current milestone:
+Early development. Current milestone:
 
 ```text
-adce init
-adce scan
-adce status
+adce init → adce scan → adce status
+```
 
-See /docs for the project specification and architecture.
+## Documentation
 
----
+| Document | Role |
+|----------|------|
+| [docs/AGENTS.md](docs/AGENTS.md) | Coding agent instructions and invariants |
+| [docs/ADCE_Technical_Specification.md](docs/ADCE_Technical_Specification.md) | Primary technical source of truth |
+| [docs/ADCE_Project_Directory_and_Implementation_Plan.md](docs/ADCE_Project_Directory_and_Implementation_Plan.md) | Package layout and development order |
+| [docs/ADCE_Complete_Project_Explanation.md](docs/ADCE_Complete_Project_Explanation.md) | Full product and research explanation |
 
-# Documentation
+## Development
 
-## 16. Make sure your existing documentation is in `/docs`
+```bash
+pnpm install
+pnpm --filter @adce/cli dev -- --help
+```
 
-You should end up with:
-
-```text
-docs/
-├── AGENTS.md
-├── ADCE_Technical_Specification.md
-├── ADCE_Project_Directory_and_Implementation_Plan.md
-└── ADCE_Complete_Project_Explanation.md
+Requires Node.js 22+.
