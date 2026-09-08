@@ -50,6 +50,10 @@ export const openDatabase = (dbPath: string) => {
   return drizzle(sqlite, { schema });
 };
 
+export const closeDatabase = (db: AdceDb): void => {
+  db.$client.close();
+};
+
 export const getMeta = (db: AdceDb, key: string): string | null => {
   const row = db
     .select()

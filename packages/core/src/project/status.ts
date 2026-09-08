@@ -1,6 +1,7 @@
 import { access } from "node:fs/promises";
 import type { StatusReport } from "@adce/shared";
 import {
+  closeDatabase,
   countArtifacts,
   getLatestScan,
   getMeta,
@@ -33,29 +34,33 @@ export async function getProjectStatus(
   }
 
   const db = openDatabase(dbPath(rootPath));
-  const lastScanAt = getMeta(db, "lastScanAt");
-  const latest = getLatestScan(db);
+  try {
+    const lastScanAt = getMeta(db, "lastScanAt");
+    const latest = getLatestScan(db);
 
-  return {
-    initialized: true,
-    rootPath: getMeta(db, "rootPath") ?? rootPath,
-    gitDetected: getMeta(db, "gitDetected") === "true",
-    createdAt: getMeta(db, "createdAt"),
-    lastScanAt: lastScanAt ? lastScanAt : null,
-    artifactCount: countArtifacts(db),
-    lastScan: latest
-      ? {
-          mode: latest.mode,
-          startedAt: latest.startedAt,
-          finishedAt: latest.finishedAt,
-          filesSeen: latest.filesSeen,
-          artifactsUpserted: latest.artifactsUpserted,
-          unchanged: latest.unchanged,
-          changed: latest.changed,
-          added: latest.added,
-          removed: latest.removed,
-          gitDetected: latest.gitDetected,
-        }
-      : null,
-  };
+    return {
+      initialized: true,
+      rootPath: getMeta(db, "rootPath") ?? rootPath,
+      gitDetected: getMeta(db, "gitDetected") === "true",
+      createdAt: getMeta(db, "createdAt"),
+      lastScanAt: lastScanAt ? lastScanAt : null,
+      artifactCount: countArtifacts(db),
+      lastScan: latest
+        ? {
+            mode: latest.mode,
+            startedAt: latest.startedAt,
+            finishedAt: latest.finishedAt,
+            filesSeen: latest.filesSeen,
+            artifactsUpserted: latest.artifactsUpserted,
+            unchanged: latest.unchanged,
+            changed: latest.changed,
+            added: latest.added,
+            removed: latest.removed,
+            gitDetected: latest.gitDetected,
+          }
+        : null,
+    };
+  } finally {
+    closeDatabase(db);
+  }
 }

@@ -1,6 +1,6 @@
 import { access, mkdir, writeFile } from "node:fs/promises";
 import { isGitRepository } from "@adce/git";
-import { openDatabase, setMeta } from "@adce/storage";
+import { closeDatabase, openDatabase, setMeta } from "@adce/storage";
 import { writeDefaultConfig } from "../config/loader.js";
 import { AGENTS_TEMPLATE } from "./agents-template.js";
 import {
@@ -47,11 +47,15 @@ export async function initializeProject(rootPath: string): Promise<InitResult> {
 
   const gitDetected = await isGitRepository(rootPath);
   const db = openDatabase(dbPath(rootPath));
-  const now = new Date().toISOString();
-  setMeta(db, "rootPath", rootPath);
-  setMeta(db, "createdAt", now);
-  setMeta(db, "gitDetected", gitDetected ? "true" : "false");
-  setMeta(db, "lastScanAt", "");
+  try {
+    const now = new Date().toISOString();
+    setMeta(db, "rootPath", rootPath);
+    setMeta(db, "createdAt", now);
+    setMeta(db, "gitDetected", gitDetected ? "true" : "false");
+    setMeta(db, "lastScanAt", "");
+  } finally {
+    closeDatabase(db);
+  }
 
   const agents = agentsPath(rootPath);
   let createdAgents = false;

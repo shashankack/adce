@@ -8,3 +8,8 @@ export {
 export { classifyArtifact } from "./artifacts/classifier.js";
 export { loadConfig, writeDefaultConfig } from "./config/loader.js";
 export type { AdceConfig } from "./config/schema.js";
+export {
+  discoverProjectRoot,
+  type ProjectRootDiscovery,
+  type RootEvidence,
+} from "./project/discover-root.js";
