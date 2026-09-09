@@ -1,5 +1,5 @@
-import { and, eq, isNotNull } from "drizzle-orm";
-import type { ArtifactRecord } from "@adce/shared";
+import { and, eq, isNotNull, inArray } from "drizzle-orm";
+import type { ArtifactRecord, ArtifactType } from "@adce/shared";
 import type { AdceDb } from "./database.js";
 import { artifacts } from "./schema.js";
 
@@ -21,8 +21,26 @@ const toRecord = (row: typeof artifacts.$inferSelect): ArtifactRecord => {
   };
 };
 
-export const listArtifacts = (db: AdceDb): ArtifactRecord[] =>
-  db.select().from(artifacts).all().map(toRecord);
+export interface ListArtifactOptions {
+  types?: ArtifactType[];
+}
+
+export const listArtifacts = (
+  db: AdceDb,
+  options: ListArtifactOptions = {},
+): ArtifactRecord[] => {
+  const { types } = options;
+
+  if (types && types.length > 0) {
+    return db
+      .select()
+      .from(artifacts)
+      .where(inArray(artifacts.type, types))
+      .all()
+      .map(toRecord);
+  }
+  return db.select().from(artifacts).all().map(toRecord);
+};
 
 export const listDetectedPathArtifacts = (db: AdceDb): ArtifactRecord[] =>
   db
@@ -41,6 +59,14 @@ export const findArtifactByPath = (
     .from(artifacts)
     .where(eq(artifacts.path, filePath))
     .get();
+  return row ? toRecord(row) : null;
+};
+
+export const findArtifactById = (
+  db: AdceDb,
+  id: string,
+): ArtifactRecord | null => {
+  const row = db.select().from(artifacts).where(eq(artifacts.id, id)).get();
   return row ? toRecord(row) : null;
 };
 

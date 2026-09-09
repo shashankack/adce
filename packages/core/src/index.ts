@@ -13,3 +13,9 @@ export {
   type ProjectRootDiscovery,
   type RootEvidence,
 } from "./project/discover-root.js";
+export {
+  listProjectArtifacts,
+  getProjectArtifact,
+  AdceNotInitializedError,
+  ArtifactNotFoundError,
+} from "./artifacts/query.js";

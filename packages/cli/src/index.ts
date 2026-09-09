@@ -4,6 +4,8 @@ import { Command } from "commander";
 import { runInit } from "./commands/init.js";
 import { runScan } from "./commands/scan.js";
 import { runStatus } from "./commands/status.js";
+import { runArtifact } from "./commands/artifact.js";
+import { runArtifacts } from "./commands/artifacts.js";
 
 const program = new Command();
 
@@ -15,8 +17,9 @@ program
 program
   .command("init")
   .description("Initialize ADCE in the current project")
-  .action(async () => {
-    await runInit();
+  .option("-y, --yes", "Skip confirmation; use detected project root", false)
+  .action(async (option: { yes?: boolean }) => {
+    await runInit(process.cwd(), { yes: option.yes });
   });
 
 program
@@ -32,6 +35,21 @@ program
   .description("Show ADCE project status")
   .action(async () => {
     await runStatus();
+  });
+
+program
+  .command("artifacts")
+  .description("List stored artifacts")
+  .action(async () => {
+    await runArtifacts();
+  });
+
+program
+  .command("artifact")
+  .description("Show a single artifact by id")
+  .argument("<id>", "Full artifact id")
+  .action(async (id: string) => {
+    await runArtifact(id);
   });
 
 program.parse();
