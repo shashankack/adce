@@ -6,11 +6,11 @@ import { runScan } from "./commands/scan.js";
 import { runStatus } from "./commands/status.js";
 import {
   runArtifact,
+  runArtifactAdd,
   runArtifactVerify,
   runArtifactReject,
 } from "./commands/artifact.js";
 import { runArtifacts } from "./commands/artifacts.js";
-import { error } from "node:console";
 
 const program = new Command();
 
@@ -76,6 +76,36 @@ artifact
   .action(async (id: string) => {
     await runArtifactReject(id);
   });
+
+artifact
+  .command("add")
+  .description("Add a manual artifact (optionally with no backing file)")
+  .requiredOption("-n, --name <name>", "Artifact name")
+  .requiredOption(
+    "-t, --type <type>",
+    "Artifact type (e.g. REQUIREMENT, POLICY, DOCUMENTATION)",
+  )
+  .option("-p, --path <path>", "Optional project-relative file path")
+  .option(
+    "-m, --manual",
+    "Create a virtual artifact with no backing file",
+    false,
+  )
+  .action(
+    async (options: {
+      name: string;
+      type: string;
+      path?: string;
+      manual?: boolean;
+    }) => {
+      await runArtifactAdd({
+        name: options.name,
+        type: options.type,
+        path: options.path,
+        manual: options.manual,
+      });
+    },
+  );
 
 program.parseAsync(process.argv).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);

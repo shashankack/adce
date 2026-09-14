@@ -1,13 +1,13 @@
-import { mkdtemp, cp, rm, mkdir, writeFile, access } from "node:fs/promises";
+import { mkdtemp, cp, rm, writeFile, access } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   AdceNotInitializedError,
+  addManualArtifact,
   findAdceRoot,
   getProjectArtifact,
-  getProjectStatus,
   initializeProject,
   listProjectArtifacts,
   rejectProjectArtifact,
@@ -129,4 +129,26 @@ describe("v0.2 artifacts list / get / verify / reject", () => {
     const again = await getProjectArtifact(root, target!.id);
     expect(again.verification).toBe("REJECTED");
   });
+});
+
+it("manual artifact survives scan", async () => {
+  const root = await copyFixture("no-git");
+  await initializeProject(root);
+  await scanProject({ rootPath: root });
+
+  const manual = await addManualArtifact(root, {
+    name: "Payment Retry Policy",
+    type: "REQUIREMENT",
+    manual: true,
+  });
+
+  expect(manual.origin).toBe("MANUAL");
+  expect(manual.path).toBeNull();
+  expect(manual.verification).toBe("VERIFIED");
+
+  await scanProject({ rootPath: root });
+
+  const after = await getProjectArtifact(root, manual.id);
+  expect(after.origin).toBe("MANUAL");
+  expect(after.verification).toBe("VERIFIED");
 });

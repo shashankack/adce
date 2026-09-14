@@ -27,3 +27,9 @@ export {
   findAdceRoot,
   type AdceRootResolution,
 } from "./project/find-adce-root.js";
+export {
+  addManualArtifact,
+  InvalidArtifactTypeError,
+  ArtifactPathConflictError,
+  type AddManualArtifactInput,
+} from "./artifacts/manual-artifact.js";

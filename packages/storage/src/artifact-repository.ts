@@ -29,6 +29,12 @@ export interface ListArtifactOptions {
   types?: ArtifactType[];
 }
 
+export interface InsertManualArtifactInput {
+  name: string;
+  type: ArtifactType;
+  path?: string | null;
+}
+
 export const listArtifacts = (
   db: AdceDb,
   options: ListArtifactOptions = {},
@@ -165,6 +171,46 @@ export function upsertDetectedByPath(
     .run();
   return created;
 }
+
+export const insertManualArtifact = (
+  db: AdceDb,
+  input: InsertManualArtifactInput,
+): ArtifactRecord => {
+  const now = new Date().toISOString();
+  const created: ArtifactRecord = {
+    id: crypto.randomUUID(),
+    path: input.path ?? null,
+    name: input.name,
+    type: input.type,
+    origin: "MANUAL",
+    verification: "VERIFIED",
+    health: "UNKNOWN",
+    authority: "UNKNOWN",
+    contentHash: null,
+    sizeBytes: null,
+    mtimeMs: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+  db.insert(artifacts)
+    .values({
+      id: created.id,
+      path: created.path,
+      name: created.name,
+      type: created.type,
+      origin: created.origin,
+      verification: created.verification,
+      health: created.health,
+      authority: created.authority,
+      contentHash: created.contentHash,
+      sizeBytes: created.sizeBytes,
+      mtimeMs: created.mtimeMs,
+      createdAt: created.createdAt,
+      updatedAt: created.updatedAt,
+    })
+    .run();
+  return created;
+};
 
 export const deleteArtifactById = (db: AdceDb, id: string): void => {
   db.delete(artifacts).where(eq(artifacts.id, id)).run();
