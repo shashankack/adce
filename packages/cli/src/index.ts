@@ -11,6 +11,7 @@ import {
   runArtifactReject,
 } from "./commands/artifact.js";
 import { runArtifacts } from "./commands/artifacts.js";
+import { runArtifactsReview } from "./commands/artifacts-review.js";
 
 const program = new Command();
 
@@ -42,11 +43,18 @@ program
     await runStatus();
   });
 
-program
+const artifacts = program
   .command("artifacts")
   .description("List stored artifacts")
   .action(async () => {
     await runArtifacts();
+  });
+
+artifacts
+  .command("review")
+  .description("Interactively review UNREVIEWED DETECTED artifacts")
+  .action(async () => {
+    await runArtifactsReview();
   });
 
 const artifact = program

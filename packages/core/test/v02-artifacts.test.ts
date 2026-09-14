@@ -9,6 +9,7 @@ import {
   findAdceRoot,
   getProjectArtifact,
   initializeProject,
+  listArtifactsForReview,
   listProjectArtifacts,
   rejectProjectArtifact,
   scanProject,
@@ -151,4 +152,47 @@ it("manual artifact survives scan", async () => {
   const after = await getProjectArtifact(root, manual.id);
   expect(after.origin).toBe("MANUAL");
   expect(after.verification).toBe("VERIFIED");
+});
+
+describe("v0.2 artifacts review queue", () => {
+  it("lists only UNREVIEWED DETECTED artifacts", async () => {
+    const root = await copyFixture("no-git");
+    await initializeProject(root);
+    await scanProject({ rootPath: root });
+
+    const all = await listProjectArtifacts(root);
+    const queue = await listArtifactsForReview(root);
+
+    expect(queue.length).toBeGreaterThan(0);
+    expect(queue.length).toBe(
+      all.filter(
+        (a) => a.origin === "DETECTED" && a.verification === "UNREVIEWED",
+      ).length,
+    );
+    expect(queue.every((a) => a.origin === "DETECTED")).toBe(true);
+    expect(queue.every((a) => a.verification === "UNREVIEWED")).toBe(true);
+  });
+
+  it("shrinks after verify and excludes manual artifacts", async () => {
+    const root = await copyFixture("no-git");
+    await initializeProject(root);
+    await scanProject({ rootPath: root });
+
+    await addManualArtifact(root, {
+      name: "Human note",
+      type: "DOCUMENTATION",
+      manual: true,
+    });
+
+    const before = await listArtifactsForReview(root);
+    expect(before.every((a) => a.origin === "DETECTED")).toBe(true);
+
+    const target = before[0]!;
+    await verifyProjectArtifact(root, target.id);
+
+    const after = await listArtifactsForReview(root);
+    expect(after.length).toBe(before.length - 1);
+    expect(after.find((a) => a.id === target.id)).toBeUndefined();
+    expect(after.every((a) => a.origin !== "MANUAL")).toBe(true);
+  });
 });

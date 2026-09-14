@@ -33,3 +33,4 @@ export {
   ArtifactPathConflictError,
   type AddManualArtifactInput,
 } from "./artifacts/manual-artifact.js";
+export { listArtifactsForReview } from "./artifacts/review.js";

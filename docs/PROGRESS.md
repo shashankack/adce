@@ -12,10 +12,11 @@ Last updated: 2026-09-14
 | v0.2 Step 1 (list + show artifacts) | 100% |
 | v0.2 Step 2 (verify / reject + root resolve) | 100% |
 | v0.2 Step 3 (manual artifact add) | 100% |
-| v0.2 overall (artifact management) | ~75% |
-| Full roadmap (v0.1–v0.7) | ~22% |
+| v0.2 Step 4 (artifacts review) | 100% |
+| v0.2 overall (artifact management) | ~95% |
+| Full roadmap (v0.1–v0.7) | ~25% |
 
-**v0.1 is complete.** v0.2 Steps 1–3 are complete and covered by Vitest. Next: `adce artifacts review`.
+**v0.1 is complete.** v0.2 Steps 1–4 are complete and covered by Vitest. Optional polish remains (`--type` filter, prefix IDs).
 
 ## Current milestone: v0.2
 
@@ -27,7 +28,7 @@ adce artifact show <id>        ✓
 adce artifact verify <id>      ✓
 adce artifact reject <id>      ✓
 adce artifact add              ✓
-adce artifacts review          —
+adce artifacts review          ✓
 ```
 
 ## v0.1 (complete)
@@ -65,7 +66,7 @@ adce init → adce scan → adce status
 - [x] CLI `program.parseAsync` + global error handler
 - [x] Simple CLI logger (`→` / `✓` / `!` / `✗`)
 
-## v0.2 (in progress)
+## v0.2 (nearly complete)
 
 ### Step 1 — list + show (complete)
 
@@ -97,16 +98,20 @@ adce init → adce scan → adce status
 - [x] Manual smoke: add → show → scan → still MANUAL/VERIFIED
 - [x] Vitest: manual artifact survives scan
 
-### Step 4 — review queue (next)
+### Step 4 — review queue (complete)
 
-- [ ] `adce artifacts review` — interactive walkthrough of `UNREVIEWED` DETECTED artifacts
-- [ ] Verify / reject / skip from the review loop
+- [x] Storage: `listUnreviewedDetectedArtifacts` (DETECTED + UNREVIEWED, sorted)
+- [x] Core: `listArtifactsForReview`
+- [x] CLI UI: `review-prompt` — `[v]` verify / `[r]` reject / `[s]` skip / `[q]` quit
+- [x] CLI: `adce artifacts review` with summary counts
+- [x] Vitest: queue filters correctly; shrinks after verify; excludes MANUAL
 
 ### Optional polish (deferred)
 
 - [ ] `--type SOURCE,TEST` filter wired through core → CLI (storage ready)
 - [ ] Prefix id lookup for `adce artifact` (full UUID works for now)
 - [ ] Optional stub file under `.adce/artifacts/` when adding virtual manuals
+- [ ] Review: Edit type / Ignore (beyond reject) once confidence/edit UX exists
 
 ## Tests
 
@@ -114,7 +119,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: core suite green (v01-pipeline + v02-artifacts, including manual add)
+Current: 13 passed (v01-pipeline + v02-artifacts)
 ```
 
 ### Dev environment notes (Windows)
@@ -139,12 +144,12 @@ Current: core suite green (v01-pipeline + v02-artifacts, including manual add)
 
 ```text
 packages/cli
-  commands/       → init, scan, status, artifacts, artifact (show/verify/reject/add)
-  ui/             → confirm-init-root, logger
+  commands/       → init, scan, status, artifacts, artifacts-review, artifact
+  ui/             → confirm-init-root, logger, review-prompt
   project-root.ts → resolveAdceRoot for non-init commands
 packages/core
   project/        → initialize, status, paths, discover-root, find-adce-root
-  artifacts/      → classifier, query, verification, manual-artifact
+  artifacts/      → classifier, query, verification, manual-artifact, review
   scanner/        → discovery, hashing, scan-project
 packages/storage  → SQLite schema + artifact/scan repositories
 packages/shared   → types, enums, constants
@@ -174,6 +179,7 @@ adce init -y
 adce scan
 adce status
 adce artifacts
+adce artifacts review
 adce artifact show <full-id>
 adce artifact verify <full-id>
 adce artifact reject <full-id>
@@ -190,15 +196,14 @@ pnpm test
 
 ## Next steps
 
-1. Commit this progress doc update (if not included yet).
-2. **v0.2 Step 4** — `adce artifacts review` (interactive UNREVIEWED queue).
-3. Optional: wire `--type` filter; optional stub files under `.adce/artifacts/`.
+1. Optional polish for v0.2, or start **v0.3** (relationships + temporal).
+2. Optional: wire `--type` filter; prefix ID lookup.
 
 ## Roadmap reminder
 
 ```text
 v0.1  CLI foundation          ✓
-v0.2  Artifact management     ← here (~75%)
+v0.2  Artifact management     ← here (~95%)
 v0.3  Relationships + temporal
 v0.4  Deterministic conflicts
 v0.5  Context engine

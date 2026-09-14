@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, inArray } from "drizzle-orm";
+import { and, asc, eq, isNotNull, inArray } from "drizzle-orm";
 import type {
   ArtifactRecord,
   ArtifactType,
@@ -57,6 +57,22 @@ export const listDetectedPathArtifacts = (db: AdceDb): ArtifactRecord[] =>
     .select()
     .from(artifacts)
     .where(and(eq(artifacts.origin, "DETECTED"), isNotNull(artifacts.path)))
+    .all()
+    .map(toRecord);
+
+export const listUnreviewedDetectedArtifacts = (
+  db: AdceDb,
+): ArtifactRecord[] =>
+  db
+    .select()
+    .from(artifacts)
+    .where(
+      and(
+        eq(artifacts.origin, "DETECTED"),
+        eq(artifacts.verification, "UNREVIEWED"),
+      ),
+    )
+    .orderBy(asc(artifacts.path), asc(artifacts.name))
     .all()
     .map(toRecord);
 
