@@ -1,8 +1,10 @@
 import { AdceNotInitializedError, listProjectArtifacts } from "@adce/core";
+import { resolveAdceRoot } from "../project-root.js";
 
 export const runArtifacts = async (cwd = process.cwd()): Promise<void> => {
   try {
-    const artifacts = await listProjectArtifacts(cwd);
+    const rootPath = await resolveAdceRoot(cwd);
+    const artifacts = await listProjectArtifacts(rootPath);
 
     if (artifacts.length === 0) {
       console.log("No artifacts stored. Run `adce scan` first.");

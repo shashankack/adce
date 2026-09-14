@@ -1,13 +1,17 @@
 import { getProjectStatus } from "@adce/core";
+import { resolveAdceRoot } from "../project-root.js";
+import { log } from "../ui/logger.js";
 
 export async function runStatus(cwd = process.cwd()): Promise<void> {
-  const status = await getProjectStatus(cwd);
+  const rootPath = await resolveAdceRoot(cwd);
+  const status = await getProjectStatus(rootPath);
+
   if (!status.initialized) {
-    console.log("ADCE is not initialized in this directory.");
-    console.log("Run `adce init` first.");
+    log.error("ADCE is not initialized in this directory.");
+    log.step("Run `adce init` first.");
     return;
   }
-
+  
   console.log(`Root: ${status.rootPath}`);
   console.log(`Git detected: ${status.gitDetected ? "yes" : "no"}`);
   console.log(`Created: ${status.createdAt}`);

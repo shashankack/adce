@@ -19,3 +19,11 @@ export {
   AdceNotInitializedError,
   ArtifactNotFoundError,
 } from "./artifacts/query.js";
+export {
+  verifyProjectArtifact,
+  rejectProjectArtifact,
+} from "./artifacts/verification.js";
+export {
+  findAdceRoot,
+  type AdceRootResolution,
+} from "./project/find-adce-root.js";

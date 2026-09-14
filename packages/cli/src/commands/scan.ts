@@ -1,15 +1,21 @@
 import { scanProject } from "@adce/core";
+import { log } from "../ui/logger.js";
+import { resolveAdceRoot } from "../project-root.js";
 
 export async function runScan(
   cwd = process.cwd(),
   opts: { full?: boolean } = {},
 ): Promise<void> {
-  const result = await scanProject({ rootPath: cwd, full: opts.full });
-  console.log(`Scan complete (${result.mode})`);
-  console.log(`Files seen: ${result.filesSeen}`);
-  console.log(`Added: ${result.added}`);
-  console.log(`Changed: ${result.changed}`);
-  console.log(`Unchanged: ${result.unchanged}`);
-  console.log(`Removed: ${result.removed}`);
-  console.log(`Git detected: ${result.gitDetected ? "yes" : "no"}`);
+  const rootPath = await resolveAdceRoot(cwd);
+
+  log.step(`Scanning ${rootPath}`);
+  const result = await scanProject({ rootPath, full: opts.full });
+
+  log.ok(`Scan complete (${result.mode})`);
+  log.step(`Files seen: ${result.filesSeen}`);
+  log.step(`Added: ${result.added}`);
+  log.step(`Changed: ${result.changed}`);
+  log.step(`Unchanged: ${result.unchanged}`);
+  log.step(`Removed: ${result.removed}`);
+  log.step(`Git detected: ${result.gitDetected ? "yes" : "no"}`);
 }

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "pnpm -r --if-present test",
+    "test:core": "pnpm --filter @adce/core test",
     "typecheck": "pnpm -r typecheck",
     "dev": "pnpm --filter @adce/cli dev"
   },

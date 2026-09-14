@@ -4,8 +4,13 @@ import { Command } from "commander";
 import { runInit } from "./commands/init.js";
 import { runScan } from "./commands/scan.js";
 import { runStatus } from "./commands/status.js";
-import { runArtifact } from "./commands/artifact.js";
+import {
+  runArtifact,
+  runArtifactVerify,
+  runArtifactReject,
+} from "./commands/artifact.js";
 import { runArtifacts } from "./commands/artifacts.js";
+import { error } from "node:console";
 
 const program = new Command();
 
@@ -44,12 +49,36 @@ program
     await runArtifacts();
   });
 
-program
+const artifact = program
   .command("artifact")
+  .description("Inspect or update a single artifact");
+
+artifact
+  .command("show")
   .description("Show a single artifact by id")
   .argument("<id>", "Full artifact id")
   .action(async (id: string) => {
     await runArtifact(id);
   });
 
-program.parse();
+artifact
+  .command("verify")
+  .description("Mark an artifact as VERIFIED")
+  .argument("<id>", "Full artifact id")
+  .action(async (id: string) => {
+    await runArtifactVerify(id);
+  });
+
+artifact
+  .command("reject")
+  .description("Mark an artifact as REJECTED")
+  .argument("<id>", "Full artifact id")
+  .action(async (id: string) => {
+    await runArtifactReject(id);
+  });
+
+program.parseAsync(process.argv).catch((error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`Error: ${message}`);
+  process.exitCode = 1;
+});

@@ -1,5 +1,6 @@
 import { discoverProjectRoot, initializeProject } from "@adce/core";
 import { confirmInitRoot } from "../ui/confirm-init-root.js";
+import { log } from "../ui/logger.js";
 
 export interface RunInitOptions {
   /** Skip prompts; if mismatch, use detected root (or cwd if none). */
@@ -32,10 +33,11 @@ export const runInit = async (
     );
   }
 
+  log.step(`Initializing ADCE in ${targetRoot}`);
   const result = await initializeProject(targetRoot);
-  console.log(`Initialized ADCE in ${result.rootPath}`);
-  console.log(`Git detected: ${result.gitDetected ? "yes" : "no"}`);
+  log.ok(`Initialized ADCE in ${result.rootPath}`);
+  log.step(`Git detected: ${result.gitDetected ? "yes" : "no"}`);
   if (!result.created.agentsMd) {
-    console.log("AGENTS.md already existed — left unchanged.");
+    log.warn("AGENTS.md already existed — left unchanged.");
   }
 };

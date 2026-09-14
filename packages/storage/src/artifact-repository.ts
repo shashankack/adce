@@ -1,5 +1,9 @@
 import { and, eq, isNotNull, inArray } from "drizzle-orm";
-import type { ArtifactRecord, ArtifactType } from "@adce/shared";
+import type {
+  ArtifactRecord,
+  ArtifactType,
+  VerificationState,
+} from "@adce/shared";
 import type { AdceDb } from "./database.js";
 import { artifacts } from "./schema.js";
 
@@ -70,6 +74,28 @@ export const findArtifactById = (
   return row ? toRecord(row) : null;
 };
 
+export const setArtifactVerification = (
+  db: AdceDb,
+  id: string,
+  verification: VerificationState,
+): ArtifactRecord | null => {
+  const existing = findArtifactById(db, id);
+  if (!existing) return null;
+
+  const updatedAt = new Date().toISOString();
+  db.update(artifacts)
+    .set({ verification, updatedAt })
+    .where(eq(artifacts.id, id))
+    .run();
+
+  return {
+    ...existing,
+    verification,
+    updatedAt,
+  };
+};
+
+// Human fields (verification, origin, authority, health) must survive scans.
 export function upsertDetectedByPath(
   db: AdceDb,
   incoming: Omit<ArtifactRecord, "id" | "createdAt"> & {
