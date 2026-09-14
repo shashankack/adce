@@ -39,6 +39,20 @@ CREATE TABLE IF NOT EXISTS scans (
   removed INTEGER NOT NULL,
   git_detected INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS relationships (
+  id TEXT PRIMARY KEY NOT NULL,
+  source_artifact_id TEXT NOT NULL,
+  target_artifact_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  origin TEXT NOT NULL,
+  confidence TEXT NOT NULL,
+  verification TEXT NOT NULL,
+  evidence TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS relationships_unique_edge
+  ON relationships(source_artifact_id, target_artifact_id, type);
 `;
 
 export type AdceDb = ReturnType<typeof openDatabase>;

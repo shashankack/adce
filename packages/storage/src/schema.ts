@@ -34,3 +34,16 @@ export const scans = sqliteTable("scans", {
   removed: integer("removed").notNull(),
   gitDetected: integer("git_detected", { mode: "boolean" }).notNull(),
 });
+
+export const relationships = sqliteTable("relationships", {
+  id: text("id").primaryKey(),
+  sourceArtifactId: text("source_artifact_id").notNull(),
+  targetArtifactId: text("target_artifact_id").notNull(),
+  type: text("type").notNull(),
+  origin: text("origin").notNull(),
+  confidence: text("confidence").notNull(),
+  verification: text("verification").notNull(),
+  evidence: text("evidence"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});

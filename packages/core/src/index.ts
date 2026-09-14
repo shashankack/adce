@@ -1,5 +1,13 @@
-﻿export { initializeProject, type InitResult } from "./project/initialize.js";
+﻿export {
+  initializeProject,
+  type InitResult,
+  type InitOptions,
+} from "./project/initialize.js";
 export { getProjectStatus } from "./project/status.js";
+export {
+  isAdceInitialized,
+  AdceIncompleteError,
+} from "./project/is-initialized.js";
 export {
   scanProject,
   type ScanOptions,
@@ -42,3 +50,20 @@ export {
   ArtifactEditError,
   type EditProjectArtifactInput,
 } from "./artifacts/edit-artifact.js";
+export {
+  listProjectRelationships,
+  getProjectRelationship,
+} from "./relationships/query.js";
+export {
+  linkProjectArtifacts,
+  unlinkProjectRelationship,
+  type LinkProjectArtifactsInput,
+} from "./relationships/link.js";
+export { listProjectGraph, type GraphEdgeView } from "./relationships/graph.js";
+export {
+  InvalidRelationshipTypeError,
+  RelationshipNotFoundError,
+  AmbiguousRelationshipIdError,
+  RelationshipExistsError,
+  RelationshipSelfLinkError,
+} from "./relationships/errors.js";

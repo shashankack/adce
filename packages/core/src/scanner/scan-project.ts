@@ -1,4 +1,4 @@
-import { stat } from "node:fs/promises";
+import { access, stat } from "node:fs/promises";
 import path from "node:path";
 import { isGitRepository } from "@adce/git";
 import type { ScanMode, ScanSummary } from "@adce/shared";
@@ -14,6 +14,8 @@ import {
 } from "@adce/storage";
 import { loadConfig } from "../config/loader.js";
 import { classifyArtifact } from "../artifacts/classifier.js";
+import { AdceIncompleteError, isAdceInitialized } from "../project/is-initialized.js";
+import { AdceNotInitializedError } from "../artifacts/query.js";
 import { dbPath } from "../project/paths.js";
 import { discoverFiles } from "./discovery.js";
 import { hashFile } from "./hashing.js";
@@ -27,14 +29,32 @@ export interface ScanResult extends ScanSummary {
   id: string;
 }
 
+const exists = async (p: string): Promise<boolean> => {
+  try {
+    await access(p);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export async function scanProject(options: ScanOptions): Promise<ScanResult> {
   const { rootPath } = options;
   const databasePath = dbPath(rootPath);
+
+  // Do not call openDatabase before this check — it would create an empty DB.
+  if (!(await exists(databasePath))) {
+    throw new AdceNotInitializedError(rootPath);
+  }
+  if (!(await isAdceInitialized(rootPath))) {
+    throw new AdceIncompleteError(rootPath);
+  }
+
   const db = openDatabase(databasePath);
 
   try {
     if (!getMeta(db, "createdAt")) {
-      throw new Error("ADCE is not initialized. Run `adce init` first.");
+      throw new AdceIncompleteError(rootPath);
     }
 
     const config = await loadConfig(rootPath);

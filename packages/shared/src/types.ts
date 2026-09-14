@@ -96,3 +96,37 @@ export interface StatusReport {
   artifactCount: number;
   lastScan: ScanSummary | null;
 }
+
+export const RelationshipTypes = [
+  "DOCUMENTS",
+  "IMPLEMENTS",
+  "TESTS",
+  "SPECIFIES",
+  "CONFIGURES",
+  "DEPENDS_ON",
+  "GENERATED_FROM",
+  "MIGRATES",
+  "VALIDATES",
+  "SUPERSEDES",
+  "RELATED_TO",
+] as const;
+export type RelationshipType = (typeof RelationshipTypes)[number];
+
+export const RelationshipOrigins = ["DETECTED", "MANUAL", "INFERRED"] as const;
+export type RelationshipOrigin = (typeof RelationshipOrigins)[number];
+
+export const ConfidenceLevels = ["POTENTIAL", "LIKELY", "CONFIRMED"] as const;
+export type ConfidenceLevel = (typeof ConfidenceLevels)[number];
+
+export interface RelationshipRecord {
+  id: string;
+  sourceArtifactId: string;
+  targetArtifactId: string;
+  type: RelationshipType;
+  origin: RelationshipOrigin;
+  confidence: ConfidenceLevel;
+  verification: VerificationState;
+  evidence: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

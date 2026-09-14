@@ -14,6 +14,9 @@ import {
 } from "./commands/artifact.js";
 import { runArtifacts } from "./commands/artifacts.js";
 import { runArtifactsReview } from "./commands/artifacts-review.js";
+import { runGraph } from "./commands/graph.js";
+import { runLink } from "./commands/link.js";
+import { runUnlink } from "./commands/unlink.js";
 
 const program = new Command();
 
@@ -26,8 +29,13 @@ program
   .command("init")
   .description("Initialize ADCE in the current project")
   .option("-y, --yes", "Skip confirmation; use detected project root", false)
-  .action(async (option: { yes?: boolean }) => {
-    await runInit(process.cwd(), { yes: option.yes });
+  .option(
+    "--repair",
+    "Repair an incomplete .adce (rewrite missing meta / layout)",
+    false,
+  )
+  .action(async (option: { yes?: boolean; repair?: boolean }) => {
+    await runInit(process.cwd(), { yes: option.yes, repair: option.repair });
   });
 
 program
@@ -145,6 +153,34 @@ artifact
       });
     },
   );
+
+program
+  .command("graph")
+  .description("List artifact relationships")
+  .action(async () => {
+    await runGraph();
+  });
+
+program
+  .command("link")
+  .description("Create a manual relationship between two artifacts")
+  .argument("<source>", "Source artifact id or unique prefix")
+  .argument("<target>", "Target artifact id or unique prefix")
+  .requiredOption(
+    "-t, --type <type>",
+    "Relationship type (e.g. TESTS, IMPLEMENTS, DOCUMENTS)",
+  )
+  .action(async (source: string, target: string, options: { type: string }) => {
+    await runLink({ source, target, type: options.type });
+  });
+
+program
+  .command("unlink")
+  .description("Remove a relationship by id or unique prefix")
+  .argument("<id>", "Relationship id or unique prefix")
+  .action(async (id: string) => {
+    await runUnlink(id);
+  });
 
 program.parseAsync(process.argv).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);

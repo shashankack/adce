@@ -1,9 +1,10 @@
-import { mkdtemp, cp, rm, writeFile, access } from "node:fs/promises";
+import { mkdtemp, cp, rm, writeFile, access, mkdir } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  AdceIncompleteError,
   AdceNotInitializedError,
   AmbiguousArtifactIdError,
   addManualArtifact,
@@ -18,6 +19,7 @@ import {
   scanProject,
   verifyProjectArtifact,
 } from "@adce/core";
+import { closeDatabase, openDatabase } from "@adce/storage";
 
 const repoRoot = fileURLToPath(new URL("../../..", import.meta.url));
 const temps: string[] = [];
@@ -73,6 +75,37 @@ describe("v0.2 findAdceRoot", () => {
     await expect(findAdceRoot(empty)).rejects.toBeInstanceOf(
       AdceNotInitializedError,
     );
+  });
+
+  it("throws AdceIncompleteError when .adce exists without meta", async () => {
+    const root = await copyFixture("no-git");
+    const adce = path.join(root, ".adce");
+    await mkdir(adce, { recursive: true });
+    const db = openDatabase(path.join(adce, "state.db"));
+    closeDatabase(db);
+
+    await expect(findAdceRoot(root)).rejects.toBeInstanceOf(
+      AdceIncompleteError,
+    );
+  });
+
+  it("init --repair restores missing meta", async () => {
+    const root = await copyFixture("no-git");
+    const adce = path.join(root, ".adce");
+    await mkdir(adce, { recursive: true });
+    const db = openDatabase(path.join(adce, "state.db"));
+    closeDatabase(db);
+
+    await expect(initializeProject(root)).rejects.toThrow(/incomplete/);
+
+    const repaired = await initializeProject(root, { repair: true });
+    expect(repaired.repaired).toBe(true);
+
+    const resolution = await findAdceRoot(root);
+    expect(resolution.rootPath).toBe(root);
+
+    const scan = await scanProject({ rootPath: root });
+    expect(scan.filesSeen).toBeGreaterThan(0);
   });
 });
 

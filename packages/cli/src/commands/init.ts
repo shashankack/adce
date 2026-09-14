@@ -1,10 +1,15 @@
-import { discoverProjectRoot, initializeProject } from "@adce/core";
+import {
+  discoverProjectRoot,
+  initializeProject,
+} from "@adce/core";
 import { confirmInitRoot } from "../ui/confirm-init-root.js";
 import { log } from "../ui/logger.js";
 
 export interface RunInitOptions {
   /** Skip prompts; if mismatch, use detected root (or cwd if none). */
   yes?: boolean;
+  /** Repair incomplete `.adce` (missing meta / layout). */
+  repair?: boolean;
 }
 
 export const runInit = async (
@@ -16,9 +21,9 @@ export const runInit = async (
   let targetRoot = discovery.cwd;
 
   if (!discovery.sameAsCwd && discovery.detectedRoot) {
-    if (options.yes) {
+    if (options.yes || options.repair) {
       targetRoot = discovery.detectedRoot;
-      console.log(`Using detected project root: ${targetRoot} (from --yes)`);
+      console.log(`Using detected project root: ${targetRoot}`);
     } else {
       const choice = await confirmInitRoot(discovery);
       if (choice === "cancel") {
@@ -33,9 +38,19 @@ export const runInit = async (
     );
   }
 
-  log.step(`Initializing ADCE in ${targetRoot}`);
-  const result = await initializeProject(targetRoot);
-  log.ok(`Initialized ADCE in ${result.rootPath}`);
+  log.step(
+    options.repair
+      ? `Repairing ADCE in ${targetRoot}`
+      : `Initializing ADCE in ${targetRoot}`,
+  );
+  const result = await initializeProject(targetRoot, {
+    repair: options.repair,
+  });
+  if (result.repaired) {
+    log.ok(`Repaired ADCE in ${result.rootPath}`);
+  } else {
+    log.ok(`Initialized ADCE in ${result.rootPath}`);
+  }
   log.step(`Git detected: ${result.gitDetected ? "yes" : "no"}`);
   if (!result.created.agentsMd) {
     log.warn("AGENTS.md already existed — left unchanged.");

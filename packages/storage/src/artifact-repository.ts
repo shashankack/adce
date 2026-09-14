@@ -66,9 +66,7 @@ export const listDetectedPathArtifacts = (db: AdceDb): ArtifactRecord[] =>
     .all()
     .map(toRecord);
 
-export const listUnreviewedDetectedArtifacts = (
-  db: AdceDb,
-): ArtifactRecord[] =>
+export const listUnreviewedDetectedArtifacts = (db: AdceDb): ArtifactRecord[] =>
   db
     .select()
     .from(artifacts)

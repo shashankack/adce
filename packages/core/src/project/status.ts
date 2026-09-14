@@ -7,7 +7,8 @@ import {
   getMeta,
   openDatabase,
 } from "@adce/storage";
-import { adceDir, dbPath } from "./paths.js";
+import { isAdceInitialized } from "./is-initialized.js";
+import { dbPath } from "./paths.js";
 
 async function exists(p: string): Promise<boolean> {
   try {
@@ -21,7 +22,20 @@ async function exists(p: string): Promise<boolean> {
 export async function getProjectStatus(
   rootPath: string,
 ): Promise<StatusReport> {
-  if (!(await exists(adceDir(rootPath)))) {
+  if (!(await isAdceInitialized(rootPath))) {
+    return {
+      initialized: false,
+      rootPath,
+      gitDetected: false,
+      createdAt: null,
+      lastScanAt: null,
+      artifactCount: 0,
+      lastScan: null,
+    };
+  }
+
+  // Guard: never openDatabase if the file is missing (would create empty DB).
+  if (!(await exists(dbPath(rootPath)))) {
     return {
       initialized: false,
       rootPath,
