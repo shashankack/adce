@@ -1,4 +1,4 @@
-import { and, asc, eq, isNotNull, inArray } from "drizzle-orm";
+import { and, asc, eq, isNotNull, inArray, like } from "drizzle-orm";
 import type {
   ArtifactRecord,
   ArtifactType,
@@ -30,9 +30,15 @@ export interface ListArtifactOptions {
 }
 
 export interface InsertManualArtifactInput {
+  id?: string;
   name: string;
   type: ArtifactType;
   path?: string | null;
+}
+
+export interface UpdateArtifactMetadataInput {
+  name?: string;
+  type?: ArtifactType;
 }
 
 export const listArtifacts = (
@@ -96,6 +102,19 @@ export const findArtifactById = (
   return row ? toRecord(row) : null;
 };
 
+export const findArtifactsByIdPrefix = (
+  db: AdceDb,
+  prefix: string,
+): ArtifactRecord[] => {
+  if (!prefix) return [];
+  return db
+    .select()
+    .from(artifacts)
+    .where(like(artifacts.id, `${prefix}%`))
+    .all()
+    .map(toRecord);
+};
+
 export const setArtifactVerification = (
   db: AdceDb,
   id: string,
@@ -113,6 +132,31 @@ export const setArtifactVerification = (
   return {
     ...existing,
     verification,
+    updatedAt,
+  };
+};
+
+export const updateArtifactMetadata = (
+  db: AdceDb,
+  id: string,
+  input: UpdateArtifactMetadataInput,
+): ArtifactRecord | null => {
+  const existing = findArtifactById(db, id);
+  if (!existing) return null;
+
+  const name = input.name ?? existing.name;
+  const type = input.type ?? existing.type;
+  const updatedAt = new Date().toISOString();
+
+  db.update(artifacts)
+    .set({ name, type, updatedAt })
+    .where(eq(artifacts.id, id))
+    .run();
+
+  return {
+    ...existing,
+    name,
+    type,
     updatedAt,
   };
 };
@@ -194,7 +238,7 @@ export const insertManualArtifact = (
 ): ArtifactRecord => {
   const now = new Date().toISOString();
   const created: ArtifactRecord = {
-    id: crypto.randomUUID(),
+    id: input.id ?? crypto.randomUUID(),
     path: input.path ?? null,
     name: input.name,
     type: input.type,

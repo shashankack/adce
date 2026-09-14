@@ -6,7 +6,10 @@ import {
   setArtifactVerification,
 } from "@adce/storage";
 import { adceDir, dbPath } from "../project/paths.js";
-import { AdceNotInitializedError, ArtifactNotFoundError } from "./query.js";
+import {
+  AdceNotInitializedError,
+  resolveArtifactId,
+} from "./query.js";
 
 const exists = async (path: string): Promise<boolean> => {
   try {
@@ -17,9 +20,9 @@ const exists = async (path: string): Promise<boolean> => {
   }
 };
 
-const setVerificaction = async (
+const setVerification = async (
   rootPath: string,
-  id: string,
+  idOrPrefix: string,
   verification: VerificationState,
 ): Promise<ArtifactRecord> => {
   if (!(await exists(adceDir(rootPath))))
@@ -27,9 +30,10 @@ const setVerificaction = async (
 
   const db = openDatabase(dbPath(rootPath));
   try {
-    const updated = setArtifactVerification(db, id, verification);
+    const resolved = resolveArtifactId(db, idOrPrefix);
+    const updated = setArtifactVerification(db, resolved.id, verification);
     if (!updated) {
-      throw new ArtifactNotFoundError(id);
+      throw new Error(`Failed to update artifact: ${resolved.id}`);
     }
     return updated;
   } finally {
@@ -39,14 +43,21 @@ const setVerificaction = async (
 
 export const verifyProjectArtifact = async (
   rootPath: string,
-  id: string,
+  idOrPrefix: string,
 ): Promise<ArtifactRecord> => {
-  return setVerificaction(rootPath, id, "VERIFIED");
+  return setVerification(rootPath, idOrPrefix, "VERIFIED");
 };
 
 export const rejectProjectArtifact = async (
   rootPath: string,
-  id: string,
+  idOrPrefix: string,
 ): Promise<ArtifactRecord> => {
-  return setVerificaction(rootPath, id, "REJECTED");
+  return setVerification(rootPath, idOrPrefix, "REJECTED");
+};
+
+export const ignoreProjectArtifact = async (
+  rootPath: string,
+  idOrPrefix: string,
+): Promise<ArtifactRecord> => {
+  return setVerification(rootPath, idOrPrefix, "IGNORED");
 };

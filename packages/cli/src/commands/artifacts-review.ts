@@ -1,5 +1,8 @@
 import {
   AdceNotInitializedError,
+  editProjectArtifact,
+  ignoreProjectArtifact,
+  InvalidArtifactTypeError,
   listArtifactsForReview,
   rejectProjectArtifact,
   verifyProjectArtifact,
@@ -9,6 +12,7 @@ import { log } from "../ui/logger.js";
 import {
   createReviewReadline,
   promptArtifactReview,
+  promptArtifactType,
 } from "../ui/review-prompt.js";
 
 export const runArtifactsReview = async (
@@ -27,40 +31,83 @@ export const runArtifactsReview = async (
 
     let verified = 0;
     let rejected = 0;
+    let ignored = 0;
+    let edited = 0;
     let skipped = 0;
 
     const rl = createReviewReadline();
     try {
       for (let i = 0; i < queue.length; i++) {
-        const artifact = queue[i]!;
-        const choice = await promptArtifactReview(
-          artifact,
-          i + 1,
-          queue.length,
-          rl,
-        );
+        let artifact = queue[i]!;
+        let done = false;
 
-        if (choice === "quit") {
-          log.warn("Review stopped early.");
-          break;
+        while (!done) {
+          const choice = await promptArtifactReview(
+            artifact,
+            i + 1,
+            queue.length,
+            rl,
+          );
+
+          if (choice === "quit") {
+            log.warn("Review stopped early.");
+            console.log("");
+            log.ok(
+              `Review summary: ${verified} verified, ${rejected} rejected, ${ignored} ignored, ${edited} edited, ${skipped} skipped`,
+            );
+            return;
+          }
+
+          if (choice === "edit") {
+            const nextType = await promptArtifactType(rl, artifact.type);
+            if (!nextType) {
+              log.step("Edit cancelled.");
+              continue;
+            }
+            try {
+              artifact = await editProjectArtifact(rootPath, artifact.id, {
+                type: nextType,
+              });
+              edited += 1;
+              log.ok(`Updated type → ${artifact.type}`);
+            } catch (error) {
+              if (error instanceof InvalidArtifactTypeError) {
+                log.error(error.message);
+                continue;
+              }
+              throw error;
+            }
+            continue;
+          }
+
+          if (choice === "verify") {
+            await verifyProjectArtifact(rootPath, artifact.id);
+            verified += 1;
+            log.ok(`Verified ${artifact.path ?? artifact.name}`);
+            done = true;
+            continue;
+          }
+
+          if (choice === "reject") {
+            await rejectProjectArtifact(rootPath, artifact.id);
+            rejected += 1;
+            log.ok(`Rejected ${artifact.path ?? artifact.name}`);
+            done = true;
+            continue;
+          }
+
+          if (choice === "ignore") {
+            await ignoreProjectArtifact(rootPath, artifact.id);
+            ignored += 1;
+            log.ok(`Ignored ${artifact.path ?? artifact.name}`);
+            done = true;
+            continue;
+          }
+
+          skipped += 1;
+          log.step(`Skipped ${artifact.path ?? artifact.name}`);
+          done = true;
         }
-
-        if (choice === "verify") {
-          await verifyProjectArtifact(rootPath, artifact.id);
-          verified += 1;
-          log.ok(`Verified ${artifact.path ?? artifact.name}`);
-          continue;
-        }
-
-        if (choice === "reject") {
-          await rejectProjectArtifact(rootPath, artifact.id);
-          rejected += 1;
-          log.ok(`Rejected ${artifact.path ?? artifact.name}`);
-          continue;
-        }
-
-        skipped += 1;
-        log.step(`Skipped ${artifact.path ?? artifact.name}`);
       }
     } finally {
       rl.close();
@@ -68,7 +115,7 @@ export const runArtifactsReview = async (
 
     console.log("");
     log.ok(
-      `Review summary: ${verified} verified, ${rejected} rejected, ${skipped} skipped`,
+      `Review summary: ${verified} verified, ${rejected} rejected, ${ignored} ignored, ${edited} edited, ${skipped} skipped`,
     );
   } catch (error) {
     if (error instanceof AdceNotInitializedError) {

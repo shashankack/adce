@@ -9,25 +9,23 @@ Last updated: 2026-09-14
 | v0.1 code (init → scan → status) | 100% |
 | v0.1 definition of done (proven + tested) | 100% |
 | Init root confirmation + `--yes` | 100% |
-| v0.2 Step 1 (list + show artifacts) | 100% |
-| v0.2 Step 2 (verify / reject + root resolve) | 100% |
-| v0.2 Step 3 (manual artifact add) | 100% |
-| v0.2 Step 4 (artifacts review) | 100% |
-| v0.2 overall (artifact management) | ~95% |
-| Full roadmap (v0.1–v0.7) | ~25% |
+| v0.2 artifact management (steps + polish) | 100% |
+| Full roadmap (v0.1–v0.7) | ~28% |
 
-**v0.1 is complete.** v0.2 Steps 1–4 are complete and covered by Vitest. Optional polish remains (`--type` filter, prefix IDs).
+**v0.1 and v0.2 are complete.** Next milestone: **v0.3** (relationships + temporal).
 
-## Current milestone: v0.2
+## Current milestone: v0.2 ✓
 
 Target flow:
 
 ```text
-adce artifacts                 ✓
-adce artifact show <id>        ✓
+adce artifacts [--type …]      ✓
+adce artifact show <id|prefix> ✓
 adce artifact verify <id>      ✓
 adce artifact reject <id>      ✓
-adce artifact add              ✓
+adce artifact ignore <id>      ✓
+adce artifact edit <id>        ✓
+adce artifact add [--stub]     ✓
 adce artifacts review          ✓
 ```
 
@@ -66,7 +64,7 @@ adce init → adce scan → adce status
 - [x] CLI `program.parseAsync` + global error handler
 - [x] Simple CLI logger (`→` / `✓` / `!` / `✗`)
 
-## v0.2 (nearly complete)
+## v0.2 (complete)
 
 ### Step 1 — list + show (complete)
 
@@ -94,7 +92,7 @@ adce init → adce scan → adce status
 - [x] CLI: `adce artifact add -n … -t … [-m|--manual] [-p|--path]`
 - [x] Path conflict when file already has a DETECTED artifact
 - [x] Invalid type rejected with allowed list
-- [x] Manual artifacts live in `state.db` (`.adce/artifacts/` reserved; unused for pathless manuals)
+- [x] Manual artifacts live in `state.db`
 - [x] Manual smoke: add → show → scan → still MANUAL/VERIFIED
 - [x] Vitest: manual artifact survives scan
 
@@ -102,16 +100,18 @@ adce init → adce scan → adce status
 
 - [x] Storage: `listUnreviewedDetectedArtifacts` (DETECTED + UNREVIEWED, sorted)
 - [x] Core: `listArtifactsForReview`
-- [x] CLI UI: `review-prompt` — `[v]` verify / `[r]` reject / `[s]` skip / `[q]` quit
+- [x] CLI UI: `review-prompt` — verify / edit / ignore / reject / skip / quit
 - [x] CLI: `adce artifacts review` with summary counts
 - [x] Vitest: queue filters correctly; shrinks after verify; excludes MANUAL
 
-### Optional polish (deferred)
+### Optional polish (complete)
 
-- [ ] `--type SOURCE,TEST` filter wired through core → CLI (storage ready)
-- [ ] Prefix id lookup for `adce artifact` (full UUID works for now)
-- [ ] Optional stub file under `.adce/artifacts/` when adding virtual manuals
-- [ ] Review: Edit type / Ignore (beyond reject) once confidence/edit UX exists
+- [x] `--type SOURCE,TEST` filter on `adce artifacts` (core → CLI)
+- [x] Prefix id lookup for `adce artifact *` (unique prefix; ambiguous error)
+- [x] `--stub` writes virtual manuals under `.adce/artifacts/`
+- [x] `adce artifact edit` (name and/or type)
+- [x] `adce artifact ignore` + review `[i]` → `IGNORED` verification state
+- [x] Review `[e]` edit type then re-prompt
 
 ## Tests
 
@@ -119,7 +119,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 13 passed (v01-pipeline + v02-artifacts)
+Current: 19 passed (v01-pipeline + v02-artifacts)
 ```
 
 ### Dev environment notes (Windows)
@@ -139,6 +139,7 @@ Current: 13 passed (v01-pipeline + v02-artifacts)
 | `c9be8f7` | Artifact list/show + init `--yes` |
 | `2e84da2` | Artifact verify/reject + resolve ADCE root from subdirs |
 | `98a7dab` | Manual artifacts via `adce artifact add` |
+| `caa1497` | Interactive artifacts review queue |
 
 ## Package map
 
@@ -149,7 +150,7 @@ packages/cli
   project-root.ts → resolveAdceRoot for non-init commands
 packages/core
   project/        → initialize, status, paths, discover-root, find-adce-root
-  artifacts/      → classifier, query, verification, manual-artifact, review
+  artifacts/      → classifier, query, verification, manual-artifact, review, edit-artifact
   scanner/        → discovery, hashing, scan-project
 packages/storage  → SQLite schema + artifact/scan repositories
 packages/shared   → types, enums, constants
@@ -179,11 +180,15 @@ adce init -y
 adce scan
 adce status
 adce artifacts
+adce artifacts --type SOURCE,TEST
 adce artifacts review
-adce artifact show <full-id>
-adce artifact verify <full-id>
-adce artifact reject <full-id>
+adce artifact show <id-or-prefix>
+adce artifact verify <id-or-prefix>
+adce artifact reject <id-or-prefix>
+adce artifact ignore <id-or-prefix>
+adce artifact edit <id-or-prefix> -t DOCUMENTATION -n "New name"
 adce artifact add --manual -n "Payment Retry Policy" -t REQUIREMENT
+adce artifact add --manual --stub -n "Payment Retry Policy" -t REQUIREMENT
 ```
 
 Tests:
@@ -196,15 +201,15 @@ pnpm test
 
 ## Next steps
 
-1. Optional polish for v0.2, or start **v0.3** (relationships + temporal).
-2. Optional: wire `--type` filter; prefix ID lookup.
+1. Start **v0.3** — relationships + temporal (`adce graph` / `link` / `unlink` / `history`).
+2. Schema: `relationships` table + temporal providers (Git, filesystem, ADCE snapshots).
 
 ## Roadmap reminder
 
 ```text
 v0.1  CLI foundation          ✓
-v0.2  Artifact management     ← here (~95%)
-v0.3  Relationships + temporal
+v0.2  Artifact management     ✓
+v0.3  Relationships + temporal  ← next
 v0.4  Deterministic conflicts
 v0.5  Context engine
 v0.6  ML integration

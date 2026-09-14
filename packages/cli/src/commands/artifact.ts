@@ -1,11 +1,15 @@
 // Imports
 import {
   AdceNotInitializedError,
+  AmbiguousArtifactIdError,
+  ArtifactEditError,
   ArtifactNotFoundError,
   ArtifactPathConflictError,
   InvalidArtifactTypeError,
   addManualArtifact,
+  editProjectArtifact,
   getProjectArtifact,
+  ignoreProjectArtifact,
   rejectProjectArtifact,
   verifyProjectArtifact,
 } from "@adce/core";
@@ -18,7 +22,25 @@ export interface RunArtifactAddOptions {
   type: string;
   path?: string | null;
   manual?: boolean;
+  stub?: boolean;
 }
+
+export interface RunArtifactEditOptions {
+  name?: string;
+  type?: string;
+}
+
+const handleLookupError = (error: unknown): boolean => {
+  if (
+    error instanceof AdceNotInitializedError ||
+    error instanceof ArtifactNotFoundError ||
+    error instanceof AmbiguousArtifactIdError
+  ) {
+    log.error(error.message);
+    return true;
+  }
+  return false;
+};
 
 export const runArtifact = async (
   id: string,
@@ -42,13 +64,7 @@ export const runArtifact = async (
     console.log(`Created at: ${a.createdAt}`);
     console.log(`Updated at: ${a.updatedAt}`);
   } catch (error) {
-    if (
-      error instanceof AdceNotInitializedError ||
-      error instanceof ArtifactNotFoundError
-    ) {
-      console.log(error.message);
-      return;
-    }
+    if (handleLookupError(error)) return;
     throw error;
   }
 };
@@ -64,6 +80,7 @@ export const runArtifactAdd = async (
       type: options.type,
       path: options.path,
       manual: options.manual,
+      stub: options.stub,
     });
     log.ok(`Added manual artifact ${artifact.id}`);
     console.log(`Name: ${artifact.name}`);
@@ -84,6 +101,34 @@ export const runArtifactAdd = async (
   }
 };
 
+export const runArtifactEdit = async (
+  id: string,
+  options: RunArtifactEditOptions,
+  cwd = process.cwd(),
+): Promise<void> => {
+  try {
+    const rootPath = await resolveAdceRoot(cwd);
+    const a = await editProjectArtifact(rootPath, id, {
+      name: options.name,
+      type: options.type,
+    });
+    log.ok(`Updated artifact ${a.id}`);
+    console.log(`Name: ${a.name}`);
+    console.log(`Type: ${a.type}`);
+    console.log(`Verification: ${a.verification}`);
+  } catch (error) {
+    if (handleLookupError(error)) return;
+    if (
+      error instanceof ArtifactEditError ||
+      error instanceof InvalidArtifactTypeError
+    ) {
+      log.error(error.message);
+      return;
+    }
+    throw error;
+  }
+};
+
 export const runArtifactVerify = async (
   id: string,
   cwd = process.cwd(),
@@ -95,13 +140,7 @@ export const runArtifactVerify = async (
     console.log(`Path: ${a.path ?? "(none)"}`);
     console.log(`Verification: ${a.verification}`);
   } catch (error) {
-    if (
-      error instanceof AdceNotInitializedError ||
-      error instanceof ArtifactNotFoundError
-    ) {
-      console.log(error.message);
-      return;
-    }
+    if (handleLookupError(error)) return;
     throw error;
   }
 };
@@ -117,13 +156,23 @@ export const runArtifactReject = async (
     console.log(`Path: ${a.path ?? "(none)"}`);
     console.log(`Verification: ${a.verification}`);
   } catch (error) {
-    if (
-      error instanceof AdceNotInitializedError ||
-      error instanceof ArtifactNotFoundError
-    ) {
-      console.log(error.message);
-      return;
-    }
+    if (handleLookupError(error)) return;
+    throw error;
+  }
+};
+
+export const runArtifactIgnore = async (
+  id: string,
+  cwd = process.cwd(),
+): Promise<void> => {
+  try {
+    const rootPath = await resolveAdceRoot(cwd);
+    const a = await ignoreProjectArtifact(rootPath, id);
+    console.log(`Ignored: ${a.id}`);
+    console.log(`Path: ${a.path ?? "(none)"}`);
+    console.log(`Verification: ${a.verification}`);
+  } catch (error) {
+    if (handleLookupError(error)) return;
     throw error;
   }
 };

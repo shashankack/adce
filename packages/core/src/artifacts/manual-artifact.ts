@@ -1,4 +1,4 @@
-import { access } from "node:fs/promises";
+import { access, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
   ArtifactTypes,
@@ -11,7 +11,7 @@ import {
   insertManualArtifact,
   openDatabase,
 } from "@adce/storage";
-import { adceDir, dbPath } from "../project/paths.js";
+import { adceDir, artifactsDir, dbPath } from "../project/paths.js";
 import { AdceNotInitializedError } from "./query.js";
 
 const exists = async (p: string): Promise<boolean> => {
@@ -45,7 +45,17 @@ export interface AddManualArtifactInput {
   /** Relative path inside the project, or null/undefined for virtual */
   path?: string | null;
   manual?: boolean;
+  /** When creating a virtual artifact, also write a stub under `.adce/artifacts/` */
+  stub?: boolean;
 }
+
+const slugify = (name: string): string => {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug.length > 0 ? slug.slice(0, 48) : "artifact";
+};
 
 export const addManualArtifact = async (
   rootPath: string,
@@ -62,6 +72,7 @@ export const addManualArtifact = async (
 
   const isManual = input.manual === true || !input.path;
   let relativePath: string | null = null;
+  const id = crypto.randomUUID();
 
   if (!isManual && input.path) {
     relativePath = input.path.replace(/\\/g, "/").replace(/^\.\//, "");
@@ -69,6 +80,19 @@ export const addManualArtifact = async (
     if (!(await exists(absolute))) {
       throw new Error(`File not found: ${relativePath}`);
     }
+  } else if (isManual && input.stub) {
+    relativePath = `.adce/artifacts/${slugify(input.name)}-${id.slice(0, 8)}.md`;
+    const absolute = path.join(rootPath, relativePath);
+    await mkdir(artifactsDir(rootPath), { recursive: true });
+    const body = [
+      `# ${input.name.trim()}`,
+      "",
+      `Type: ${type}`,
+      "",
+      "Manual ADCE artifact stub.",
+      "",
+    ].join("\n");
+    await writeFile(absolute, body, "utf8");
   }
 
   const db = openDatabase(dbPath(rootPath));
@@ -81,6 +105,7 @@ export const addManualArtifact = async (
     }
 
     return insertManualArtifact(db, {
+      id,
       name: input.name.trim(),
       type: type as ArtifactType,
       path: relativePath,

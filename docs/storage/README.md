@@ -83,7 +83,7 @@ One row per artifact. `path` is nullable so later manual/virtual artifacts can e
 | `name` | `name` | TEXT | Basename |
 | `type` | `type` | TEXT | `ArtifactType` from `@adce/shared` |
 | `origin` | `origin` | TEXT | `DETECTED` / `MANUAL` / `IMPORTED` |
-| `verification` | `verification` | TEXT | `UNREVIEWED` / `VERIFIED` / `REJECTED` |
+| `verification` | `verification` | TEXT | `UNREVIEWED` / `VERIFIED` / `REJECTED` / `IGNORED` |
 | `health` | `health` | TEXT | `HEALTHY` / `POTENTIALLY_STALE` / `CONFLICTING` / `UNKNOWN` |
 | `authority` | `authority` | TEXT | `CANONICAL` / `AUTHORITATIVE` / `SUPPORTING` / `INFERRED` / `UNKNOWN` |
 | `content_hash` | `contentHash` | TEXT NULL | SHA-256 hex of file bytes |

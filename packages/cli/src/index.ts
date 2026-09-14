@@ -7,6 +7,8 @@ import { runStatus } from "./commands/status.js";
 import {
   runArtifact,
   runArtifactAdd,
+  runArtifactEdit,
+  runArtifactIgnore,
   runArtifactVerify,
   runArtifactReject,
 } from "./commands/artifact.js";
@@ -46,8 +48,12 @@ program
 const artifacts = program
   .command("artifacts")
   .description("List stored artifacts")
-  .action(async () => {
-    await runArtifacts();
+  .option(
+    "-t, --type <types>",
+    "Comma-separated artifact types (e.g. SOURCE,TEST)",
+  )
+  .action(async (options: { type?: string }) => {
+    await runArtifacts({ type: options.type });
   });
 
 artifacts
@@ -63,8 +69,8 @@ const artifact = program
 
 artifact
   .command("show")
-  .description("Show a single artifact by id")
-  .argument("<id>", "Full artifact id")
+  .description("Show a single artifact by id or unique prefix")
+  .argument("<id>", "Artifact id or unique prefix")
   .action(async (id: string) => {
     await runArtifact(id);
   });
@@ -72,7 +78,7 @@ artifact
 artifact
   .command("verify")
   .description("Mark an artifact as VERIFIED")
-  .argument("<id>", "Full artifact id")
+  .argument("<id>", "Artifact id or unique prefix")
   .action(async (id: string) => {
     await runArtifactVerify(id);
   });
@@ -80,9 +86,27 @@ artifact
 artifact
   .command("reject")
   .description("Mark an artifact as REJECTED")
-  .argument("<id>", "Full artifact id")
+  .argument("<id>", "Artifact id or unique prefix")
   .action(async (id: string) => {
     await runArtifactReject(id);
+  });
+
+artifact
+  .command("ignore")
+  .description("Mark an artifact as IGNORED")
+  .argument("<id>", "Artifact id or unique prefix")
+  .action(async (id: string) => {
+    await runArtifactIgnore(id);
+  });
+
+artifact
+  .command("edit")
+  .description("Edit artifact name and/or type")
+  .argument("<id>", "Artifact id or unique prefix")
+  .option("-n, --name <name>", "New artifact name")
+  .option("-t, --type <type>", "New artifact type")
+  .action(async (id: string, options: { name?: string; type?: string }) => {
+    await runArtifactEdit(id, { name: options.name, type: options.type });
   });
 
 artifact
@@ -99,18 +123,25 @@ artifact
     "Create a virtual artifact with no backing file",
     false,
   )
+  .option(
+    "--stub",
+    "For virtual artifacts, write a stub under .adce/artifacts/",
+    false,
+  )
   .action(
     async (options: {
       name: string;
       type: string;
       path?: string;
       manual?: boolean;
+      stub?: boolean;
     }) => {
       await runArtifactAdd({
         name: options.name,
         type: options.type,
         path: options.path,
         manual: options.manual,
+        stub: options.stub,
       });
     },
   );

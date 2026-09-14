@@ -5,6 +5,7 @@ export const VerificationStates = [
   "UNREVIEWED",
   "VERIFIED",
   "REJECTED",
+  "IGNORED",
 ] as const;
 export type VerificationState = (typeof VerificationStates)[number];
 

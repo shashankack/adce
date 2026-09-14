@@ -18,10 +18,13 @@ export {
   getProjectArtifact,
   AdceNotInitializedError,
   ArtifactNotFoundError,
+  AmbiguousArtifactIdError,
+  type ListProjectArtifactsOptions,
 } from "./artifacts/query.js";
 export {
   verifyProjectArtifact,
   rejectProjectArtifact,
+  ignoreProjectArtifact,
 } from "./artifacts/verification.js";
 export {
   findAdceRoot,
@@ -34,3 +37,8 @@ export {
   type AddManualArtifactInput,
 } from "./artifacts/manual-artifact.js";
 export { listArtifactsForReview } from "./artifacts/review.js";
+export {
+  editProjectArtifact,
+  ArtifactEditError,
+  type EditProjectArtifactInput,
+} from "./artifacts/edit-artifact.js";
