@@ -130,3 +130,26 @@ export interface RelationshipRecord {
   createdAt: string;
   updatedAt: string;
 }
+
+export const TemporalProviders = [
+  "filesystem",
+  "adce_snapshot",
+  "git",
+] as const;
+export type TemporalProvider = (typeof TemporalProviders)[number];
+
+export interface TemporalEvent {
+  at: string;
+  provider: TemporalProvider;
+  kind: string;
+  summary: string;
+  confidence: ConfidenceLevel;
+  evidence: string | null;
+}
+
+export interface ArtifactHistoryReport {
+  artifactId: string;
+  artifactName: string;
+  artifactPath: string | null;
+  events: TemporalEvent[];
+}

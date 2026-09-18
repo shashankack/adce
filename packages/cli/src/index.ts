@@ -17,6 +17,7 @@ import { runArtifactsReview } from "./commands/artifacts-review.js";
 import { runGraph } from "./commands/graph.js";
 import { runLink } from "./commands/link.js";
 import { runUnlink } from "./commands/unlink.js";
+import { runHistory } from "./commands/history.js";
 
 const program = new Command();
 
@@ -176,10 +177,18 @@ program
 
 program
   .command("unlink")
-  .description("Remove a relationship by id or unique prefix")
+  .description("Reject a relationship by id or unique prefix (tombstone)")
   .argument("<id>", "Relationship id or unique prefix")
   .action(async (id: string) => {
     await runUnlink(id);
+  });
+
+program
+  .command("history")
+  .description("Show temporal history for an artifact")
+  .argument("<id>", "Artifact id or unique prefix")
+  .action(async (id: string) => {
+    await runHistory(id);
   });
 
 program.parseAsync(process.argv).catch((error: unknown) => {

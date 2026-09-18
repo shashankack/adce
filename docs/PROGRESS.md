@@ -12,12 +12,13 @@ Last updated: 2026-09-18
 | v0.2 artifact management (steps + polish) | 100% |
 | v0.3 Step 1 (manual graph / link / unlink) | 100% |
 | v0.3 Step 2 (inferred relationships + reject tombstone) | 100% |
-| v0.3 overall (relationships + temporal) | ~55% |
-| Full roadmap (v0.1–v0.7) | ~35% |
+| v0.3 Step 3 (temporal / history) | 100% |
+| v0.3 overall (relationships + temporal) | ~95% |
+| Full roadmap (v0.1–v0.7) | ~40% |
 
-**v0.1 and v0.2 are complete.** **v0.3** Steps 1–2 are complete. Next: temporal / `adce history`.
+**v0.1 and v0.2 are complete.** **v0.3** Steps 1–3 are complete (optional polish remains).
 
-## Current milestone: v0.3
+## Current milestone: v0.3 ✓
 
 Target flow:
 
@@ -25,7 +26,7 @@ Target flow:
 adce graph                      ✓
 adce link <src> <tgt> -t TYPE   ✓
 adce unlink <id>                ✓  (marks REJECTED; scan won't recreate)
-adce history <artifact>         —
+adce history <artifact>         ✓
 ```
 
 Scan also infers `DOCUMENTS` + `TESTS` edges (`DETECTED` / `UNREVIEWED`).
@@ -135,7 +136,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 27 passed (v01-pipeline + v02-artifacts + v03-relationships)
+Current: 29 passed (v01 + v02 + v03 relationships + history)
 ```
 
 ### Dev environment notes (Windows)
@@ -171,6 +172,7 @@ packages/core
   project/        → initialize, status, paths, discover-root, find-adce-root, is-initialized
   artifacts/      → classifier, query, verification, manual-artifact, review, edit-artifact
   relationships/  → link, query, graph, errors, infer
+  temporal/       → history + providers (filesystem, adce-snapshot, git)
   scanner/        → discovery, hashing, scan-project
 packages/storage  → SQLite schema + artifact/scan/relationship repositories
 packages/shared   → types, enums, constants
@@ -212,6 +214,7 @@ adce artifact add --manual --stub -n "Payment Retry Policy" -t REQUIREMENT
 adce graph
 adce link <src-prefix> <tgt-prefix> -t RELATED_TO
 adce unlink <relationship-prefix>
+adce history <artifact-prefix>
 ```
 
 ## v0.3 (in progress)
@@ -233,25 +236,28 @@ adce unlink <relationship-prefix>
 - [x] `unlink` marks `REJECTED` (tombstone) instead of delete
 - [x] Vitest: inference on `basic-typescript`; rejection survives rescan
 
-### Step 3 — temporal / history (next)
+### Step 3 — temporal / history (complete)
 
-- [ ] Filesystem temporal provider (mtime from artifacts)
-- [ ] Git temporal provider (when repo has history)
-- [ ] ADCE snapshot provider (scan timestamps)
-- [ ] `adce history <artifact>`
+- [x] Shared: `TemporalEvent`, `ArtifactHistoryReport`, provider ids
+- [x] Storage: `listScans`
+- [x] Git: `getPathCommitHistory` via simple-git (optional)
+- [x] Providers: filesystem, ADCE snapshot, git
+- [x] Core: `getArtifactHistory` merges + sorts newest-first
+- [x] CLI: `adce history <id-or-prefix>`
+- [x] Vitest: no-git snapshot/fs events; git commits when repo present
 
 ## Next steps
 
-1. Commit Step 2 (inference + unlink reject + progress).
-2. **v0.3 Step 3** — temporal providers + `adce history <artifact>`.
+1. Commit Step 2 + Step 3 (inference, history, progress).
+2. Optional v0.3 polish, or start **v0.4** (deterministic conflicts).
 
 ## Roadmap reminder
 
 ```text
 v0.1  CLI foundation          ✓
 v0.2  Artifact management     ✓
-v0.3  Relationships + temporal  ← here (~55%)
-v0.4  Deterministic conflicts
+v0.3  Relationships + temporal  ✓ (~95%)
+v0.4  Deterministic conflicts   ← next
 v0.5  Context engine
 v0.6  ML integration
 v0.7  Research benchmark

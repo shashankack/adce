@@ -72,3 +72,4 @@ export {
   RelationshipExistsError,
   RelationshipSelfLinkError,
 } from "./relationships/errors.js";
+export { getArtifactHistory } from "./temporal/history.js";

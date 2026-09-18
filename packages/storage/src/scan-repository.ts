@@ -44,3 +44,29 @@ export const getLatestScan = (
     gitDetected: row.gitDetected,
   };
 };
+
+export const listScans = (
+  db: AdceDb,
+  limit = 10,
+): (ScanSummary & { id: string })[] => {
+  const rows = db
+    .select()
+    .from(scans)
+    .orderBy(desc(scans.finishedAt))
+    .limit(limit)
+    .all();
+
+  return rows.map((row) => ({
+    id: row.id,
+    mode: row.mode as ScanSummary["mode"],
+    startedAt: row.startedAt,
+    finishedAt: row.finishedAt,
+    filesSeen: row.filesSeen,
+    artifactsUpserted: row.artifactsUpserted,
+    unchanged: row.unchanged,
+    changed: row.changed,
+    added: row.added,
+    removed: row.removed,
+    gitDetected: row.gitDetected,
+  }));
+};
