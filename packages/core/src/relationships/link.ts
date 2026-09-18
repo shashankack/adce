@@ -3,10 +3,10 @@ import type { RelationshipRecord, RelationshipType } from "@adce/shared";
 import { RelationshipTypes } from "@adce/shared";
 import {
   closeDatabase,
-  deleteRelationshipById,
   findRelationshipByEdge,
   insertManualRelationship,
   openDatabase,
+  setRelationshipVerification,
 } from "@adce/storage";
 import { adceDir, dbPath } from "../project/paths.js";
 import {
@@ -78,10 +78,11 @@ export const linkProjectArtifacts = async (
   }
 };
 
+/** Mark relationship REJECTED so scan inference will not recreate it. */
 export const unlinkProjectRelationship = async (
   rootPath: string,
   idOrPrefix: string,
-): Promise<void> => {
+): Promise<RelationshipRecord> => {
   if (!(await exists(adceDir(rootPath)))) {
     throw new AdceNotInitializedError(rootPath);
   }
@@ -89,10 +90,11 @@ export const unlinkProjectRelationship = async (
   const db = openDatabase(dbPath(rootPath));
   try {
     const resolved = resolveRelationshipId(db, idOrPrefix);
-    const deleted = deleteRelationshipById(db, resolved.id);
-    if (!deleted) {
+    const updated = setRelationshipVerification(db, resolved.id, "REJECTED");
+    if (!updated) {
       throw new RelationshipNotFoundError(resolved.id);
     }
+    return updated;
   } finally {
     closeDatabase(db);
   }

@@ -61,6 +61,11 @@ export {
 } from "./relationships/link.js";
 export { listProjectGraph, type GraphEdgeView } from "./relationships/graph.js";
 export {
+  inferRelationshipCandidates,
+  persistInferredRelationships,
+  type InferredEdge,
+} from "./relationships/infer.js";
+export {
   InvalidRelationshipTypeError,
   RelationshipNotFoundError,
   AmbiguousRelationshipIdError,

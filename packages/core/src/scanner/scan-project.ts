@@ -8,15 +8,20 @@ import {
   getMeta,
   insertScan,
   listDetectedPathArtifacts,
+  listArtifacts,
   openDatabase,
   setMeta,
   upsertDetectedByPath,
 } from "@adce/storage";
 import { loadConfig } from "../config/loader.js";
 import { classifyArtifact } from "../artifacts/classifier.js";
-import { AdceIncompleteError, isAdceInitialized } from "../project/is-initialized.js";
+import {
+  AdceIncompleteError,
+  isAdceInitialized,
+} from "../project/is-initialized.js";
 import { AdceNotInitializedError } from "../artifacts/query.js";
 import { dbPath } from "../project/paths.js";
+import { persistInferredRelationships } from "../relationships/infer.js";
 import { discoverFiles } from "./discovery.js";
 import { hashFile } from "./hashing.js";
 
@@ -120,6 +125,10 @@ export async function scanProject(options: ScanOptions): Promise<ScanResult> {
         removed += 1;
       }
     }
+
+    // Infer relationships from current artifact set (respects MANUAL / REJECTED).
+    const allArtifacts = listArtifacts(db);
+    persistInferredRelationships(db, allArtifacts);
 
     const finishedAt = new Date().toISOString();
     const summary: ScanResult = {

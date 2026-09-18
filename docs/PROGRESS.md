@@ -1,6 +1,6 @@
 # ADCE Progress
 
-Last updated: 2026-09-14
+Last updated: 2026-09-18
 
 ## Summary
 
@@ -10,11 +10,27 @@ Last updated: 2026-09-14
 | v0.1 definition of done (proven + tested) | 100% |
 | Init root confirmation + `--yes` | 100% |
 | v0.2 artifact management (steps + polish) | 100% |
-| Full roadmap (v0.1–v0.7) | ~28% |
+| v0.3 Step 1 (manual graph / link / unlink) | 100% |
+| v0.3 Step 2 (inferred relationships + reject tombstone) | 100% |
+| v0.3 overall (relationships + temporal) | ~55% |
+| Full roadmap (v0.1–v0.7) | ~35% |
 
-**v0.1 and v0.2 are complete.** Next milestone: **v0.3** (relationships + temporal).
+**v0.1 and v0.2 are complete.** **v0.3** Steps 1–2 are complete. Next: temporal / `adce history`.
 
-## Current milestone: v0.2 ✓
+## Current milestone: v0.3
+
+Target flow:
+
+```text
+adce graph                      ✓
+adce link <src> <tgt> -t TYPE   ✓
+adce unlink <id>                ✓  (marks REJECTED; scan won't recreate)
+adce history <artifact>         —
+```
+
+Scan also infers `DOCUMENTS` + `TESTS` edges (`DETECTED` / `UNREVIEWED`).
+
+## v0.2 ✓
 
 Target flow:
 
@@ -119,7 +135,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 19 passed (v01-pipeline + v02-artifacts)
+Current: 27 passed (v01-pipeline + v02-artifacts + v03-relationships)
 ```
 
 ### Dev environment notes (Windows)
@@ -127,6 +143,7 @@ Current: 19 passed (v01-pipeline + v02-artifacts)
 - Prefer **Node 22 LTS** (fnm) for this repo; Node 24 often forces `better-sqlite3` to compile.
 - Windows needs **MSVC / Desktop development with C++** if a native rebuild is required.
 - Avoid mixing WSL and Windows `pnpm install` on the same `node_modules` tree.
+- Smoke suite: `~/smoke.sh` → `/mnt/c/crucifer/tmp/adce-smoke-tests` (Windows FS for Node).
 
 ## Commits
 
@@ -140,19 +157,22 @@ Current: 19 passed (v01-pipeline + v02-artifacts)
 | `2e84da2` | Artifact verify/reject + resolve ADCE root from subdirs |
 | `98a7dab` | Manual artifacts via `adce artifact add` |
 | `caa1497` | Interactive artifacts review queue |
+| `a0d55fa` | v0.2 polish (type filter, edit/ignore, stubs, prefixes) |
+| `9e781f5` | Manual relationships + init repair |
 
 ## Package map
 
 ```text
 packages/cli
-  commands/       → init, scan, status, artifacts, artifacts-review, artifact
+  commands/       → init, scan, status, artifacts, graph, link, unlink, artifact
   ui/             → confirm-init-root, logger, review-prompt
   project-root.ts → resolveAdceRoot for non-init commands
 packages/core
-  project/        → initialize, status, paths, discover-root, find-adce-root
+  project/        → initialize, status, paths, discover-root, find-adce-root, is-initialized
   artifacts/      → classifier, query, verification, manual-artifact, review, edit-artifact
+  relationships/  → link, query, graph, errors, infer
   scanner/        → discovery, hashing, scan-project
-packages/storage  → SQLite schema + artifact/scan repositories
+packages/storage  → SQLite schema + artifact/scan/relationship repositories
 packages/shared   → types, enums, constants
 packages/git      → isGitRepository()
 packages/parsers  → stub only
@@ -189,27 +209,48 @@ adce artifact ignore <id-or-prefix>
 adce artifact edit <id-or-prefix> -t DOCUMENTATION -n "New name"
 adce artifact add --manual -n "Payment Retry Policy" -t REQUIREMENT
 adce artifact add --manual --stub -n "Payment Retry Policy" -t REQUIREMENT
+adce graph
+adce link <src-prefix> <tgt-prefix> -t RELATED_TO
+adce unlink <relationship-prefix>
 ```
 
-Tests:
+## v0.3 (in progress)
 
-```bash
-pnpm test:core
-# or
-pnpm test
-```
+### Step 1 — manual relationships (complete)
+
+- [x] Shared relationship types + `RelationshipRecord`
+- [x] Storage `relationships` table + repository
+- [x] Core `link` / `unlink` / `graph`
+- [x] CLI `adce graph` / `link` / `unlink`
+- [x] Init hardening: `isAdceInitialized`, `AdceIncompleteError`, `adce init --repair`
+
+### Step 2 — inferred relationships (complete)
+
+- [x] `upsertDetectedRelationship` (skips MANUAL + REJECTED)
+- [x] `setRelationshipVerification`
+- [x] Core `infer.ts` — DOCUMENTS + TESTS heuristics
+- [x] Wired into `scanProject` after artifact upsert
+- [x] `unlink` marks `REJECTED` (tombstone) instead of delete
+- [x] Vitest: inference on `basic-typescript`; rejection survives rescan
+
+### Step 3 — temporal / history (next)
+
+- [ ] Filesystem temporal provider (mtime from artifacts)
+- [ ] Git temporal provider (when repo has history)
+- [ ] ADCE snapshot provider (scan timestamps)
+- [ ] `adce history <artifact>`
 
 ## Next steps
 
-1. Start **v0.3** — relationships + temporal (`adce graph` / `link` / `unlink` / `history`).
-2. Schema: `relationships` table + temporal providers (Git, filesystem, ADCE snapshots).
+1. Commit Step 2 (inference + unlink reject + progress).
+2. **v0.3 Step 3** — temporal providers + `adce history <artifact>`.
 
 ## Roadmap reminder
 
 ```text
 v0.1  CLI foundation          ✓
 v0.2  Artifact management     ✓
-v0.3  Relationships + temporal  ← next
+v0.3  Relationships + temporal  ← here (~55%)
 v0.4  Deterministic conflicts
 v0.5  Context engine
 v0.6  ML integration

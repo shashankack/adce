@@ -14,7 +14,7 @@ export const runUnlink = async (
   try {
     const rootPath = await resolveAdceRoot(cwd);
     await unlinkProjectRelationship(rootPath, id);
-    log.ok("Relationship removed.");
+    log.ok("Relationship rejected (will not be re-inferred on scan).");
   } catch (error) {
     if (
       error instanceof AdceNotInitializedError ||

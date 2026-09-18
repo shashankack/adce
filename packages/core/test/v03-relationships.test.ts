@@ -58,12 +58,18 @@ describe("v0.3 relationships", () => {
     expect(rel.type).toBe("RELATED_TO");
 
     const all = await listProjectRelationships(root);
-    expect(all).toHaveLength(1);
+    expect(all.some((r) => r.id === rel.id && r.type === "RELATED_TO")).toBe(
+      true,
+    );
 
     const graph = await listProjectGraph(root);
-    expect(graph).toHaveLength(1);
-    expect(graph[0]!.sourceLabel).toBe(source.path);
-    expect(graph[0]!.targetLabel).toBe(target!.path);
+    expect(graph.some((e) => e.relationship.id === rel.id)).toBe(true);
+    expect(
+      graph.find((e) => e.relationship.id === rel.id)?.sourceLabel,
+    ).toBe(source.path);
+    expect(
+      graph.find((e) => e.relationship.id === rel.id)?.targetLabel,
+    ).toBe(target!.path);
   });
 
   it("rejects duplicate edge", async () => {
@@ -114,7 +120,7 @@ describe("v0.3 relationships", () => {
     ).rejects.toBeInstanceOf(InvalidRelationshipTypeError);
   });
 
-  it("unlinks by relationship id prefix", async () => {
+  it("unlinks by marking relationship REJECTED", async () => {
     const root = await copyFixture("no-git");
     await initializeProject(root);
     await scanProject({ rootPath: root });
@@ -123,12 +129,65 @@ describe("v0.3 relationships", () => {
     const rel = await linkProjectArtifacts(root, {
       sourceIdOrPrefix: a!.id,
       targetIdOrPrefix: b!.id,
-      type: "DOCUMENTS",
+      type: "RELATED_TO",
     });
 
-    await unlinkProjectRelationship(root, rel.id.slice(0, 8));
+    const rejected = await unlinkProjectRelationship(root, rel.id.slice(0, 8));
+    expect(rejected.verification).toBe("REJECTED");
 
     const after = await listProjectRelationships(root);
-    expect(after).toHaveLength(0);
+    const row = after.find((r) => r.id === rel.id);
+    expect(row?.verification).toBe("REJECTED");
+  });
+
+  it("infers DOCUMENTS and TESTS on basic-typescript scan", async () => {
+    const root = await copyFixture("basic-typescript");
+    await initializeProject(root);
+    await scanProject({ rootPath: root });
+
+    const artifacts = await listProjectArtifacts(root);
+    const readme = artifacts.find((a) => a.path === "README.md");
+    const source = artifacts.find((a) => a.path === "src/index.ts");
+    const test = artifacts.find((a) => a.path === "src/index.test.ts");
+    expect(readme).toBeDefined();
+    expect(source).toBeDefined();
+    expect(test).toBeDefined();
+
+    const rels = await listProjectRelationships(root);
+    const docs = rels.find(
+      (r) =>
+        r.type === "DOCUMENTS" &&
+        r.sourceArtifactId === readme!.id &&
+        r.targetArtifactId === source!.id,
+    );
+    expect(docs?.origin).toBe("DETECTED");
+    expect(docs?.verification).toBe("UNREVIEWED");
+
+    const tests = rels.find(
+      (r) =>
+        r.type === "TESTS" &&
+        r.sourceArtifactId === test!.id &&
+        r.targetArtifactId === source!.id,
+    );
+    expect(tests?.origin).toBe("DETECTED");
+    expect(tests?.confidence).toBe("LIKELY");
+  });
+
+  it("does not recreate REJECTED relationships on rescan", async () => {
+    const root = await copyFixture("basic-typescript");
+    await initializeProject(root);
+    await scanProject({ rootPath: root });
+
+    const rels = await listProjectRelationships(root);
+    const tests = rels.find((r) => r.type === "TESTS");
+    expect(tests).toBeDefined();
+
+    await unlinkProjectRelationship(root, tests!.id);
+    await scanProject({ rootPath: root });
+
+    const after = await listProjectRelationships(root);
+    const again = after.find((r) => r.id === tests!.id);
+    expect(again?.verification).toBe("REJECTED");
+    expect(again?.origin).toBe("DETECTED");
   });
 });
