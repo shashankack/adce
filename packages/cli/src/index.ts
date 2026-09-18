@@ -18,6 +18,12 @@ import { runGraph } from "./commands/graph.js";
 import { runLink } from "./commands/link.js";
 import { runUnlink } from "./commands/unlink.js";
 import { runHistory } from "./commands/history.js";
+import {
+  runConflictIgnore,
+  runConflictReject,
+  runConflictShow,
+  runConflicts,
+} from "./commands/conflicts.js";
 
 const program = new Command();
 
@@ -189,6 +195,42 @@ program
   .argument("<id>", "Artifact id or unique prefix")
   .action(async (id: string) => {
     await runHistory(id);
+  });
+
+program
+  .command("conflicts")
+  .description("List open conflicts")
+  .option("--all", "Include rejected / ignored / resolved conflicts", false)
+  .action(async (options: { all?: boolean }) => {
+    await runConflicts({ all: options.all });
+  });
+
+const conflict = program
+  .command("conflict")
+  .description("Inspect or update a single conflict");
+
+conflict
+  .command("show")
+  .description("Show a conflict by id or unique prefix")
+  .argument("<id>", "Conflict id or unique prefix")
+  .action(async (id: string) => {
+    await runConflictShow(id);
+  });
+
+conflict
+  .command("reject")
+  .description("Mark a conflict as REJECTED (survives future scans)")
+  .argument("<id>", "Conflict id or unique prefix")
+  .action(async (id: string) => {
+    await runConflictReject(id);
+  });
+
+conflict
+  .command("ignore")
+  .description("Mark a conflict as IGNORED (survives future scans)")
+  .argument("<id>", "Conflict id or unique prefix")
+  .action(async (id: string) => {
+    await runConflictIgnore(id);
   });
 
 program.parseAsync(process.argv).catch((error: unknown) => {

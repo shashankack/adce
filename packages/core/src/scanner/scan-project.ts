@@ -22,6 +22,7 @@ import {
 import { AdceNotInitializedError } from "../artifacts/query.js";
 import { dbPath } from "../project/paths.js";
 import { persistInferredRelationships } from "../relationships/infer.js";
+import { detectProjectConflicts } from "../conflicts/query.js";
 import { discoverFiles } from "./discovery.js";
 import { hashFile } from "./hashing.js";
 
@@ -129,6 +130,7 @@ export async function scanProject(options: ScanOptions): Promise<ScanResult> {
     // Infer relationships from current artifact set (respects MANUAL / REJECTED).
     const allArtifacts = listArtifacts(db);
     persistInferredRelationships(db, allArtifacts);
+    detectProjectConflicts(db);
 
     const finishedAt = new Date().toISOString();
     const summary: ScanResult = {

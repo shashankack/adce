@@ -153,3 +153,44 @@ export interface ArtifactHistoryReport {
   artifactPath: string | null;
   events: TemporalEvent[];
 }
+
+export const ConflictCategories = [
+  "TEMPORAL_MISMATCH",
+  "STRUCTURAL_MISMATCH",
+  "SCHEMA_MISMATCH",
+  "API_SPEC_MISMATCH",
+  "CONFIGURATION_MISMATCH",
+  "DEPENDENCY_MISMATCH",
+  "TEST_MISMATCH",
+  "DOCUMENTATION_MISMATCH",
+  "SEMANTIC_CONFLICT",
+] as const;
+export type ConflictCategory = (typeof ConflictCategories)[number];
+
+export const ConflictLifecycles = [
+  "DETECTED",
+  "ANALYZED",
+  "CONFIRMED",
+  "REJECTED",
+  "RESOLVED",
+  "IGNORED",
+] as const;
+export type ConflictLifecycle = (typeof ConflictLifecycles)[number];
+
+export const ConflictSeverities = ["LOW", "MEDIUM", "HIGH"] as const;
+export type ConflictSeverity = (typeof ConflictSeverities)[number];
+
+export interface ConflictRecord {
+  id: string;
+  category: ConflictCategory;
+  lifecycle: ConflictLifecycle;
+  confidence: ConfidenceLevel;
+  severity: ConflictSeverity;
+  sourceArtifactId: string | null;
+  targetArtifactId: string | null;
+  relationshipId: string | null;
+  summary: string;
+  evidence: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

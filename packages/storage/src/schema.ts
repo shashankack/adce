@@ -47,3 +47,18 @@ export const relationships = sqliteTable("relationships", {
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
+
+export const conflicts = sqliteTable("conflicts", {
+  id: text("id").primaryKey(),
+  category: text("category").notNull(),
+  lifecycle: text("lifecycle").notNull(),
+  confidence: text("confidence").notNull(),
+  severity: text("severity").notNull(),
+  sourceArtifactId: text("source_artifact_id"),
+  targetArtifactId: text("target_artifact_id"),
+  relationshipId: text("relationship_id"),
+  summary: text("summary").notNull(),
+  evidence: text("evidence"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});

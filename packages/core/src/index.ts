@@ -73,3 +73,13 @@ export {
   RelationshipSelfLinkError,
 } from "./relationships/errors.js";
 export { getArtifactHistory } from "./temporal/history.js";
+export {
+  listProjectConflicts,
+  getProjectConflict,
+  rejectProjectConflict,
+  ignoreProjectConflict,
+  detectProjectConflicts,
+  ConflictNotFoundError,
+  AmbiguousConflictIdError,
+} from "./conflicts/query.js";
+export { detectTemporalMismatches } from "./conflicts/detect-temporal.js";

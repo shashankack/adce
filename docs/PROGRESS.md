@@ -13,20 +13,22 @@ Last updated: 2026-09-18
 | v0.3 Step 1 (manual graph / link / unlink) | 100% |
 | v0.3 Step 2 (inferred relationships + reject tombstone) | 100% |
 | v0.3 Step 3 (temporal / history) | 100% |
-| v0.3 overall (relationships + temporal) | ~95% |
-| Full roadmap (v0.1–v0.7) | ~40% |
+| v0.3 overall (relationships + temporal) | 100% |
+| v0.4 Step 1 (conflicts list/show + temporal detector) | 100% |
+| v0.4 overall (deterministic conflicts) | ~40% |
+| Full roadmap (v0.1–v0.7) | ~45% |
 
-**v0.1 and v0.2 are complete.** **v0.3** Steps 1–3 are complete (optional polish remains).
+**v0.1–v0.3 are complete.** **v0.4** Step 1 is in progress (temporal mismatch detector + CLI).
 
-## Current milestone: v0.3 ✓
+## Current milestone: v0.4
 
 Target flow:
 
 ```text
-adce graph                      ✓
-adce link <src> <tgt> -t TYPE   ✓
-adce unlink <id>                ✓  (marks REJECTED; scan won't recreate)
-adce history <artifact>         ✓
+adce conflicts [--all]          ✓
+adce conflict show <id>         ✓
+adce conflict reject|ignore     ✓
+adce conflicts (more detectors) —
 ```
 
 Scan also infers `DOCUMENTS` + `TESTS` edges (`DETECTED` / `UNREVIEWED`).
@@ -136,7 +138,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 29 passed (v01 + v02 + v03 relationships + history)
+Current: 32 passed (v01–v04)
 ```
 
 ### Dev environment notes (Windows)
@@ -246,18 +248,36 @@ adce history <artifact-prefix>
 - [x] CLI: `adce history <id-or-prefix>`
 - [x] Vitest: no-git snapshot/fs events; git commits when repo present
 
+## v0.4 (in progress)
+
+### Step 1 — conflict store + temporal detector (complete)
+
+- [x] Shared conflict categories, lifecycle, severity, `ConflictRecord`
+- [x] Storage `conflicts` table + upsert (respects REJECTED/IGNORED/RESOLVED)
+- [x] Detector: DOCUMENTS/TESTS mtime lag ≥ 1 day → DOCUMENTATION/TEST_MISMATCH
+- [x] Confidence stays POTENTIAL/LIKELY (never CONFIRMED from mtime alone)
+- [x] Wired into scan after relationship inference
+- [x] CLI: `conflicts`, `conflict show|reject|ignore`
+- [x] Vitest: detect stale docs/tests; rejection survives rescan
+
+### Step 2 — more detectors (next)
+
+- [ ] STRUCTURAL / SCHEMA / CONFIG mismatches (parsers)
+- [ ] Conflict confirm / resolve commands
+- [ ] Optionally mark artifact `health = CONFLICTING`
+
 ## Next steps
 
-1. Commit Step 2 + Step 3 (inference, history, progress).
-2. Optional v0.3 polish, or start **v0.4** (deterministic conflicts).
+1. Commit v0.4 Step 1.
+2. Expand conflict detectors or start confirm/resolve UX.
 
 ## Roadmap reminder
 
 ```text
 v0.1  CLI foundation          ✓
 v0.2  Artifact management     ✓
-v0.3  Relationships + temporal  ✓ (~95%)
-v0.4  Deterministic conflicts   ← next
+v0.3  Relationships + temporal  ✓
+v0.4  Deterministic conflicts   ← here (~40%)
 v0.5  Context engine
 v0.6  ML integration
 v0.7  Research benchmark

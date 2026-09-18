@@ -53,6 +53,23 @@ CREATE TABLE IF NOT EXISTS relationships (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS relationships_unique_edge
   ON relationships(source_artifact_id, target_artifact_id, type);
+CREATE TABLE IF NOT EXISTS conflicts (
+  id TEXT PRIMARY KEY NOT NULL,
+  category TEXT NOT NULL,
+  lifecycle TEXT NOT NULL,
+  confidence TEXT NOT NULL,
+  severity TEXT NOT NULL,
+  source_artifact_id TEXT,
+  target_artifact_id TEXT,
+  relationship_id TEXT,
+  summary TEXT NOT NULL,
+  evidence TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS conflicts_unique_edge
+  ON conflicts(category, relationship_id)
+  WHERE relationship_id IS NOT NULL;
 `;
 
 export type AdceDb = ReturnType<typeof openDatabase>;
