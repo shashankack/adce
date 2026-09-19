@@ -194,3 +194,26 @@ export interface ConflictRecord {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ContextArtifactView {
+  id: string;
+  name: string;
+  path: string | null;
+  type: ArtifactType;
+  origin: ArtifactOrigin;
+  verification: VerificationState;
+  health: HealthState;
+  authority: AuthorityLevel;
+  score: number;
+  reasons: string[];
+}
+
+export interface ContextBundle {
+  task: string | null;
+  rootPath: string;
+  generatedAt: string;
+  artifacts: ContextArtifactView[];
+  relationships: RelationshipRecord[];
+  conflicts: ConflictRecord[];
+  notes: string[];
+}

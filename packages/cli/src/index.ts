@@ -19,11 +19,14 @@ import { runLink } from "./commands/link.js";
 import { runUnlink } from "./commands/unlink.js";
 import { runHistory } from "./commands/history.js";
 import {
+  runConflictConfirm,
   runConflictIgnore,
   runConflictReject,
+  runConflictResolve,
   runConflictShow,
   runConflicts,
 } from "./commands/conflicts.js";
+import { runContext } from "./commands/context.js";
 
 const program = new Command();
 
@@ -232,6 +235,39 @@ conflict
   .action(async (id: string) => {
     await runConflictIgnore(id);
   });
+
+conflict
+  .command("confirm")
+  .description("Mark a conflict as CONFIRMED")
+  .argument("<id>", "Conflict id or unique prefix")
+  .action(async (id: string) => {
+    await runConflictConfirm(id);
+  });
+
+conflict
+  .command("resolve")
+  .description("Mark a conflict as RESOLVED")
+  .argument("<id>", "Conflict id or unique prefix")
+  .action(async (id: string) => {
+    await runConflictResolve(id);
+  });
+
+program
+  .command("context")
+  .description("Generate ranked project context for agents")
+  .option("-t, --task <task>", "Task description to bias ranking")
+  .option("--budget <n>", "Max primary artifacts", (v) => Number(v), 12)
+  .option("--format <format>", "text or json", "text")
+  .action(
+    async (options: { task?: string; budget?: number; format?: string }) => {
+      const format = options.format === "json" ? "json" : "text";
+      await runContext({
+        task: options.task,
+        budget: options.budget,
+        format,
+      });
+    },
+  );
 
 program.parseAsync(process.argv).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);

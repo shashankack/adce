@@ -8,6 +8,7 @@ import {
   listRelationships,
   openDatabase,
   setConflictLifecycle,
+  syncArtifactHealthFromConflicts,
 } from "@adce/storage";
 import { AdceNotInitializedError } from "../artifacts/query.js";
 import { adceDir, dbPath } from "../project/paths.js";
@@ -107,6 +108,7 @@ export const setProjectConflictLifecycle = async (
     const resolved = resolveConflictId(db, idOrPrefix);
     const updated = setConflictLifecycle(db, resolved.id, lifecycle);
     if (!updated) throw new ConflictNotFoundError(resolved.id);
+    syncArtifactHealthFromConflicts(db);
     return updated;
   } finally {
     closeDatabase(db);
@@ -125,10 +127,24 @@ export const ignoreProjectConflict = (
 ): Promise<ConflictRecord> =>
   setProjectConflictLifecycle(rootPath, idOrPrefix, "IGNORED");
 
-/** Run deterministic detectors against current graph. */
+export const confirmProjectConflict = (
+  rootPath: string,
+  idOrPrefix: string,
+): Promise<ConflictRecord> =>
+  setProjectConflictLifecycle(rootPath, idOrPrefix, "CONFIRMED");
+
+export const resolveProjectConflict = (
+  rootPath: string,
+  idOrPrefix: string,
+): Promise<ConflictRecord> =>
+  setProjectConflictLifecycle(rootPath, idOrPrefix, "RESOLVED");
+
+/** Run deterministic detectors against current graph + sync health. */
 export const detectProjectConflicts = (db: Parameters<
   typeof listRelationships
 >[0]): number => {
   const relationships = listRelationships(db);
-  return detectTemporalMismatches(db, relationships);
+  const count = detectTemporalMismatches(db, relationships);
+  syncArtifactHealthFromConflicts(db);
+  return count;
 };

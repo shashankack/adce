@@ -78,8 +78,14 @@ export {
   getProjectConflict,
   rejectProjectConflict,
   ignoreProjectConflict,
+  confirmProjectConflict,
+  resolveProjectConflict,
   detectProjectConflicts,
   ConflictNotFoundError,
   AmbiguousConflictIdError,
 } from "./conflicts/query.js";
 export { detectTemporalMismatches } from "./conflicts/detect-temporal.js";
+export {
+  buildProjectContext,
+  type BuildContextOptions,
+} from "./context/build-context.js";

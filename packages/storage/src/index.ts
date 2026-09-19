@@ -10,3 +10,4 @@ export * from "./artifact-repository.js";
 export * from "./scan-repository.js";
 export * from "./relationship-repository.js";
 export * from "./conflict-repository.js";
+export * from "./health-sync.js";

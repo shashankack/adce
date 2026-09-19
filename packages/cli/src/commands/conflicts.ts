@@ -2,13 +2,27 @@ import {
   AdceNotInitializedError,
   AmbiguousConflictIdError,
   ConflictNotFoundError,
+  confirmProjectConflict,
   getProjectConflict,
   ignoreProjectConflict,
   listProjectConflicts,
   rejectProjectConflict,
+  resolveProjectConflict,
 } from "@adce/core";
 import { resolveAdceRoot } from "../project-root.js";
 import { log } from "../ui/logger.js";
+
+const handleConflictError = (error: unknown): boolean => {
+  if (
+    error instanceof AdceNotInitializedError ||
+    error instanceof ConflictNotFoundError ||
+    error instanceof AmbiguousConflictIdError
+  ) {
+    log.error(error.message);
+    return true;
+  }
+  return false;
+};
 
 export const runConflicts = async (
   options: { all?: boolean } = {},
@@ -67,14 +81,7 @@ export const runConflictShow = async (
     console.log(`Created at: ${c.createdAt}`);
     console.log(`Updated at: ${c.updatedAt}`);
   } catch (error) {
-    if (
-      error instanceof AdceNotInitializedError ||
-      error instanceof ConflictNotFoundError ||
-      error instanceof AmbiguousConflictIdError
-    ) {
-      log.error(error.message);
-      return;
-    }
+    if (handleConflictError(error)) return;
     throw error;
   }
 };
@@ -89,14 +96,7 @@ export const runConflictReject = async (
     log.ok(`Conflict rejected: ${c.id}`);
     console.log(`Lifecycle: ${c.lifecycle}`);
   } catch (error) {
-    if (
-      error instanceof AdceNotInitializedError ||
-      error instanceof ConflictNotFoundError ||
-      error instanceof AmbiguousConflictIdError
-    ) {
-      log.error(error.message);
-      return;
-    }
+    if (handleConflictError(error)) return;
     throw error;
   }
 };
@@ -111,14 +111,37 @@ export const runConflictIgnore = async (
     log.ok(`Conflict ignored: ${c.id}`);
     console.log(`Lifecycle: ${c.lifecycle}`);
   } catch (error) {
-    if (
-      error instanceof AdceNotInitializedError ||
-      error instanceof ConflictNotFoundError ||
-      error instanceof AmbiguousConflictIdError
-    ) {
-      log.error(error.message);
-      return;
-    }
+    if (handleConflictError(error)) return;
+    throw error;
+  }
+};
+
+export const runConflictConfirm = async (
+  id: string,
+  cwd = process.cwd(),
+): Promise<void> => {
+  try {
+    const rootPath = await resolveAdceRoot(cwd);
+    const c = await confirmProjectConflict(rootPath, id);
+    log.ok(`Conflict confirmed: ${c.id}`);
+    console.log(`Lifecycle: ${c.lifecycle}`);
+  } catch (error) {
+    if (handleConflictError(error)) return;
+    throw error;
+  }
+};
+
+export const runConflictResolve = async (
+  id: string,
+  cwd = process.cwd(),
+): Promise<void> => {
+  try {
+    const rootPath = await resolveAdceRoot(cwd);
+    const c = await resolveProjectConflict(rootPath, id);
+    log.ok(`Conflict resolved: ${c.id}`);
+    console.log(`Lifecycle: ${c.lifecycle}`);
+  } catch (error) {
+    if (handleConflictError(error)) return;
     throw error;
   }
 };
