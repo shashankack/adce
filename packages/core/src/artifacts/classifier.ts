@@ -35,9 +35,11 @@ export function classifyArtifact(relativePath: string): ArtifactType {
   }
 
   if (
+    base.endsWith(".schema.json") ||
     base === "schema.prisma" ||
     base.endsWith(".prisma") ||
-    (parts.includes("schemas") && base.endsWith(".sql"))
+    (parts.includes("schemas") &&
+      (base.endsWith(".sql") || base.endsWith(".json")))
   ) {
     return "SCHEMA";
   }
@@ -80,9 +82,18 @@ export function classifyArtifact(relativePath: string): ArtifactType {
   if (
     base === ".env.example" ||
     base === ".env.sample" ||
-    base === ".env.template"
+    base === ".env.template" ||
+    base === ".nvmrc" ||
+    base === ".node-version"
   ) {
     return "ENVIRONMENT_TEMPLATE";
+  }
+
+  if (
+    (parts.includes("config") || parts.includes("configs")) &&
+    base.endsWith(".json")
+  ) {
+    return "CONFIGURATION";
   }
 
   if (

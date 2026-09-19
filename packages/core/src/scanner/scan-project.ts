@@ -130,7 +130,7 @@ export async function scanProject(options: ScanOptions): Promise<ScanResult> {
     // Infer relationships from current artifact set (respects MANUAL / REJECTED).
     const allArtifacts = listArtifacts(db);
     persistInferredRelationships(db, allArtifacts);
-    detectProjectConflicts(db);
+    await detectProjectConflicts(db, rootPath);
 
     const finishedAt = new Date().toISOString();
     const summary: ScanResult = {

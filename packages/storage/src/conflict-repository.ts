@@ -97,6 +97,61 @@ export const findConflictByCategoryAndRelationship = (
   return row ? toRecord(row) : null;
 };
 
+export const findConflictByCategoryAndArtifacts = (
+  db: AdceDb,
+  category: ConflictCategory,
+  sourceArtifactId: string,
+  targetArtifactId: string,
+): ConflictRecord | null => {
+  const row = db
+    .select()
+    .from(conflicts)
+    .where(
+      and(
+        eq(conflicts.category, category),
+        eq(conflicts.sourceArtifactId, sourceArtifactId),
+        eq(conflicts.targetArtifactId, targetArtifactId),
+      ),
+    )
+    .get();
+  return row ? toRecord(row) : null;
+};
+
+const refreshOpenConflict = (
+  db: AdceDb,
+  existing: ConflictRecord,
+  input: UpsertDetectedConflictInput,
+): ConflictRecord => {
+  if (CLOSED.includes(existing.lifecycle)) {
+    return existing;
+  }
+  const updatedAt = new Date().toISOString();
+  db.update(conflicts)
+    .set({
+      confidence: input.confidence,
+      severity: input.severity,
+      summary: input.summary,
+      evidence: input.evidence,
+      sourceArtifactId: input.sourceArtifactId,
+      targetArtifactId: input.targetArtifactId,
+      relationshipId: input.relationshipId,
+      updatedAt,
+    })
+    .where(eq(conflicts.id, existing.id))
+    .run();
+  return {
+    ...existing,
+    confidence: input.confidence,
+    severity: input.severity,
+    summary: input.summary,
+    evidence: input.evidence,
+    sourceArtifactId: input.sourceArtifactId,
+    targetArtifactId: input.targetArtifactId,
+    relationshipId: input.relationshipId,
+    updatedAt,
+  };
+};
+
 export const upsertDetectedConflict = (
   db: AdceDb,
   input: UpsertDetectedConflictInput,
@@ -107,34 +162,15 @@ export const upsertDetectedConflict = (
       input.category,
       input.relationshipId,
     );
-    if (existing) {
-      if (CLOSED.includes(existing.lifecycle)) {
-        return existing;
-      }
-      const updatedAt = new Date().toISOString();
-      db.update(conflicts)
-        .set({
-          confidence: input.confidence,
-          severity: input.severity,
-          summary: input.summary,
-          evidence: input.evidence,
-          sourceArtifactId: input.sourceArtifactId,
-          targetArtifactId: input.targetArtifactId,
-          updatedAt,
-        })
-        .where(eq(conflicts.id, existing.id))
-        .run();
-      return {
-        ...existing,
-        confidence: input.confidence,
-        severity: input.severity,
-        summary: input.summary,
-        evidence: input.evidence,
-        sourceArtifactId: input.sourceArtifactId,
-        targetArtifactId: input.targetArtifactId,
-        updatedAt,
-      };
-    }
+    if (existing) return refreshOpenConflict(db, existing, input);
+  } else if (input.sourceArtifactId && input.targetArtifactId) {
+    const existing = findConflictByCategoryAndArtifacts(
+      db,
+      input.category,
+      input.sourceArtifactId,
+      input.targetArtifactId,
+    );
+    if (existing) return refreshOpenConflict(db, existing, input);
   }
 
   const now = new Date().toISOString();

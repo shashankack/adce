@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@adce/git": "workspace:*",
+    "@adce/parsers": "workspace:*",
     "@adce/shared": "workspace:*",
     "@adce/storage": "workspace:*",
     "fast-glob": "^3.3.3",

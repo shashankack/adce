@@ -12,6 +12,9 @@ import {
 } from "@adce/storage";
 import { AdceNotInitializedError } from "../artifacts/query.js";
 import { adceDir, dbPath } from "../project/paths.js";
+import { detectConfigurationMismatches } from "./detect-configuration.js";
+import { detectSchemaMismatches } from "./detect-schema.js";
+import { detectStructuralMismatches } from "./detect-structural.js";
 import { detectTemporalMismatches } from "./detect-temporal.js";
 
 const exists = async (p: string): Promise<boolean> => {
@@ -140,11 +143,16 @@ export const resolveProjectConflict = (
   setProjectConflictLifecycle(rootPath, idOrPrefix, "RESOLVED");
 
 /** Run deterministic detectors against current graph + sync health. */
-export const detectProjectConflicts = (db: Parameters<
-  typeof listRelationships
->[0]): number => {
+export const detectProjectConflicts = async (
+  db: Parameters<typeof listRelationships>[0],
+  rootPath: string,
+): Promise<number> => {
   const relationships = listRelationships(db);
-  const count = detectTemporalMismatches(db, relationships);
+  let count = 0;
+  count += detectTemporalMismatches(db, relationships);
+  count += await detectStructuralMismatches(db, rootPath, relationships);
+  count += await detectSchemaMismatches(db, rootPath);
+  count += await detectConfigurationMismatches(db, rootPath);
   syncArtifactHealthFromConflicts(db);
   return count;
 };

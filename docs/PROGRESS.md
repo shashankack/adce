@@ -7,13 +7,13 @@ Last updated: 2026-09-19
 | Scope | Estimate |
 |-------|----------|
 | v0.1–v0.3 | 100% |
-| v0.4 deterministic conflicts | ~85% |
+| v0.4 deterministic conflicts | ~100% |
 | v0.5 context engine | ~95% |
-| Full roadmap (v0.1–v0.7) | ~60% |
+| Full roadmap (v0.1–v0.7) | ~65% |
 
-**v0.1–v0.3 complete.** **v0.4** lifecycle + health done (parser-based detectors deferred). **v0.5** context, authority, and AGENTS.md integration shipped.
+**v0.1–v0.5 essentially complete.** Parser-based STRUCTURAL / SCHEMA / CONFIGURATION detectors shipped. **v0.6** ML is next (optional).
 
-## Current milestone: v0.5 (nearly complete)
+## Current milestone: v0.4–v0.5 complete → v0.6 optional
 
 Target flow:
 
@@ -129,7 +129,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 35 passed (v01–v05)
+Current: 37 passed (v01–v05 + parser conflicts)
 ```
 
 ### Dev environment notes (Windows)
@@ -173,8 +173,8 @@ packages/core
 packages/storage  → SQLite schema + artifact/scan/relationship/conflict repositories
 packages/shared   → types, enums, constants
 packages/git      → isGitRepository()
-packages/parsers  → stub only
-fixtures/         → no-git, basic-typescript, empty-project (+ stubs for later)
+packages/parsers  → JSON/YAML/TS symbol extraction (lightweight, no tree-sitter yet)
+fixtures/         → no-git, basic-typescript, empty-project, parser-conflicts
 ```
 
 ## How to run locally (dev)
@@ -247,7 +247,7 @@ adce authority clear <id>
 - [x] CLI: `adce history <id-or-prefix>`
 - [x] Vitest: no-git snapshot/fs events; git commits when repo present
 
-## v0.4 (nearly complete)
+## v0.4 (complete)
 
 ### Step 1 — conflict store + temporal detector (complete)
 
@@ -265,9 +265,14 @@ adce authority clear <id>
 - [x] Sync artifact `health = CONFLICTING` for open conflicts; clear on resolve/reject/ignore
 - [x] Vitest: health flips with confirm/resolve
 
-### Deferred
+### Step 3 — parser-based detectors (complete)
 
-- [ ] STRUCTURAL / SCHEMA / CONFIG mismatches (needs parsers)
+- [x] `@adce/parsers` — TS symbol extract, JSON Schema, package/nvmrc helpers
+- [x] STRUCTURAL_MISMATCH — TESTS import missing source exports
+- [x] SCHEMA_MISMATCH — `*.schema.json` required vs sibling JSON data
+- [x] CONFIGURATION_MISMATCH — `package.json` engines.node vs `.nvmrc` / `.node-version`
+- [x] Upsert dedupe by category + artifact pair (no relationship required)
+- [x] Fixture `parser-conflicts` + Vitest
 
 ## v0.5 (nearly complete)
 
@@ -280,9 +285,9 @@ adce authority clear <id>
 
 ## Next steps
 
-1. Commit v0.5 authority + AGENTS.md polish.
-2. Optional: parser-based STRUCTURAL/SCHEMA/CONFIG conflict detectors.
-3. Or start **v0.6** ML integration (optional enhancement).
+1. Commit parser-based v0.4 Step 3.
+2. Start **v0.6** ML integration (`adce analyze`, optional Python) — or deepen parsers (tree-sitter / OpenAPI).
+3. Later: **v0.7** research benchmark.
 
 ## Roadmap reminder
 
@@ -290,7 +295,7 @@ adce authority clear <id>
 v0.1  CLI foundation          ✓
 v0.2  Artifact management     ✓
 v0.3  Relationships + temporal  ✓
-v0.4  Deterministic conflicts   ✓ (~85%)
+v0.4  Deterministic conflicts   ✓
 v0.5  Context engine            ✓ (~95%)
 v0.6  ML integration            ← next (optional)
 v0.7  Research benchmark

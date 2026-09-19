@@ -91,6 +91,9 @@ export {
   AmbiguousConflictIdError,
 } from "./conflicts/query.js";
 export { detectTemporalMismatches } from "./conflicts/detect-temporal.js";
+export { detectStructuralMismatches } from "./conflicts/detect-structural.js";
+export { detectSchemaMismatches } from "./conflicts/detect-schema.js";
+export { detectConfigurationMismatches } from "./conflicts/detect-configuration.js";
 export {
   buildProjectContext,
   type BuildContextOptions,
