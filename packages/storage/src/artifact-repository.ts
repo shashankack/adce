@@ -2,6 +2,7 @@ import { and, asc, eq, isNotNull, inArray, like } from "drizzle-orm";
 import type {
   ArtifactRecord,
   ArtifactType,
+  AuthorityLevel,
   HealthState,
   VerificationState,
 } from "@adce/shared";
@@ -131,6 +132,27 @@ export const setArtifactVerification = (
   return {
     ...existing,
     verification,
+    updatedAt,
+  };
+};
+
+export const setArtifactAuthority = (
+  db: AdceDb,
+  id: string,
+  authority: AuthorityLevel,
+): ArtifactRecord | null => {
+  const existing = findArtifactById(db, id);
+  if (!existing) return null;
+
+  const updatedAt = new Date().toISOString();
+  db.update(artifacts)
+    .set({ authority, updatedAt })
+    .where(eq(artifacts.id, id))
+    .run();
+
+  return {
+    ...existing,
+    authority,
     updatedAt,
   };
 };

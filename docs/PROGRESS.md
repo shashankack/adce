@@ -8,19 +8,20 @@ Last updated: 2026-09-19
 |-------|----------|
 | v0.1–v0.3 | 100% |
 | v0.4 deterministic conflicts | ~85% |
-| v0.5 context engine (MVP) | ~70% |
-| Full roadmap (v0.1–v0.7) | ~55% |
+| v0.5 context engine | ~95% |
+| Full roadmap (v0.1–v0.7) | ~60% |
 
-**v0.1–v0.3 complete.** **v0.4** lifecycle + health done (parser-based detectors deferred). **v0.5** MVP context ranking shipped.
+**v0.1–v0.3 complete.** **v0.4** lifecycle + health done (parser-based detectors deferred). **v0.5** context, authority, and AGENTS.md integration shipped.
 
-## Current milestone: v0.5
+## Current milestone: v0.5 (nearly complete)
 
 Target flow:
 
 ```text
 adce conflicts [--all]                    ✓
 adce conflict show|reject|ignore|confirm|resolve  ✓
-adce context [--task] [--budget] [--format json]  ✓
+adce context [--task/--budget/--format text|json|markdown]  ✓
+adce authority set|clear                  ✓
 ```
 
 ## v0.2 ✓
@@ -128,7 +129,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 34 passed (v01–v05)
+Current: 35 passed (v01–v05)
 ```
 
 ### Dev environment notes (Windows)
@@ -157,16 +158,19 @@ Current: 34 passed (v01–v05)
 
 ```text
 packages/cli
-  commands/       → init, scan, status, artifacts, graph, link, unlink, artifact
+  commands/       → init, scan, status, artifacts, graph, link, unlink, artifact,
+                    history, conflicts, context, authority
   ui/             → confirm-init-root, logger, review-prompt
   project-root.ts → resolveAdceRoot for non-init commands
 packages/core
   project/        → initialize, status, paths, discover-root, find-adce-root, is-initialized
-  artifacts/      → classifier, query, verification, manual-artifact, review, edit-artifact
+  artifacts/      → classifier, query, verification, authority, manual-artifact, review, edit
   relationships/  → link, query, graph, errors, infer
+  conflicts/      → temporal detector + lifecycle query
+  context/        → build-context ranking
   temporal/       → history + providers (filesystem, adce-snapshot, git)
   scanner/        → discovery, hashing, scan-project
-packages/storage  → SQLite schema + artifact/scan/relationship repositories
+packages/storage  → SQLite schema + artifact/scan/relationship/conflict repositories
 packages/shared   → types, enums, constants
 packages/git      → isGitRepository()
 packages/parsers  → stub only
@@ -207,9 +211,14 @@ adce graph
 adce link <src-prefix> <tgt-prefix> -t RELATED_TO
 adce unlink <relationship-prefix>
 adce history <artifact-prefix>
+adce conflicts
+adce conflict show|confirm|resolve|reject|ignore <id>
+adce context --task "…" [--format markdown|json]
+adce authority set <id> -l CANONICAL
+adce authority clear <id>
 ```
 
-## v0.3 (in progress)
+## v0.3 (complete)
 
 ### Step 1 — manual relationships (complete)
 
@@ -260,17 +269,19 @@ adce history <artifact-prefix>
 
 - [ ] STRUCTURAL / SCHEMA / CONFIG mismatches (needs parsers)
 
-## v0.5 (MVP complete)
+## v0.5 (nearly complete)
 
-- [x] `buildProjectContext` — score artifacts by type, verification, health, task tokens
+- [x] `buildProjectContext` — score by type, verification, health, authority, task tokens
 - [x] Expand selection via active relationships; include related open conflicts
-- [x] CLI: `adce context` / `--task` / `--budget` / `--format json`
-- [x] Vitest: task bias toward index source/tests
+- [x] CLI: `adce context` / `--task` / `--budget` / `--format text|json|markdown`
+- [x] `adce authority set|clear` + storage/core authority persistence (survives scan)
+- [x] AGENTS.md template: status → context → conflicts → authority guidance
+- [x] Vitest: task bias; CANONICAL boost; AGENTS.md content
 
 ## Next steps
 
-1. Commit v0.4 Step 2 + v0.5 context MVP.
-2. Optional: more conflict detectors when parsers land; context authority ranking polish.
+1. Commit v0.5 authority + AGENTS.md polish.
+2. Optional: parser-based STRUCTURAL/SCHEMA/CONFIG conflict detectors.
 3. Or start **v0.6** ML integration (optional enhancement).
 
 ## Roadmap reminder
@@ -280,7 +291,7 @@ v0.1  CLI foundation          ✓
 v0.2  Artifact management     ✓
 v0.3  Relationships + temporal  ✓
 v0.4  Deterministic conflicts   ✓ (~85%)
-v0.5  Context engine            ✓ MVP (~70%)
+v0.5  Context engine            ✓ (~95%)
 v0.6  ML integration            ← next (optional)
 v0.7  Research benchmark
       Dashboard (later)

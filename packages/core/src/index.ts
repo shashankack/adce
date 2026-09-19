@@ -35,9 +35,15 @@ export {
   ignoreProjectArtifact,
 } from "./artifacts/verification.js";
 export {
+  setProjectArtifactAuthority,
+  clearProjectArtifactAuthority,
+  InvalidAuthorityLevelError,
+} from "./artifacts/authority.js";
+export {
   findAdceRoot,
   type AdceRootResolution,
 } from "./project/find-adce-root.js";
+export { AGENTS_TEMPLATE } from "./project/agents-template.js";
 export {
   addManualArtifact,
   InvalidArtifactTypeError,

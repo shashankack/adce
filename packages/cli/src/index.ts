@@ -27,6 +27,7 @@ import {
   runConflicts,
 } from "./commands/conflicts.js";
 import { runContext } from "./commands/context.js";
+import { runAuthorityClear, runAuthoritySet } from "./commands/authority.js";
 
 const program = new Command();
 
@@ -257,10 +258,15 @@ program
   .description("Generate ranked project context for agents")
   .option("-t, --task <task>", "Task description to bias ranking")
   .option("--budget <n>", "Max primary artifacts", (v) => Number(v), 12)
-  .option("--format <format>", "text or json", "text")
+  .option("--format <format>", "text, json, or markdown", "text")
   .action(
     async (options: { task?: string; budget?: number; format?: string }) => {
-      const format = options.format === "json" ? "json" : "text";
+      const format =
+        options.format === "json"
+          ? "json"
+          : options.format === "markdown"
+            ? "markdown"
+            : "text";
       await runContext({
         task: options.task,
         budget: options.budget,
@@ -268,6 +274,30 @@ program
       });
     },
   );
+
+const authority = program
+  .command("authority")
+  .description("Set or clear artifact authority");
+
+authority
+  .command("set")
+  .description("Set artifact authority level")
+  .argument("<id>", "Artifact id or unique prefix")
+  .requiredOption(
+    "-l, --level <level>",
+    "CANONICAL | AUTHORITATIVE | SUPPORTING | INFERRED | UNKNOWN",
+  )
+  .action(async (id: string, options: { level: string }) => {
+    await runAuthoritySet(id, options.level);
+  });
+
+authority
+  .command("clear")
+  .description("Clear artifact authority back to UNKNOWN")
+  .argument("<id>", "Artifact id or unique prefix")
+  .action(async (id: string) => {
+    await runAuthorityClear(id);
+  });
 
 program.parseAsync(process.argv).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);

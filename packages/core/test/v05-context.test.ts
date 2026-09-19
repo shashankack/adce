@@ -1,16 +1,20 @@
-import { mkdtemp, cp, rm, utimes } from "node:fs/promises";
+import { mkdtemp, cp, rm, utimes, readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  AGENTS_TEMPLATE,
   buildProjectContext,
+  clearProjectArtifactAuthority,
   confirmProjectConflict,
   getProjectArtifact,
   initializeProject,
+  listProjectArtifacts,
   listProjectConflicts,
   resolveProjectConflict,
   scanProject,
+  setProjectArtifactAuthority,
 } from "@adce/core";
 
 const repoRoot = fileURLToPath(new URL("../../..", import.meta.url));
@@ -90,5 +94,45 @@ describe("v0.5 context engine", () => {
         (a) => a.path === "src/index.ts" || a.path === "src/index.test.ts",
       ),
     ).toBe(true);
+  });
+
+  it("boosts CANONICAL authority in ranking and writes AGENTS.md guidance", async () => {
+    const root = await copyFixture("basic-typescript");
+    const init = await initializeProject(root);
+    expect(init.created.agentsMd).toBe(true);
+    const agentsMd = await readFile(path.join(root, "AGENTS.md"), "utf8");
+    expect(agentsMd).toContain("adce context");
+    expect(agentsMd).toContain("adce authority set");
+    expect(AGENTS_TEMPLATE).toContain("--format markdown");
+
+    await scanProject({ rootPath: root });
+    const readme = (await listProjectArtifacts(root)).find(
+      (a) => a.path === "README.md",
+    )!;
+    expect(readme).toBeDefined();
+
+    const before = await buildProjectContext(root, { budget: 20 });
+    const beforeScore =
+      before.artifacts.find((a) => a.id === readme.id)?.score ?? 0;
+
+    await setProjectArtifactAuthority(root, readme.id, "CANONICAL");
+    expect((await getProjectArtifact(root, readme.id)).authority).toBe(
+      "CANONICAL",
+    );
+
+    const after = await buildProjectContext(root, { budget: 20 });
+    const afterView = after.artifacts.find((a) => a.id === readme.id)!;
+    expect(afterView.score).toBeGreaterThan(beforeScore);
+    expect(
+      afterView.reasons.some((r) => r.includes("authority CANONICAL")),
+    ).toBe(true);
+    expect(
+      after.notes.some((n) => n.includes("CANONICAL/AUTHORITATIVE")),
+    ).toBe(true);
+
+    await clearProjectArtifactAuthority(root, readme.id.slice(0, 8));
+    expect((await getProjectArtifact(root, readme.id)).authority).toBe(
+      "UNKNOWN",
+    );
   });
 });

@@ -1,3 +1,4 @@
+import type { ContextBundle } from "@adce/shared";
 import { AdceNotInitializedError, buildProjectContext } from "@adce/core";
 import { resolveAdceRoot } from "../project-root.js";
 import { log } from "../ui/logger.js";
@@ -5,8 +6,66 @@ import { log } from "../ui/logger.js";
 export interface RunContextOptions {
   task?: string;
   budget?: number;
-  format?: "text" | "json";
+  format?: "text" | "json" | "markdown";
 }
+
+const formatMarkdown = (bundle: ContextBundle): string => {
+  const lines: string[] = [];
+  lines.push(`# ADCE Context`);
+  lines.push("");
+  lines.push(`- **Root:** \`${bundle.rootPath}\``);
+  if (bundle.task) lines.push(`- **Task:** ${bundle.task}`);
+  lines.push(`- **Generated:** ${bundle.generatedAt}`);
+  lines.push("");
+
+  if (bundle.notes.length > 0) {
+    lines.push("## Notes");
+    lines.push("");
+    for (const note of bundle.notes) {
+      lines.push(`- ${note}`);
+    }
+    lines.push("");
+  }
+
+  lines.push(`## Artifacts (${bundle.artifacts.length})`);
+  lines.push("");
+  for (const a of bundle.artifacts) {
+    const loc = a.path ?? "(no file)";
+    lines.push(
+      `- **[${a.score}]** \`${loc}\` — ${a.type}, ${a.verification}, ${a.health}, ${a.authority}`,
+    );
+    if (a.reasons.length > 0) {
+      lines.push(`  - ${a.reasons.slice(0, 3).join("; ")}`);
+    }
+  }
+  lines.push("");
+
+  lines.push(`## Relationships (${bundle.relationships.length})`);
+  lines.push("");
+  if (bundle.relationships.length === 0) {
+    lines.push("- (none)");
+  } else {
+    for (const r of bundle.relationships) {
+      lines.push(
+        `- \`${r.sourceArtifactId.slice(0, 8)}\` --${r.type}--> \`${r.targetArtifactId.slice(0, 8)}\` (${r.origin})`,
+      );
+    }
+  }
+  lines.push("");
+
+  lines.push(`## Open conflicts (${bundle.conflicts.length})`);
+  lines.push("");
+  if (bundle.conflicts.length === 0) {
+    lines.push("- (none)");
+  } else {
+    for (const c of bundle.conflicts) {
+      lines.push(`- **${c.severity}** ${c.category}: ${c.summary}`);
+    }
+  }
+  lines.push("");
+
+  return lines.join("\n");
+};
 
 export const runContext = async (
   options: RunContextOptions = {},
@@ -24,6 +83,11 @@ export const runContext = async (
       return;
     }
 
+    if (options.format === "markdown") {
+      console.log(formatMarkdown(bundle));
+      return;
+    }
+
     console.log(`Context for ${bundle.rootPath}`);
     if (bundle.task) console.log(`Task: ${bundle.task}`);
     console.log(`Generated: ${bundle.generatedAt}`);
@@ -38,7 +102,7 @@ export const runContext = async (
     for (const a of bundle.artifacts) {
       const loc = a.path ?? "(no file)";
       console.log(
-        `  [${a.score}] ${a.type.padEnd(18)} ${a.verification.padEnd(10)} ${a.health.padEnd(12)} ${loc}`,
+        `  [${a.score}] ${a.type.padEnd(18)} ${a.verification.padEnd(10)} ${a.health.padEnd(12)} ${a.authority.padEnd(13)} ${loc}`,
       );
       console.log(`       ${a.reasons.slice(0, 3).join("; ")}`);
     }

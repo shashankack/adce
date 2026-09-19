@@ -1,6 +1,7 @@
 import { access } from "node:fs/promises";
 import type {
   ArtifactRecord,
+  AuthorityLevel,
   ContextArtifactView,
   ContextBundle,
   RelationshipRecord,
@@ -25,6 +26,14 @@ const exists = async (p: string): Promise<boolean> => {
 };
 
 const DEFAULT_BUDGET = 12;
+
+const AUTHORITY_BOOST: Record<AuthorityLevel, number> = {
+  CANONICAL: 10,
+  AUTHORITATIVE: 7,
+  SUPPORTING: 2,
+  INFERRED: 1,
+  UNKNOWN: 0,
+};
 
 const tokenize = (task: string): string[] =>
   task
@@ -55,6 +64,12 @@ const scoreArtifact = (
   const boost = typeBoost[artifact.type] ?? 2;
   score += boost;
   reasons.push(`type ${artifact.type} (+${boost})`);
+
+  const authBoost = AUTHORITY_BOOST[artifact.authority] ?? 0;
+  if (authBoost > 0) {
+    score += authBoost;
+    reasons.push(`authority ${artifact.authority} (+${authBoost})`);
+  }
 
   if (artifact.verification === "VERIFIED") {
     score += 4;
@@ -202,6 +217,14 @@ export const buildProjectContext = async (
     notes.push(
       `Selected ${selected.length} artifacts, ${selectedRels.length} relationships, ${selectedConflicts.length} open conflicts.`,
     );
+    const highAuthority = selected.filter(
+      (a) => a.authority === "CANONICAL" || a.authority === "AUTHORITATIVE",
+    );
+    if (highAuthority.length > 0) {
+      notes.push(
+        `Prefer high-authority artifacts (${highAuthority.length} CANONICAL/AUTHORITATIVE in selection).`,
+      );
+    }
     if (selectedConflicts.length > 0) {
       notes.push(
         "Treat CONFLICTING / open-conflict artifacts with caution; prefer VERIFIED sources.",
