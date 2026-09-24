@@ -98,3 +98,10 @@ export {
   buildProjectContext,
   type BuildContextOptions,
 } from "./context/build-context.js";
+export {
+  analyzeProject,
+  type AnalyzeProjectOptions,
+} from "./analyze/analyze-project.js";
+export { runProjectAnalyze } from "./analyze/run-analyze.js";
+export { runHeuristicAnalyze } from "./analyze/heuristic.js";
+export { runMlAnalyze } from "./analyze/ml-client.js";

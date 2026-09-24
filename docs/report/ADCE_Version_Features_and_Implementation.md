@@ -6,9 +6,9 @@
 |-------|--------|
 | Project | ADCE — Artifact-Driven Context Engine |
 | Document date | 2026-09-19 |
-| Scope covered | v0.1 – v0.5 (implemented); v0.6 – v0.7 (planned) |
-| Overall roadmap progress | ~65% of v0.1–v0.7 |
-| Test baseline | 37 automated Vitest cases (`pnpm test:core` + `@adce/parsers`) |
+| Scope covered | v0.1 – v0.6 (implemented); v0.7 (planned) |
+| Overall roadmap progress | ~75% of v0.1–v0.7 |
+| Test baseline | 39 automated Vitest cases (`pnpm test:core` + `@adce/parsers`) |
 | Primary sources | `docs/PROGRESS.md`, `docs/ADCE_Technical_Specification.md`, `docs/AGENTS.md`, git history |
 
 ---
@@ -59,7 +59,7 @@ ADCE is a **temporal and conflict-aware context layer for AI coding agents**. It
 | v0.3 | Relationships + temporal | Complete | 100% |
 | v0.4 | Deterministic conflicts | Complete | ~100% |
 | v0.5 | Context engine | Complete (MVP+) | ~95% |
-| v0.6 | ML integration | Not started | 0% |
+| v0.6 | ML integration | Complete (MVP) | ~85% |
 | v0.7 | Research benchmark | Not started | 0% |
 | Dashboard | UI (post-roadmap) | Deferred | — |
 
@@ -378,23 +378,32 @@ adce authority clear <id>
 
 ---
 
-## 8. Planned — v0.6 ML integration (not implemented)
+## 8. v0.6 — ML integration (MVP implemented)
 
-### Intended features
+### Goal
 
-- `adce analyze` / `adce analyze <conflict-id>` / `--all` / `--deep`
-- Optional Python ML layer for:
-  - semantic artifact similarity
-  - relationship prediction
-  - semantic conflict detection
-  - authority ranking
-  - confidence scoring
-- Hybrid deterministic + ML analysis
-- Caching / cloud analysis as needed
+Optional hybrid analysis on top of deterministic conflicts: heuristic always works; Python ML is optional. Never auto-confirm or silently rewrite human authority.
 
-### Explicit non-goals for ML
+### Features delivered
 
-ML must **not** own: scanning, Git history, persistence, manual artifacts, human overrides, configuration, or basic deterministic conflicts.
+- `adce analyze` / `[conflict-id]` / `--all` / `--deep` / `--format json`
+- `--no-ml`, `--ml-script`, `--no-cache`, `--no-apply`
+- Heuristic suggestions (structural/schema strength, weak temporal notes, deep name-overlap notes)
+- Optional `ml/adce_ml/cli.py` (token Jaccard similarity)
+- Cache under `.adce/cache/analyze-*.json`
+- Open conflicts marked `ANALYZED`; confidence capped (no auto-`CONFIRMED`)
+- Authority suggestions are advisory only
+
+### Coded units
+
+| Layer | Units |
+|-------|--------|
+| Shared | `AnalyzeRequest`, `AnalyzeSuggestion`, `AnalyzeReport` |
+| Core | `heuristic.ts`, `ml-client.ts`, `run-analyze.ts`, `analyze-project.ts` |
+| Storage | `updateConflictAnalysis` |
+| CLI | `commands/analyze.ts` |
+| Python | `ml/adce_ml/cli.py` |
+| Tests | `v06-analyze.test.ts` |
 
 ---
 
@@ -516,6 +525,7 @@ Suggested metrics table for reports:
 
 | Document | Use |
 |----------|-----|
+| `docs/ADCE_Hybrid_Architecture_Lock.md` | **Binding** hybrid / ML / agent-consumption decisions |
 | `docs/PROGRESS.md` | Living checklist / day-to-day progress |
 | `docs/ADCE_Technical_Specification.md` | Requirements & version targets |
 | `docs/ADCE_Complete_Project_Explanation.md` | Narrative product explanation |

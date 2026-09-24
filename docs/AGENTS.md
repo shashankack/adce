@@ -361,18 +361,45 @@ Only after these are stable should the ML integration become a major focus.
 
 ## ML Rules
 
-Python ML may handle:
+Binding detail: `docs/ADCE_Hybrid_Architecture_Lock.md`.
+
+### Thesis
+
+```text
+ADCE owns repository intelligence (facts locally; judgment on ML server when available).
+The coding agent owns implementation, guided by AGENTS.md + adce context/analyze.
+```
+
+### Runtime
+
+```text
+Local-first: scan / graph / conflicts / context must work without the ML server.
+If ML is unreachable → heuristic analyze + local context (no hard failure).
+```
+
+### Project scope (academic + product)
+
+```text
+CLI-only is NOT the end architecture.
+Ship a full ML HTTP service (embeddings, semantic conflicts, ranking, agent brief packing).
+Local Python CLI script = temporary stand-in only; prefer ADCE_ML_URL → your server.
+Heavy models run on the server, not on every user machine.
+```
+
+### ML server may handle
 
 ```text
 Semantic artifact similarity
 Relationship prediction
 Semantic conflict detection
-Authority ranking
+Authority ranking assistance
 Conflict ranking
 Confidence scoring
+Context packing / agent brief enrichment
+Optional later: bandit or RL ranking using human feedback rewards
 ```
 
-ML must not own:
+### ML must not own
 
 ```text
 Scanning
@@ -384,7 +411,15 @@ Configuration
 Basic deterministic conflicts
 ```
 
-The system should support research comparisons between:
+### Agent consumption
+
+```text
+AGENTS.md instructs the agent to run ADCE.
+Final agent context comes from ADCE output (local baseline ± ML enrichment).
+It must NOT be designed so the only possible agent prompt is whatever the API returns.
+```
+
+### Research comparisons
 
 ```text
 Rule-based ADCE

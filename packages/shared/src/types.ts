@@ -217,3 +217,70 @@ export interface ContextBundle {
   conflicts: ConflictRecord[];
   notes: string[];
 }
+
+export interface AnalyzeArtifactFeature {
+  id: string;
+  path: string | null;
+  name: string;
+  type: string;
+  verification: string;
+  health: string;
+  authority: string;
+  contentHash: string | null;
+  // privacy-safe: prefer hash + short excerpt, not full file dumps by default
+  excerpt?: string | null;
+}
+
+export interface AnalyzeConflictFeature {
+  id: string;
+  category: string;
+  lifecycle: string;
+  confidence: string;
+  severity: string;
+  sourceArtifactId: string | null;
+  targetArtifactId: string | null;
+  summary: string;
+  evidence: string | null;
+}
+export interface AnalyzeRequest {
+  rootPath: string;
+  mode: "default" | "deep";
+  conflictIds: string[] | null; // null = all open
+  artifacts: AnalyzeArtifactFeature[];
+  conflicts: AnalyzeConflictFeature[];
+  relationships: Array<{
+    id: string;
+    type: string;
+    sourceArtifactId: string;
+    targetArtifactId: string;
+    verification: string;
+  }>;
+}
+export interface AnalyzeSuggestion {
+  kind: "conflict_confidence" | "semantic_conflict" | "authority" | "note";
+  conflictId?: string;
+  artifactId?: string;
+  targetArtifactId?: string;
+  // proposed values — never auto-applied to closed human decisions
+  confidence?: "POTENTIAL" | "LIKELY" | "CONFIRMED";
+  severity?: "LOW" | "MEDIUM" | "HIGH";
+  authority?:
+    | "CANONICAL"
+    | "AUTHORITATIVE"
+    | "SUPPORTING"
+    | "INFERRED"
+    | "UNKNOWN";
+  summary?: string;
+  score?: number; // 0..1
+  reason: string;
+  source: "heuristic" | "ml";
+}
+export interface AnalyzeReport {
+  rootPath: string;
+  generatedAt: string;
+  mode: "default" | "deep";
+  engine: "heuristic" | "ml" | "hybrid";
+  suggestions: AnalyzeSuggestion[];
+  notes: string[];
+  cached: boolean;
+}

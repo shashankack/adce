@@ -222,6 +222,41 @@ export const setConflictLifecycle = (
   return { ...existing, lifecycle, updatedAt };
 };
 
+export interface UpdateConflictAnalysisInput {
+  lifecycle?: ConflictLifecycle;
+  confidence?: ConfidenceLevel;
+  severity?: ConflictSeverity;
+}
+
+/** Soft analysis update — refuses closed conflicts. */
+export const updateConflictAnalysis = (
+  db: AdceDb,
+  id: string,
+  input: UpdateConflictAnalysisInput,
+): ConflictRecord | null => {
+  const existing = findConflictById(db, id);
+  if (!existing) return null;
+  if (CLOSED.includes(existing.lifecycle)) return existing;
+
+  const lifecycle = input.lifecycle ?? existing.lifecycle;
+  const confidence = input.confidence ?? existing.confidence;
+  const severity = input.severity ?? existing.severity;
+  const updatedAt = new Date().toISOString();
+
+  db.update(conflicts)
+    .set({ lifecycle, confidence, severity, updatedAt })
+    .where(eq(conflicts.id, id))
+    .run();
+
+  return {
+    ...existing,
+    lifecycle,
+    confidence,
+    severity,
+    updatedAt,
+  };
+};
+
 export const countConflicts = (
   db: AdceDb,
   options: { includeClosed?: boolean } = {},

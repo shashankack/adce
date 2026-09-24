@@ -9,19 +9,18 @@ Last updated: 2026-09-19
 | v0.1–v0.3 | 100% |
 | v0.4 deterministic conflicts | ~100% |
 | v0.5 context engine | ~95% |
-| Full roadmap (v0.1–v0.7) | ~65% |
+| v0.6 ML integration | ~85% |
+| Full roadmap (v0.1–v0.7) | ~75% |
 
-**v0.1–v0.5 essentially complete.** Parser-based STRUCTURAL / SCHEMA / CONFIGURATION detectors shipped. **v0.6** ML is next (optional).
+**v0.1–v0.5 complete.** **v0.6** hybrid analyze shipped (heuristic + optional Python). **v0.7** research benchmark is next.
 
-## Current milestone: v0.4–v0.5 complete → v0.6 optional
+## Current milestone: v0.6 (MVP)
 
 Target flow:
 
 ```text
-adce conflicts [--all]                    ✓
-adce conflict show|reject|ignore|confirm|resolve  ✓
-adce context [--task/--budget/--format text|json|markdown]  ✓
-adce authority set|clear                  ✓
+adce analyze [conflict-id] [--all] [--deep] [--format json]
+adce analyze --no-ml | --ml-script <path> | --no-cache | --no-apply
 ```
 
 ## v0.2 ✓
@@ -129,7 +128,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 37 passed (v01–v05 + parser conflicts)
+Current: 39 passed (v01–v06)
 ```
 
 ### Dev environment notes (Windows)
@@ -166,14 +165,16 @@ packages/core
   project/        → initialize, status, paths, discover-root, find-adce-root, is-initialized
   artifacts/      → classifier, query, verification, authority, manual-artifact, review, edit
   relationships/  → link, query, graph, errors, infer
-  conflicts/      → temporal detector + lifecycle query
+  conflicts/      → temporal + structural + schema + config detectors + lifecycle
   context/        → build-context ranking
+  analyze/        → heuristic + optional ML + cache (v0.6)
   temporal/       → history + providers (filesystem, adce-snapshot, git)
   scanner/        → discovery, hashing, scan-project
 packages/storage  → SQLite schema + artifact/scan/relationship/conflict repositories
 packages/shared   → types, enums, constants
 packages/git      → isGitRepository()
 packages/parsers  → JSON/YAML/TS symbol extraction (lightweight, no tree-sitter yet)
+ml/               → optional Python analyze CLI (`adce_ml/cli.py`)
 fixtures/         → no-git, basic-typescript, empty-project, parser-conflicts
 ```
 
@@ -216,6 +217,7 @@ adce conflict show|confirm|resolve|reject|ignore <id>
 adce context --task "…" [--format markdown|json]
 adce authority set <id> -l CANONICAL
 adce authority clear <id>
+adce analyze [conflict-id] [--deep] [--format json]
 ```
 
 ## v0.3 (complete)
@@ -283,11 +285,22 @@ adce authority clear <id>
 - [x] AGENTS.md template: status → context → conflicts → authority guidance
 - [x] Vitest: task bias; CANONICAL boost; AGENTS.md content
 
+## v0.6 (MVP complete)
+
+- [x] Shared `AnalyzeRequest` / `AnalyzeReport` / `AnalyzeSuggestion` contracts
+- [x] Heuristic analyzer (always-on; no Python required)
+- [x] Optional Python ML client (`ml/adce_ml/cli.py`) + hybrid merge
+- [x] Analyze cache under `.adce/cache/analyze-*.json`
+- [x] `analyzeProject` builds features from DB; marks open conflicts `ANALYZED`
+- [x] Caps confidence — never auto-`CONFIRMED`; authority suggestions not auto-applied
+- [x] CLI: `adce analyze` / `[id]` / `--all` / `--deep` / `--format` / `--no-ml` / `--no-cache`
+- [x] Vitest: heuristic engine, ANALYZED lifecycle, cache hit
+
 ## Next steps
 
-1. Commit parser-based v0.4 Step 3.
-2. Start **v0.6** ML integration (`adce analyze`, optional Python) — or deepen parsers (tree-sitter / OpenAPI).
-3. Later: **v0.7** research benchmark.
+1. Commit pending v0.6 + docs (architecture lock).
+2. **Build full ML HTTP service** + `ADCE_ML_URL` client (see Architecture Lock) — required project scope, not optional forever.
+3. Then **v0.7** research benchmark (rule vs ML vs hybrid).
 
 ## Roadmap reminder
 
@@ -297,9 +310,9 @@ v0.2  Artifact management     ✓
 v0.3  Relationships + temporal  ✓
 v0.4  Deterministic conflicts   ✓
 v0.5  Context engine            ✓ (~95%)
-v0.6  ML integration            ← next (optional)
-v0.7  Research benchmark
+v0.6  ML integration            ✓ MVP (~85%)
+v0.7  Research benchmark        ← next
       Dashboard (later)
 ```
 
-Sources of truth: `docs/AGENTS.md`, `docs/ADCE_Technical_Specification.md`.
+Sources of truth: `docs/AGENTS.md`, `docs/ADCE_Technical_Specification.md`, **`docs/ADCE_Hybrid_Architecture_Lock.md`** (hybrid / ML decisions — do not steer away).

@@ -28,6 +28,7 @@ import {
 } from "./commands/conflicts.js";
 import { runContext } from "./commands/context.js";
 import { runAuthorityClear, runAuthoritySet } from "./commands/authority.js";
+import { runAnalyze } from "./commands/analyze.js";
 
 const program = new Command();
 
@@ -298,6 +299,43 @@ authority
   .action(async (id: string) => {
     await runAuthorityClear(id);
   });
+
+program
+  .command("analyze")
+  .description("Analyze conflicts (heuristic + optional ML)")
+  .argument("[conflictId]", "Optional conflict id or unique prefix")
+  .option("--all", "Include closed conflicts as analysis input", false)
+  .option("--deep", "Deeper heuristic / ML feature set", false)
+  .option("--format <format>", "text or json", "text")
+  .option("--no-cache", "Bypass analyze cache", false)
+  .option("--no-ml", "Skip Python ML even if available", false)
+  .option("--no-apply", "Do not mark conflicts ANALYZED", false)
+  .option("--ml-script <path>", "Path to Python ML CLI script")
+  .action(
+    async (
+      conflictId: string | undefined,
+      options: {
+        all?: boolean;
+        deep?: boolean;
+        format?: string;
+        noCache?: boolean;
+        noMl?: boolean;
+        noApply?: boolean;
+        mlScript?: string;
+      },
+    ) => {
+      await runAnalyze({
+        conflictId,
+        all: options.all,
+        deep: options.deep,
+        format: options.format === "json" ? "json" : "text",
+        noCache: options.noCache,
+        noMl: options.noMl,
+        noApply: options.noApply,
+        mlScript: options.mlScript,
+      });
+    },
+  );
 
 program.parseAsync(process.argv).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);

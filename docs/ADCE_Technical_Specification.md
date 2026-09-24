@@ -40,6 +40,9 @@ The system must remain useful without ML, Git, documentation, or a well-structur
 
 ## 3. Main Architecture
 
+> **Binding decisions:** see `docs/ADCE_Hybrid_Architecture_Lock.md`.
+> Do not reduce ADCE to CLI-only, and do not require the ML API for basic local operation.
+
 ### Local Engine
 
 Runs inside the developer's environment.
@@ -65,27 +68,47 @@ Responsibilities:
 - local SQLite state
 - privacy filtering
 - secret detection
-- local context generation
-- cloud request preparation
+- local context generation (baseline agent brief)
+- cloud / ML request preparation (selected payload only)
 - local caching
+- heuristic analyze fallback when ML is unreachable
 
-### Cloud / ML Layer
+### Cloud / ML Layer (full project component)
 
-Used only for heavier analysis.
+Heavier analysis runs on **the project’s ML server** (not as large models installed on every laptop).
+
+A local Python script may be used only as a **development stand-in**. Production / academic target is an HTTP(S) ML API (e.g. `ADCE_ML_URL`).
 
 Responsibilities:
 
-- semantic similarity
+- semantic similarity (embeddings)
 - semantic relationship detection
 - semantic conflict analysis
-- authority ranking
-- conflict ranking
-- confidence scoring
-- embedding-based analysis
+- authority ranking assistance
+- conflict ranking / confidence scoring
+- context packing into a decision-ready agent brief
+- server-side caching
+- optional feedback logging for ranking / bandit / RL research
 
 The cloud must not receive the full repository by default.
 
 The local engine decides what leaves the machine.
+
+### Intelligence split (locked)
+
+```text
+ADCE (local + ML service) = repository intelligence and trust/ranking
+Coding agent             = implements code using ADCE’s structured brief
+```
+
+Agents discover ADCE primarily via `AGENTS.md` (or equivalent) and by running CLI commands such as `adce context` and `adce analyze`. The final agent prompt is **not** required to come only from the ML API; local context is the baseline, ML enrichment is the upgrade path.
+
+### Runtime vs project scope
+
+| | Local engine | ML server |
+|--|--------------|-----------|
+| Runtime if unavailable | Required | Optional fallback to heuristic / local context |
+| Project / thesis deliverable | Required | Required (full hybrid, not CLI-only) |
 
 ---
 
@@ -807,11 +830,14 @@ Build:
 
 Build:
 
-- cloud analysis
-- Python ML
-- semantic conflicts
-- authority ranking
-- caching
+- hybrid analyze (`adce analyze`) with local heuristic fallback
+- **full ML HTTP service** (not CLI-only end state): embeddings, semantic conflicts, ranking, context packing
+- CLI client to ML API (`ADCE_ML_URL`) with privacy-filtered payloads
+- caching (local + server)
+- never auto-CONFIRMED from ML; never silent authority overwrite
+- local Python subprocess allowed only as a temporary stand-in
+
+See `docs/ADCE_Hybrid_Architecture_Lock.md`.
 
 ### v0.7
 
@@ -842,4 +868,6 @@ Dashboard work comes after these.
 12. Important findings must be explainable.
 13. Important CLI commands should support JSON output.
 14. Incremental scanning should be preferred after the first scan.
-15. The dashboard is not a core project dependency.
+16. Hybrid architecture is local-first at runtime and ML-server-complete in project scope (see Architecture Lock).
+17. Coding agents consume ADCE via AGENTS.md + CLI; ML API enriches but does not solely own the agent prompt.
+18. Decision-ready structured context is preferred over free-form prose for agent consumption.

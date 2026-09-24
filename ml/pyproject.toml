@@ -1,0 +1,9 @@
+[project]
+name = "adce-ml"
+version = "0.1.0"
+description = "Optional lightweight ML helpers for ADCE analyze"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+adce-ml = "adce_ml.cli:main"
