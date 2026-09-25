@@ -105,3 +105,4 @@ export {
 export { runProjectAnalyze } from "./analyze/run-analyze.js";
 export { runHeuristicAnalyze } from "./analyze/heuristic.js";
 export { runMlAnalyze } from "./analyze/ml-client.js";
+export { checkProjectStructure } from "./structure/check-structure.js";

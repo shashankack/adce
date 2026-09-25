@@ -9,20 +9,22 @@ Last updated: 2026-09-25
 | v0.1–v0.3 | 100% |
 | v0.4 deterministic conflicts | ~100% |
 | v0.5 context engine | ~100% |
+| v0.5 structure profiles | ~100% (check-only; `--fix` deferred) |
 | v0.6 ML integration | ~85% |
-| Full roadmap (v0.1–v0.7) | ~78% |
+| Full roadmap (v0.1–v0.7) | ~80% |
 
-**v0.1–v0.5 complete** (decision-ready context brief + JSON status/conflicts). **v0.6** hybrid analyze MVP; full ML HTTP service still pending. **v0.7** research benchmark is next.
+**Local CLI complete** through context brief, JSON status/conflicts, and `adce structure`. **v0.6** full ML HTTP service is next; then **v0.7** benchmarks.
 
-## Current milestone: finish local CLI polish → full ML server
+## Current milestone: full ML server (after local CLI)
 
 Target flow:
 
 ```text
 adce status --format json
 adce conflicts --format json
-adce context --task "…" --format markdown   # MUST READ / CAUTION / TRUST ORDER
-adce analyze [conflict-id] [--all] [--deep] [--format json]
+adce context --task "…" --format markdown
+adce structure [--profile typescript-lib] [--format json]
+adce analyze …   # heuristic now; HTTP ML next
 ```
 
 ## v0.2 ✓
@@ -130,7 +132,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 39 passed (v01–v06)
+Current: 42 passed (v01–v06 + structure)
 ```
 
 ### Dev environment notes (Windows)
@@ -160,7 +162,7 @@ Current: 39 passed (v01–v06)
 ```text
 packages/cli
   commands/       → init, scan, status, artifacts, graph, link, unlink, artifact,
-                    history, conflicts, context, authority
+                    history, conflicts, context, authority, analyze, structure
   ui/             → confirm-init-root, logger, review-prompt
   project-root.ts → resolveAdceRoot for non-init commands
 packages/core
@@ -170,6 +172,7 @@ packages/core
   conflicts/      → temporal + structural + schema + config detectors + lifecycle
   context/        → build-context ranking
   analyze/        → heuristic + optional ML + cache (v0.6)
+  structure/      → recommended artifact profiles + check
   temporal/       → history + providers (filesystem, adce-snapshot, git)
   scanner/        → discovery, hashing, scan-project
 packages/storage  → SQLite schema + artifact/scan/relationship/conflict repositories
@@ -208,6 +211,7 @@ adce history <artifact-prefix>
 adce conflicts [--all] [--format json]
 adce conflict show|confirm|resolve|reject|ignore <id>
 adce context --task "…" [--format markdown|json]
+adce structure [--profile typescript-lib] [--format json]
 adce authority set <id> -l CANONICAL
 adce authority clear <id>
 adce analyze [conflict-id] [--deep] [--format json]
@@ -280,6 +284,17 @@ adce analyze [conflict-id] [--deep] [--format json]
 - [x] CLI polish: `adce status --format json`, `adce conflicts --format json`
 - [x] Vitest: task bias; CANONICAL boost; brief shape; AGENTS.md content
 
+### Structure profiles (complete — check only)
+
+- [x] Shared structure profile / finding / report types
+- [x] Built-in `typescript-lib` profile (required + recommended rules)
+- [x] `matchGlob` + `checkProjectStructure` (PRESENT / MISSING / SUGGESTED / WEAK)
+- [x] Relationship checks (`test-naming-sibling`)
+- [x] CLI: `adce structure` / `--profile` / `--format json`
+- [x] AGENTS.md mentions `adce structure`
+- [x] Vitest: glob matching; basic-typescript present; empty-project missing
+- [ ] Optional later: `adce structure --fix` stubs
+
 ## v0.6 (MVP complete)
 
 - [x] Shared `AnalyzeRequest` / `AnalyzeReport` / `AnalyzeSuggestion` contracts
@@ -293,9 +308,10 @@ adce analyze [conflict-id] [--deep] [--format json]
 
 ## Next steps
 
-1. Commit CLI polish (context brief + JSON status/conflicts).
-2. **Build full ML HTTP service** + `ADCE_ML_URL` client (see Architecture Lock).
-3. Then **v0.7** research benchmark (rule vs ML vs hybrid).
+1. Commit `adce structure` + checker fixes.
+2. **Build full ML HTTP service** + `ADCE_ML_URL` client (Architecture Lock).
+3. Optional: `structure --fix`, more profiles (`typescript-api`).
+4. Then **v0.7** research benchmark (rule vs ML vs hybrid).
 
 ## Roadmap reminder
 
@@ -304,7 +320,7 @@ v0.1  CLI foundation          ✓
 v0.2  Artifact management     ✓
 v0.3  Relationships + temporal  ✓
 v0.4  Deterministic conflicts   ✓
-v0.5  Context engine            ✓
+v0.5  Context + structure       ✓
 v0.6  ML integration            ✓ MVP (~85%) — HTTP server pending
 v0.7  Research benchmark        ← next after ML server
       Dashboard (later)

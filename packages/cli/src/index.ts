@@ -29,6 +29,7 @@ import {
 import { runContext } from "./commands/context.js";
 import { runAuthorityClear, runAuthoritySet } from "./commands/authority.js";
 import { runAnalyze } from "./commands/analyze.js";
+import { runStructure } from "./commands/structure.js";
 
 const program = new Command();
 
@@ -343,6 +344,18 @@ program
       });
     },
   );
+
+program
+  .command("structure")
+  .description("Check project against a recommended artifact structure")
+  .option("-p, --profile <id>", "Profile id", "typescript-lib")
+  .option("--format <format>", "text or json", "text")
+  .action(async (opts) => {
+    await runStructure({
+      profile: opts.profile,
+      format: opts.format === "json" ? "json" : "text",
+    });
+  });
 
 program.parseAsync(process.argv).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);

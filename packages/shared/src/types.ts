@@ -305,3 +305,57 @@ export interface AnalyzeReport {
   notes: string[];
   cached: boolean;
 }
+
+export type StructureRequirementLevel = "required" | "recommended";
+
+export interface StructureRule {
+  id: string;
+  level: StructureRequirementLevel;
+  type: ArtifactType;
+  pathGlob?: string;
+  minCount?: number;
+  description: string;
+}
+
+export interface StructureRelationshipRule {
+  id: string;
+  level: StructureRequirementLevel;
+  relationshipType: RelationshipType;
+  description: string;
+  check: "test-naming-sibling" | "any-documents-edge";
+}
+
+export interface StructureProfile {
+  id: string;
+  name: string;
+  description: string;
+  rules: StructureRule[];
+  relationshipRules?: StructureRelationshipRule[];
+}
+
+export type StructureFindingStatus =
+  | "PRESENT"
+  | "MISSING"
+  | "SUGGESTED"
+  | "WEAK";
+
+export interface StructureFinding {
+  ruleId: string;
+  status: StructureFindingStatus;
+  level: StructureRequirementLevel;
+  summary: string;
+  evidence?: string;
+  hint?: string; // e.g. adce artifact add …
+}
+export interface StructureReport {
+  rootPath: string;
+  profileId: string;
+  generatedAt: string;
+  findings: StructureFinding[];
+  summary: {
+    present: number;
+    missing: number;
+    suggested: number;
+    weak: number;
+  };
+}

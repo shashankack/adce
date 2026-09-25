@@ -10,4 +10,5 @@ Before repository-level modifications:
 4. Do not trust CAUTION artifacts over TRUST ORDER / VERIFIED sources.
 5. Run \`adce conflicts\` (and \`adce analyze\` if available) when CAUTION is non-empty.
 6. Set known trust with \`adce authority set <id> -l CANONICAL|AUTHORITATIVE|SUPPORTING\`.
+7. Run \`adce structure\` and fill MISSING / SUGGESTED gaps before large changes.
 `;
