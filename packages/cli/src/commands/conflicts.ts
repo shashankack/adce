@@ -25,7 +25,7 @@ const handleConflictError = (error: unknown): boolean => {
 };
 
 export const runConflicts = async (
-  options: { all?: boolean } = {},
+  options: { all?: boolean; format?: "text" | "json" } = {},
   cwd = process.cwd(),
 ): Promise<void> => {
   try {
@@ -33,6 +33,22 @@ export const runConflicts = async (
     const conflicts = await listProjectConflicts(rootPath, {
       includeClosed: options.all,
     });
+
+    if (options.format === "json") {
+      console.log(
+        JSON.stringify(
+          {
+            rootPath,
+            includeClosed: Boolean(options.all),
+            count: conflicts.length,
+            conflicts,
+          },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
 
     if (conflicts.length === 0) {
       console.log(

@@ -208,6 +208,30 @@ export interface ContextArtifactView {
   reasons: string[];
 }
 
+export interface ContextBriefItem {
+  id: string;
+  path: string | null;
+  name: string;
+  type: string;
+  score: number;
+  reason: string;
+}
+
+export interface ContextCautionItem {
+  conflictId: string;
+  severity: ConflictSeverity;
+  category: ConflictCategory;
+  summary: string;
+  artifactIds: string[];
+}
+
+export interface ContextBrief {
+  mustRead: ContextBriefItem[];
+  caution: ContextCautionItem[];
+  trustOrder: ContextBriefItem[];
+  alsoRelevant: ContextBriefItem[];
+}
+
 export interface ContextBundle {
   task: string | null;
   rootPath: string;
@@ -216,6 +240,7 @@ export interface ContextBundle {
   relationships: RelationshipRecord[];
   conflicts: ConflictRecord[];
   notes: string[];
+  brief: ContextBrief;
 }
 
 export interface AnalyzeArtifactFeature {
@@ -265,11 +290,7 @@ export interface AnalyzeSuggestion {
   confidence?: "POTENTIAL" | "LIKELY" | "CONFIRMED";
   severity?: "LOW" | "MEDIUM" | "HIGH";
   authority?:
-    | "CANONICAL"
-    | "AUTHORITATIVE"
-    | "SUPPORTING"
-    | "INFERRED"
-    | "UNKNOWN";
+    "CANONICAL" | "AUTHORITATIVE" | "SUPPORTING" | "INFERRED" | "UNKNOWN";
   summary?: string;
   score?: number; // 0..1
   reason: string;

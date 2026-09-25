@@ -3,7 +3,10 @@ import type {
   ArtifactRecord,
   AuthorityLevel,
   ContextArtifactView,
+  ContextBrief,
+  ContextBriefItem,
   ContextBundle,
+  ContextCautionItem,
   RelationshipRecord,
 } from "@adce/shared";
 import {
@@ -93,7 +96,8 @@ const scoreArtifact = (
   }
 
   if (tokens.length > 0) {
-    const hay = `${artifact.name} ${artifact.path ?? ""} ${artifact.type}`.toLowerCase();
+    const hay =
+      `${artifact.name} ${artifact.path ?? ""} ${artifact.type}`.toLowerCase();
     let hits = 0;
     for (const token of tokens) {
       if (hay.includes(token)) hits += 1;
@@ -122,7 +126,10 @@ const relatedIds = (
     if (rel.verification === "REJECTED" || rel.verification === "IGNORED") {
       continue;
     }
-    if (seedIds.has(rel.sourceArtifactId) || seedIds.has(rel.targetArtifactId)) {
+    if (
+      seedIds.has(rel.sourceArtifactId) ||
+      seedIds.has(rel.targetArtifactId)
+    ) {
       out.add(rel.sourceArtifactId);
       out.add(rel.targetArtifactId);
     }
@@ -231,6 +238,79 @@ export const buildProjectContext = async (
       );
     }
 
+    const HIGH_AUTH = new Set(["CANONICAL", "AUTHORITATIVE"]);
+
+    const toBriefItem = (
+      a: ContextArtifactView,
+      reason: string,
+    ): ContextBriefItem => ({
+      id: a.id,
+      path: a.path,
+      name: a.name,
+      type: a.type,
+      score: a.score,
+      reason,
+    });
+
+    const mustRead = selected
+      .filter(
+        (a) =>
+          a.health !== "CONFLICTING" &&
+          (a.verification === "VERIFIED" ||
+            HIGH_AUTH.has(a.authority) ||
+            a.type === "SOURCE" ||
+            a.type === "API_SPEC" ||
+            a.type === "SCHEMA"),
+      )
+      .slice(0, Math.min(5, selected.length))
+      .map((a) => {
+        const bits: string[] = [];
+        if (HIGH_AUTH.has(a.authority)) bits.push(`authority ${a.authority}`);
+        if (a.verification === "VERIFIED") bits.push("verified");
+        bits.push(`type ${a.type}`);
+        return toBriefItem(a, bits.join("; "));
+      });
+
+    const mustIds = new Set(mustRead.map((m) => m.id));
+
+    const trustOrder = selected
+      .filter(
+        (a) => HIGH_AUTH.has(a.authority) || a.verification === "VERIFIED",
+      )
+      .map((a) =>
+        toBriefItem(
+          a,
+          a.authority !== "UNKNOWN"
+            ? `prefer ${a.authority}`
+            : "verified - prefer over unreviewed",
+        ),
+      );
+
+    const caution: ContextCautionItem[] = selectedConflicts.map((c) => ({
+      conflictId: c.id,
+      severity: c.severity,
+      category: c.category,
+      summary: c.summary,
+      artifactIds: [c.sourceArtifactId, c.targetArtifactId].filter(
+        (id): id is string => Boolean(id),
+      ),
+    }));
+
+    const alsoRelevant = selected
+      .filter((a) => !mustIds.has(a.id))
+      .map((a) => toBriefItem(a, a.reasons[0] ?? `score ${a.score}`));
+
+    const brief: ContextBrief = {
+      mustRead,
+      caution,
+      trustOrder,
+      alsoRelevant,
+    };
+
+    notes.push(
+      "Use brief.mustRead first; treat brief.caution as trust blockers until reviewed.",
+    );
+
     return {
       task,
       rootPath,
@@ -239,6 +319,7 @@ export const buildProjectContext = async (
       relationships: selectedRels,
       conflicts: selectedConflicts,
       notes,
+      brief,
     };
   } finally {
     closeDatabase(db);

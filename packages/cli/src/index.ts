@@ -61,8 +61,11 @@ program
 program
   .command("status")
   .description("Show ADCE project status")
-  .action(async () => {
-    await runStatus();
+  .option("--format <format>", "text or json", "text")
+  .action(async (options: { format?: string }) => {
+    await runStatus({
+      format: options.format === "json" ? "json" : "text",
+    });
   });
 
 const artifacts = program
@@ -206,8 +209,12 @@ program
   .command("conflicts")
   .description("List open conflicts")
   .option("--all", "Include rejected / ignored / resolved conflicts", false)
-  .action(async (options: { all?: boolean }) => {
-    await runConflicts({ all: options.all });
+  .option("--format <format>", "text or json", "text")
+  .action(async (options: { all?: boolean; format?: string }) => {
+    await runConflicts({
+      all: options.all,
+      format: options.format === "json" ? "json" : "text",
+    });
   });
 
 const conflict = program

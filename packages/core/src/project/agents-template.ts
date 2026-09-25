@@ -5,8 +5,9 @@ This repository uses ADCE for artifact context management.
 Before repository-level modifications:
 
 1. Run \`adce status\`.
-2. Run \`adce context --task "<current task>"\` (use \`--format markdown\` or \`json\` when useful).
-3. Check open conflicts with \`adce conflicts\`.
-4. Prefer VERIFIED and high-authority artifacts; treat CONFLICTING / stale docs with caution.
-5. When you know trust order, set it: \`adce authority set <id> -l CANONICAL|AUTHORITATIVE|SUPPORTING\`.
+2. Run \`adce context --task "<current task>" --format markdown\`.
+3. Read sections in order: MUST READ → CAUTION → TRUST ORDER → ALSO RELEVANT.
+4. Do not trust CAUTION artifacts over TRUST ORDER / VERIFIED sources.
+5. Run \`adce conflicts\` (and \`adce analyze\` if available) when CAUTION is non-empty.
+6. Set known trust with \`adce authority set <id> -l CANONICAL|AUTHORITATIVE|SUPPORTING\`.
 `;

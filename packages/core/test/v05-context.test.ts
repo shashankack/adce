@@ -94,6 +94,11 @@ describe("v0.5 context engine", () => {
         (a) => a.path === "src/index.ts" || a.path === "src/index.test.ts",
       ),
     ).toBe(true);
+    expect(tasked.brief).toBeDefined();
+    expect(tasked.brief.mustRead.length).toBeGreaterThan(0);
+    expect(Array.isArray(tasked.brief.caution)).toBe(true);
+    expect(Array.isArray(tasked.brief.trustOrder)).toBe(true);
+    expect(Array.isArray(tasked.brief.alsoRelevant)).toBe(true);
   });
 
   it("boosts CANONICAL authority in ranking and writes AGENTS.md guidance", async () => {
@@ -126,9 +131,9 @@ describe("v0.5 context engine", () => {
     expect(
       afterView.reasons.some((r) => r.includes("authority CANONICAL")),
     ).toBe(true);
-    expect(
-      after.notes.some((n) => n.includes("CANONICAL/AUTHORITATIVE")),
-    ).toBe(true);
+    expect(after.notes.some((n) => n.includes("CANONICAL/AUTHORITATIVE"))).toBe(
+      true,
+    );
 
     await clearProjectArtifactAuthority(root, readme.id.slice(0, 8));
     expect((await getProjectArtifact(root, readme.id)).authority).toBe(

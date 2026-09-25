@@ -9,6 +9,8 @@ export interface RunContextOptions {
   format?: "text" | "json" | "markdown";
 }
 
+const loc = (path: string | null, name: string) => path ?? name;
+
 const formatMarkdown = (bundle: ContextBundle): string => {
   const lines: string[] = [];
   lines.push(`# ADCE Context`);
@@ -18,53 +20,115 @@ const formatMarkdown = (bundle: ContextBundle): string => {
   lines.push(`- **Generated:** ${bundle.generatedAt}`);
   lines.push("");
 
-  if (bundle.notes.length > 0) {
-    lines.push("## Notes");
-    lines.push("");
-    for (const note of bundle.notes) {
-      lines.push(`- ${note}`);
-    }
-    lines.push("");
-  }
-
-  lines.push(`## Artifacts (${bundle.artifacts.length})`);
-  lines.push("");
-  for (const a of bundle.artifacts) {
-    const loc = a.path ?? "(no file)";
-    lines.push(
-      `- **[${a.score}]** \`${loc}\` — ${a.type}, ${a.verification}, ${a.health}, ${a.authority}`,
-    );
-    if (a.reasons.length > 0) {
-      lines.push(`  - ${a.reasons.slice(0, 3).join("; ")}`);
-    }
+  for (const note of bundle.notes) {
+    lines.push(`> ${note}`);
   }
   lines.push("");
 
-  lines.push(`## Relationships (${bundle.relationships.length})`);
+  lines.push(`## MUST READ`);
   lines.push("");
-  if (bundle.relationships.length === 0) {
+  if (bundle.brief.mustRead.length === 0) {
     lines.push("- (none)");
   } else {
-    for (const r of bundle.relationships) {
+    for (const a of bundle.brief.mustRead) {
       lines.push(
-        `- \`${r.sourceArtifactId.slice(0, 8)}\` --${r.type}--> \`${r.targetArtifactId.slice(0, 8)}\` (${r.origin})`,
+        `- \`${loc(a.path, a.name)}\` (${a.type}, score ${a.score}) — ${a.reason}`,
       );
     }
   }
   lines.push("");
 
-  lines.push(`## Open conflicts (${bundle.conflicts.length})`);
+  lines.push(`## CAUTION`);
   lines.push("");
-  if (bundle.conflicts.length === 0) {
+  if (bundle.brief.caution.length === 0) {
     lines.push("- (none)");
   } else {
-    for (const c of bundle.conflicts) {
-      lines.push(`- **${c.severity}** ${c.category}: ${c.summary}`);
+    for (const c of bundle.brief.caution) {
+      lines.push(
+        `- **${c.severity}** ${c.category}: ${c.summary} (\`${c.conflictId.slice(0, 8)}\`)`,
+      );
+    }
+  }
+  lines.push("");
+
+  lines.push(`## TRUST ORDER`);
+  lines.push("");
+  if (bundle.brief.trustOrder.length === 0) {
+    lines.push("- (none — set authority with `adce authority set`)");
+  } else {
+    for (const a of bundle.brief.trustOrder) {
+      lines.push(`- \`${loc(a.path, a.name)}\` — ${a.reason}`);
+    }
+  }
+  lines.push("");
+
+  lines.push(`## ALSO RELEVANT`);
+  lines.push("");
+  if (bundle.brief.alsoRelevant.length === 0) {
+    lines.push("- (none)");
+  } else {
+    for (const a of bundle.brief.alsoRelevant.slice(0, 8)) {
+      lines.push(`- \`${loc(a.path, a.name)}\` (${a.type}) — ${a.reason}`);
     }
   }
   lines.push("");
 
   return lines.join("\n");
+};
+
+const formatText = (bundle: ContextBundle): void => {
+  console.log(`Context for ${bundle.rootPath}`);
+  if (bundle.task) console.log(`Task: ${bundle.task}`);
+  console.log(`Generated: ${bundle.generatedAt}`);
+  console.log("");
+
+  for (const note of bundle.notes) {
+    console.log(`! ${note}`);
+  }
+  console.log("");
+
+  console.log("MUST READ:");
+  if (bundle.brief.mustRead.length === 0) {
+    console.log("  (none)");
+  } else {
+    for (const a of bundle.brief.mustRead) {
+      console.log(
+        `  [${a.score}] ${loc(a.path, a.name)} (${a.type}) — ${a.reason}`,
+      );
+    }
+  }
+  console.log("");
+
+  console.log("CAUTION:");
+  if (bundle.brief.caution.length === 0) {
+    console.log("  (none)");
+  } else {
+    for (const c of bundle.brief.caution) {
+      console.log(
+        `  ${c.severity} ${c.category}: ${c.summary} (${c.conflictId.slice(0, 8)})`,
+      );
+    }
+  }
+  console.log("");
+
+  console.log("TRUST ORDER:");
+  if (bundle.brief.trustOrder.length === 0) {
+    console.log("  (none — set authority with adce authority set)");
+  } else {
+    for (const a of bundle.brief.trustOrder) {
+      console.log(`  ${loc(a.path, a.name)} — ${a.reason}`);
+    }
+  }
+  console.log("");
+
+  console.log("ALSO RELEVANT:");
+  if (bundle.brief.alsoRelevant.length === 0) {
+    console.log("  (none)");
+  } else {
+    for (const a of bundle.brief.alsoRelevant.slice(0, 8)) {
+      console.log(`  ${loc(a.path, a.name)} (${a.type}) — ${a.reason}`);
+    }
+  }
 };
 
 export const runContext = async (
@@ -88,42 +152,7 @@ export const runContext = async (
       return;
     }
 
-    console.log(`Context for ${bundle.rootPath}`);
-    if (bundle.task) console.log(`Task: ${bundle.task}`);
-    console.log(`Generated: ${bundle.generatedAt}`);
-    console.log("");
-
-    for (const note of bundle.notes) {
-      console.log(`! ${note}`);
-    }
-    console.log("");
-
-    console.log(`Artifacts (${bundle.artifacts.length}):`);
-    for (const a of bundle.artifacts) {
-      const loc = a.path ?? "(no file)";
-      console.log(
-        `  [${a.score}] ${a.type.padEnd(18)} ${a.verification.padEnd(10)} ${a.health.padEnd(12)} ${a.authority.padEnd(13)} ${loc}`,
-      );
-      console.log(`       ${a.reasons.slice(0, 3).join("; ")}`);
-    }
-
-    console.log("");
-    console.log(`Relationships (${bundle.relationships.length}):`);
-    for (const r of bundle.relationships) {
-      console.log(
-        `  ${r.sourceArtifactId.slice(0, 8)} --${r.type}--> ${r.targetArtifactId.slice(0, 8)} (${r.origin})`,
-      );
-    }
-
-    console.log("");
-    console.log(`Open conflicts (${bundle.conflicts.length}):`);
-    if (bundle.conflicts.length === 0) {
-      console.log("  (none)");
-    } else {
-      for (const c of bundle.conflicts) {
-        console.log(`  ${c.severity} ${c.category}: ${c.summary}`);
-      }
-    }
+    formatText(bundle);
   } catch (error) {
     if (error instanceof AdceNotInitializedError) {
       log.error(error.message);

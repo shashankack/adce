@@ -1,6 +1,6 @@
 # ADCE Progress
 
-Last updated: 2026-09-19
+Last updated: 2026-09-25
 
 ## Summary
 
@@ -8,19 +8,21 @@ Last updated: 2026-09-19
 |-------|----------|
 | v0.1–v0.3 | 100% |
 | v0.4 deterministic conflicts | ~100% |
-| v0.5 context engine | ~95% |
+| v0.5 context engine | ~100% |
 | v0.6 ML integration | ~85% |
-| Full roadmap (v0.1–v0.7) | ~75% |
+| Full roadmap (v0.1–v0.7) | ~78% |
 
-**v0.1–v0.5 complete.** **v0.6** hybrid analyze shipped (heuristic + optional Python). **v0.7** research benchmark is next.
+**v0.1–v0.5 complete** (decision-ready context brief + JSON status/conflicts). **v0.6** hybrid analyze MVP; full ML HTTP service still pending. **v0.7** research benchmark is next.
 
-## Current milestone: v0.6 (MVP)
+## Current milestone: finish local CLI polish → full ML server
 
 Target flow:
 
 ```text
+adce status --format json
+adce conflicts --format json
+adce context --task "…" --format markdown   # MUST READ / CAUTION / TRUST ORDER
 adce analyze [conflict-id] [--all] [--deep] [--format json]
-adce analyze --no-ml | --ml-script <path> | --no-cache | --no-apply
 ```
 
 ## v0.2 ✓
@@ -197,22 +199,13 @@ From a **target project** (or any subdirectory once initialized):
 ```bash
 adce init -y
 adce scan
-adce status
-adce artifacts
-adce artifacts --type SOURCE,TEST
+adce status [--format json]
+adce artifacts [--type SOURCE,TEST]
 adce artifacts review
-adce artifact show <id-or-prefix>
-adce artifact verify <id-or-prefix>
-adce artifact reject <id-or-prefix>
-adce artifact ignore <id-or-prefix>
-adce artifact edit <id-or-prefix> -t DOCUMENTATION -n "New name"
-adce artifact add --manual -n "Payment Retry Policy" -t REQUIREMENT
-adce artifact add --manual --stub -n "Payment Retry Policy" -t REQUIREMENT
-adce graph
-adce link <src-prefix> <tgt-prefix> -t RELATED_TO
-adce unlink <relationship-prefix>
+adce artifact show|verify|reject|ignore|edit|add …
+adce graph | link | unlink
 adce history <artifact-prefix>
-adce conflicts
+adce conflicts [--all] [--format json]
 adce conflict show|confirm|resolve|reject|ignore <id>
 adce context --task "…" [--format markdown|json]
 adce authority set <id> -l CANONICAL
@@ -276,14 +269,16 @@ adce analyze [conflict-id] [--deep] [--format json]
 - [x] Upsert dedupe by category + artifact pair (no relationship required)
 - [x] Fixture `parser-conflicts` + Vitest
 
-## v0.5 (nearly complete)
+## v0.5 (complete)
 
 - [x] `buildProjectContext` — score by type, verification, health, authority, task tokens
 - [x] Expand selection via active relationships; include related open conflicts
+- [x] Decision-ready `brief`: MUST READ / CAUTION / TRUST ORDER / ALSO RELEVANT
 - [x] CLI: `adce context` / `--task` / `--budget` / `--format text|json|markdown`
 - [x] `adce authority set|clear` + storage/core authority persistence (survives scan)
-- [x] AGENTS.md template: status → context → conflicts → authority guidance
-- [x] Vitest: task bias; CANONICAL boost; AGENTS.md content
+- [x] AGENTS.md template: read brief sections in order; caution vs trust
+- [x] CLI polish: `adce status --format json`, `adce conflicts --format json`
+- [x] Vitest: task bias; CANONICAL boost; brief shape; AGENTS.md content
 
 ## v0.6 (MVP complete)
 
@@ -298,8 +293,8 @@ adce analyze [conflict-id] [--deep] [--format json]
 
 ## Next steps
 
-1. Commit pending v0.6 + docs (architecture lock).
-2. **Build full ML HTTP service** + `ADCE_ML_URL` client (see Architecture Lock) — required project scope, not optional forever.
+1. Commit CLI polish (context brief + JSON status/conflicts).
+2. **Build full ML HTTP service** + `ADCE_ML_URL` client (see Architecture Lock).
 3. Then **v0.7** research benchmark (rule vs ML vs hybrid).
 
 ## Roadmap reminder
@@ -309,9 +304,9 @@ v0.1  CLI foundation          ✓
 v0.2  Artifact management     ✓
 v0.3  Relationships + temporal  ✓
 v0.4  Deterministic conflicts   ✓
-v0.5  Context engine            ✓ (~95%)
-v0.6  ML integration            ✓ MVP (~85%)
-v0.7  Research benchmark        ← next
+v0.5  Context engine            ✓
+v0.6  ML integration            ✓ MVP (~85%) — HTTP server pending
+v0.7  Research benchmark        ← next after ML server
       Dashboard (later)
 ```
 
