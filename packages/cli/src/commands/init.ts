@@ -52,7 +52,13 @@ export const runInit = async (
     log.ok(`Initialized ADCE in ${result.rootPath}`);
   }
   log.step(`Git detected: ${result.gitDetected ? "yes" : "no"}`);
-  if (!result.created.agentsMd) {
-    log.warn("AGENTS.md already existed — left unchanged.");
+  if (result.agentsMdAction === "created") {
+    log.ok("Created AGENTS.md with ADCE instructions.");
+  } else if (result.agentsMdAction === "merged") {
+    log.ok("Merged ADCE instructions into existing AGENTS.md.");
+  } else if (result.agentsMdAction === "updated") {
+    log.ok("Updated ADCE section in AGENTS.md.");
+  } else {
+    log.step("AGENTS.md already contains the ADCE section.");
   }
 };

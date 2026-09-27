@@ -316,7 +316,7 @@ program
   .option("--deep", "Deeper heuristic / ML feature set", false)
   .option("--format <format>", "text or json", "text")
   .option("--no-cache", "Bypass analyze cache", false)
-  .option("--no-ml", "Skip Python ML even if available", false)
+  .option("--skip-ml", "Skip Python / ML even if available", false)
   .option("--no-apply", "Do not mark conflicts ANALYZED", false)
   .option("--ml-script <path>", "Path to Python ML CLI script")
   .action(
@@ -327,7 +327,7 @@ program
         deep?: boolean;
         format?: string;
         noCache?: boolean;
-        noMl?: boolean;
+        skipMl?: boolean;
         noApply?: boolean;
         mlScript?: string;
       },
@@ -338,7 +338,7 @@ program
         deep: options.deep,
         format: options.format === "json" ? "json" : "text",
         noCache: options.noCache,
-        noMl: options.noMl,
+        noMl: options.skipMl,
         noApply: options.noApply,
         mlScript: options.mlScript,
       });

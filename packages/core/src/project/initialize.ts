@@ -1,4 +1,4 @@
-import { access, mkdir, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { isGitRepository } from "@adce/git";
 import {
   closeDatabase,
@@ -7,7 +7,10 @@ import {
   setMeta,
 } from "@adce/storage";
 import { loadConfig, writeDefaultConfig } from "../config/loader.js";
-import { AGENTS_TEMPLATE } from "./agents-template.js";
+import {
+  mergeAgentsMarkdown,
+  type AgentsMdAction,
+} from "./agents-template.js";
 import { isAdceInitialized } from "./is-initialized.js";
 import {
   adceDir,
@@ -27,10 +30,12 @@ export interface InitResult {
   rootPath: string;
   gitDetected: boolean;
   repaired: boolean;
+  agentsMdAction: AgentsMdAction;
   created: {
     adceDir: boolean;
     config: boolean;
     database: boolean;
+    /** True when AGENTS.md was newly created (not merged into an existing file). */
     agentsMd: boolean;
   };
 }
@@ -64,6 +69,19 @@ const writeFreshMeta = async (rootPath: string): Promise<boolean> => {
     closeDatabase(db);
   }
   return gitDetected;
+};
+
+const ensureAgentsMd = async (rootPath: string): Promise<AgentsMdAction> => {
+  const agents = agentsPath(rootPath);
+  let existing: string | null = null;
+  if (await exists(agents)) {
+    existing = await readFile(agents, "utf8");
+  }
+  const { content, action } = mergeAgentsMarkdown(existing);
+  if (action !== "unchanged") {
+    await writeFile(agents, content, "utf8");
+  }
+  return action;
 };
 
 export async function initializeProject(
@@ -118,22 +136,18 @@ export async function initializeProject(
     }
   }
 
-  const agents = agentsPath(rootPath);
-  let createdAgents = false;
-  if (!(await exists(agents))) {
-    await writeFile(agents, AGENTS_TEMPLATE, "utf8");
-    createdAgents = true;
-  }
+  const agentsMdAction = await ensureAgentsMd(rootPath);
 
   return {
     rootPath,
     gitDetected,
     repaired: Boolean(options.repair && dirExists),
+    agentsMdAction,
     created: {
       adceDir: !dirExists,
       config: createdConfig,
       database: createdDatabase,
-      agentsMd: createdAgents,
+      agentsMd: agentsMdAction === "created",
     },
   };
 }

@@ -57,6 +57,7 @@ adce init → adce scan → adce status
 - [x] SQLite persistence (`meta`, `artifacts`, `scans`) via better-sqlite3 + Drizzle
 - [x] Git availability detection (no history yet)
 - [x] `adce init` — `.adce/`, `config.yaml`, `state.db`, `AGENTS.md`
+- [x] `adce init` merges ADCE section into existing `AGENTS.md` (markers; no clobber)
 - [x] `adce scan` — discover, ignore, hash, classify, persist
 - [x] Incremental scan foundation (unchanged vs changed via content hash)
 - [x] `adce status` — report stored project state
@@ -132,7 +133,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 42 passed (v01–v06 + structure)
+Current: 48 passed (v01–v06 + structure + agents merge)
 ```
 
 ### Dev environment notes (Windows)

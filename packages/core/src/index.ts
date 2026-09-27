@@ -43,7 +43,14 @@ export {
   findAdceRoot,
   type AdceRootResolution,
 } from "./project/find-adce-root.js";
-export { AGENTS_TEMPLATE } from "./project/agents-template.js";
+export {
+  AGENTS_TEMPLATE,
+  mergeAgentsMarkdown,
+  ADCE_AGENTS_BEGIN,
+  ADCE_AGENTS_END,
+  type AgentsMdAction,
+} from "./project/agents-template.js";
+
 export {
   addManualArtifact,
   InvalidArtifactTypeError,
