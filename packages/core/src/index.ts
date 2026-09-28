@@ -44,12 +44,25 @@ export {
   type AdceRootResolution,
 } from "./project/find-adce-root.js";
 export {
+  runProjectDoctor,
+  type DoctorCheck,
+  type DoctorReport,
+  type DoctorSeverity,
+} from "./project/doctor.js";
+export {
   AGENTS_TEMPLATE,
   mergeAgentsMarkdown,
   ADCE_AGENTS_BEGIN,
   ADCE_AGENTS_END,
+  AGENT_SESSION_NUDGE,
   type AgentsMdAction,
 } from "./project/agents-template.js";
+export {
+  CURSOR_ADCE_RULE_RELATIVE,
+  CURSOR_ADCE_RULE_BODY,
+  ensureCursorAdceRule,
+  type CursorRuleAction,
+} from "./project/cursor-rule.js";
 
 export {
   addManualArtifact,

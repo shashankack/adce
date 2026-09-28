@@ -25,6 +25,14 @@ ${ADCE_AGENTS_END}
 
 export type AgentsMdAction = "created" | "merged" | "updated" | "unchanged";
 
+/** Paste into an already-open coding-agent chat after mid-project init. */
+export const AGENT_SESSION_NUDGE = `ADCE is set up in this repository.
+
+Before further edits, run:
+  adce context --task "<current task>" --format markdown
+Then follow MUST READ → CAUTION → TRUST ORDER.
+Also run \`adce conflicts\` (and \`adce analyze --skip-ml\` if useful) when CAUTION is non-empty.`;
+
 const markedBlock = (): string =>
   `${ADCE_AGENTS_BEGIN}\n${AGENTS_SECTION_BODY.trimEnd()}\n${ADCE_AGENTS_END}`;
 

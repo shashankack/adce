@@ -3,6 +3,7 @@ import {
   initializeProject,
 } from "@adce/core";
 import { confirmInitRoot } from "../ui/confirm-init-root.js";
+import { printAgentSessionNudge } from "../ui/agent-nudge.js";
 import { log } from "../ui/logger.js";
 
 export interface RunInitOptions {
@@ -61,4 +62,16 @@ export const runInit = async (
   } else {
     log.step("AGENTS.md already contains the ADCE section.");
   }
+
+  if (result.cursorRuleAction === "created") {
+    log.ok("Created Cursor rule `.cursor/rules/adce.mdc`.");
+  } else if (result.cursorRuleAction === "updated") {
+    log.ok("Updated Cursor rule `.cursor/rules/adce.mdc`.");
+  } else {
+    log.step("Cursor rule `.cursor/rules/adce.mdc` already up to date.");
+  }
+
+  console.log("");
+  log.step("Next: run `adce scan`, then use context/structure/conflicts as needed.");
+  printAgentSessionNudge();
 };

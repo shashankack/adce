@@ -1,6 +1,6 @@
 # ADCE Progress
 
-Last updated: 2026-09-25
+Last updated: 2026-09-28
 
 ## Summary
 
@@ -13,7 +13,7 @@ Last updated: 2026-09-25
 | v0.6 ML integration | ~85% |
 | Full roadmap (v0.1–v0.7) | ~80% |
 
-**Local CLI complete** through context brief, JSON status/conflicts, and `adce structure`. **v0.6** full ML HTTP service is next; then **v0.7** benchmarks.
+**Local CLI complete** through context brief, JSON status/conflicts, `adce structure`, mid-session nudge, and `adce doctor`. **v0.6** full ML HTTP service is next; then **v0.7** benchmarks.
 
 ## Current milestone: full ML server (after local CLI)
 
@@ -133,7 +133,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 48 passed (v01–v06 + structure + agents merge)
+Current: 53+ passed (v01–v06 + structure + agents merge + doctor/nudge)
 ```
 
 ### Dev environment notes (Windows)
@@ -307,9 +307,16 @@ adce analyze [conflict-id] [--deep] [--format json]
 - [x] CLI: `adce analyze` / `[id]` / `--all` / `--deep` / `--format` / `--no-ml` / `--no-cache`
 - [x] Vitest: heuristic engine, ANALYZED lifecycle, cache hit
 
+### Mid-project agent awareness (complete)
+
+- [x] `adce init` prints paste-ready mid-session nudge (`AGENT_SESSION_NUDGE`)
+- [x] `adce doctor` — init / AGENTS.md markers / Cursor rule / scan checks (`--format json`, `--nudge`)
+- [x] Init writes always-apply Cursor rule `.cursor/rules/adce.mdc`
+- [x] Vitest: doctor checks + nudge content + Cursor rule repair
+
 ## Next steps
 
-1. Commit `adce structure` + checker fixes.
+1. Commit local CLI polish (structure + doctor/nudge) if not yet committed.
 2. **Build full ML HTTP service** + `ADCE_ML_URL` client (Architecture Lock).
 3. Optional: `structure --fix`, more profiles (`typescript-api`).
 4. Then **v0.7** research benchmark (rule vs ML vs hybrid).

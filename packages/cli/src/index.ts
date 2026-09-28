@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { runInit } from "./commands/init.js";
 import { runScan } from "./commands/scan.js";
 import { runStatus } from "./commands/status.js";
+import { runDoctor } from "./commands/doctor.js";
 import {
   runArtifact,
   runArtifactAdd,
@@ -66,6 +67,18 @@ program
   .action(async (options: { format?: string }) => {
     await runStatus({
       format: options.format === "json" ? "json" : "text",
+    });
+  });
+
+program
+  .command("doctor")
+  .description("Check ADCE setup (init, AGENTS.md, Cursor rule, scan)")
+  .option("--format <format>", "text or json", "text")
+  .option("--nudge", "Print paste-ready mid-session agent instructions", false)
+  .action(async (options: { format?: string; nudge?: boolean }) => {
+    await runDoctor({
+      format: options.format === "json" ? "json" : "text",
+      nudge: options.nudge,
     });
   });
 

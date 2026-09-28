@@ -11,6 +11,10 @@ import {
   mergeAgentsMarkdown,
   type AgentsMdAction,
 } from "./agents-template.js";
+import {
+  ensureCursorAdceRule,
+  type CursorRuleAction,
+} from "./cursor-rule.js";
 import { isAdceInitialized } from "./is-initialized.js";
 import {
   adceDir,
@@ -31,6 +35,7 @@ export interface InitResult {
   gitDetected: boolean;
   repaired: boolean;
   agentsMdAction: AgentsMdAction;
+  cursorRuleAction: CursorRuleAction;
   created: {
     adceDir: boolean;
     config: boolean;
@@ -137,12 +142,14 @@ export async function initializeProject(
   }
 
   const agentsMdAction = await ensureAgentsMd(rootPath);
+  const cursorRuleAction = await ensureCursorAdceRule(rootPath);
 
   return {
     rootPath,
     gitDetected,
     repaired: Boolean(options.repair && dirExists),
     agentsMdAction,
+    cursorRuleAction,
     created: {
       adceDir: !dirExists,
       config: createdConfig,
