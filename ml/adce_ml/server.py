@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from adce_ml.analyze import analyze_request
 from adce_ml.embedder import get_embedder
 from adce_ml.feedback import ALLOWED_ACTIONS, append_feedback
+from adce_ml.bandit import get_bandit, reload_bandit
 
 app = FastAPI(
     title="ADCE ML",
@@ -22,8 +23,14 @@ app = FastAPI(
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok", "service": "adce-ml", "embedder": get_embedder().name}
+def health() -> dict[str, str | int]:
+    b = get_bandit()
+    return {
+        "status": "ok",
+        "service": "adce-ml",
+        "embedder": get_embedder().name,
+        "banditArms": len(b.arms),
+    }
 
 
 class AnalyzeHttpResponse(BaseModel):
@@ -50,7 +57,7 @@ def analyze(body: dict[str, Any]) -> AnalyzeHttpResponse:
     return AnalyzeHttpResponse(
         suggestions=analyze_request(body),
         notes=[
-            f"ML HTTP: {emb.name} embeddings. Review before applying.",
+            f"ML HTTP: {emb.name} + LinUCB ranking. Review before applying.",
         ],
         engine="ml",
     )
@@ -78,4 +85,5 @@ def feedback(body: FeedbackRequest) -> dict:
         record = append_feedback({**body.model_dump(), "embedder": get_embedder().name})
     except ValueError as e:
         raise HTTPException(400, detail=str(e)) from e
-    return {"ok": True, "record": record}
+    n = reload_bandit()
+    return {"ok": True, "record": record, "banditExamples": n}

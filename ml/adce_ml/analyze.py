@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from adce_ml.embedder import artifact_text, cosine, get_embedder
+from adce_ml.bandit import rank_suggestions
 
 
 def _similarity(a: dict[str, Any], b: dict[str, Any]) -> tuple[float, str]:
@@ -32,6 +33,7 @@ def analyze_request(req: dict[str, Any]) -> list[dict[str, Any]]:
                     "kind": "conflict_confidence",
                     "conflictId": c["id"],
                     "confidence": "LIKELY" if score > 0.55 else "POTENTIAL",
+                    "category": c.get("category"),
                     "score": score,
                     "reason": (
                         f"ML {model} embedding cosine={score:.2f} "
@@ -42,12 +44,8 @@ def analyze_request(req: dict[str, Any]) -> list[dict[str, Any]]:
             )
 
     if req.get("mode") == "deep":
-        docs = [
-            a for a in req.get("artifacts", []) if a.get("type") == "DOCUMENTATION"
-        ]
-        sources = [
-            a for a in req.get("artifacts", []) if a.get("type") == "SOURCE"
-        ]
+        docs = [a for a in req.get("artifacts", []) if a.get("type") == "DOCUMENTATION"]
+        sources = [a for a in req.get("artifacts", []) if a.get("type") == "SOURCE"]
         existing = {
             (r["sourceArtifactId"], r["targetArtifactId"])
             for r in req.get("relationships", [])
@@ -63,6 +61,7 @@ def analyze_request(req: dict[str, Any]) -> list[dict[str, Any]]:
                             "kind": "semantic_conflict",
                             "artifactId": d["id"],
                             "targetArtifactId": s["id"],
+                            "category": "SEMANTIC_CONFLICT",
                             "summary": (
                                 f"Possible semantic link/conflict: "
                                 f"{d.get('path')} ↔ {s.get('path')}"
@@ -78,4 +77,4 @@ def analyze_request(req: dict[str, Any]) -> list[dict[str, Any]]:
                         }
                     )
 
-    return suggestions
+    return rank_suggestions(suggestions)
