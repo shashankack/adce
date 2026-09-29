@@ -98,10 +98,17 @@ class LinUCBCategoryBandit:
             reward = row.get("reward")
             if reward is None:
                 continue
-            # prior score unknown in log → use 0.5 as neutral context
             score = 0.5
-            if isinstance(row.get("event"), dict) and "score" in row["event"]:
-                score = float(row["event"]["score"])
+            if row.get("score") is not None:
+                try:
+                    score = float(row["score"])
+                except (TypeError, ValueError):
+                    score = 0.5
+            elif isinstance(row.get("event"), dict) and row["event"].get("score") is not None:
+                try:
+                    score = float(row["event"]["score"])
+                except (TypeError, ValueError):
+                    score = 0.5
             self.update(row.get("category"), score, float(reward))
             n += 1
         return n

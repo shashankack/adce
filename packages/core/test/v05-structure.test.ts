@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   checkProjectStructure,
+  fillStructureStubs,
   initializeProject,
   scanProject,
 } from "@adce/core";
@@ -114,5 +115,33 @@ describe("v0.5 structure check", () => {
     await expect(
       checkProjectStructure(root, { profileId: "nope" }),
     ).rejects.toThrow(/Unknown structure profile/);
+  });
+
+  it("typescript-api requires openapi on conflicting-api fixture", async () => {
+    const root = await copyFixture("conflicting-api");
+    await initializeProject(root);
+    await scanProject({ rootPath: root });
+    const report = await checkProjectStructure(root, {
+      profileId: "typescript-api",
+    });
+    expect(report.profileId).toBe("typescript-api");
+    expect(
+      report.findings.some(
+        (f) => f.ruleId === "openapi" && f.status === "PRESENT",
+      ),
+    ).toBe(true);
+  });
+
+  it("structure --fill creates concrete stubs", async () => {
+    const root = await copyFixture("empty-project");
+    await initializeProject(root);
+    const before = await checkProjectStructure(root, {
+      profileId: "typescript-lib",
+    });
+    const filled = await fillStructureStubs(root, before);
+    expect(filled.created.length).toBeGreaterThan(0);
+    expect(filled.created).toEqual(
+      expect.arrayContaining(["README.md", "package.json"]),
+    );
   });
 });

@@ -11,9 +11,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from adce_ml.analyze import analyze_request
+from adce_ml.bandit import get_bandit, reload_bandit
 from adce_ml.embedder import get_embedder
 from adce_ml.feedback import ALLOWED_ACTIONS, append_feedback
-from adce_ml.bandit import get_bandit, reload_bandit
+from adce_ml.pack import pack_brief
 
 app = FastAPI(
     title="ADCE ML",
@@ -73,6 +74,8 @@ class FeedbackRequest(BaseModel):
     sourceArtifactId: str | None = None
     targetArtifactId: str | None = None
     projectHash: str | None = None
+    # Optional ML suggestion score (0–1) for LinUCB context; defaults to 0.5 in bandit.
+    score: float | None = None
 
 
 @app.post("/v1/feedback")
@@ -87,3 +90,13 @@ def feedback(body: FeedbackRequest) -> dict:
         raise HTTPException(400, detail=str(e)) from e
     n = reload_bandit()
     return {"ok": True, "record": record, "banditExamples": n}
+
+
+@app.post("/v1/pack")
+def pack(body: dict[str, Any]) -> dict[str, Any]:
+    """Reorder/annotate a local ContextBrief (MUST READ / CAUTION / TRUST)."""
+    if "brief" not in body or not isinstance(body.get("brief"), dict):
+        raise HTTPException(400, detail="Expected { brief: ContextBrief, task? }")
+    if body.get("files") or body.get("repoArchive") or body.get("fullTree"):
+        raise HTTPException(400, detail="Full repository payloads are forbidden")
+    return pack_brief(body)

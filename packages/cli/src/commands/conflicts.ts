@@ -28,6 +28,21 @@ const handleConflictError = (error: unknown): boolean => {
 };
 
 /** Best-effort ML feedback; never fails the CLI command. */
+const confidenceToScore = (confidence: string | undefined): number => {
+  switch (confidence) {
+    case "CONFIRMED":
+      return 1;
+    case "LIKELY":
+      return 0.75;
+    case "POTENTIAL":
+      return 0.5;
+    case "UNLIKELY":
+      return 0.25;
+    default:
+      return 0.5;
+  }
+};
+
 const sendFeedback = (action: FeedbackAction, c: ConflictRecord): void => {
   void postConflictFeedback({
     action,
@@ -38,6 +53,7 @@ const sendFeedback = (action: FeedbackAction, c: ConflictRecord): void => {
     summary: c.summary,
     sourceArtifactId: c.sourceArtifactId,
     targetArtifactId: c.targetArtifactId,
+    score: confidenceToScore(c.confidence),
   }).then((ok) => {
     if (ok) log.step(`ML feedback logged (${action}).`);
   });

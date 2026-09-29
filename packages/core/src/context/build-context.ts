@@ -18,6 +18,7 @@ import {
 } from "@adce/storage";
 import { AdceNotInitializedError } from "../artifacts/query.js";
 import { adceDir, dbPath } from "../project/paths.js";
+import { packContextBrief } from "./ml-pack.js";
 
 const exists = async (p: string): Promise<boolean> => {
   try {
@@ -140,6 +141,9 @@ const relatedIds = (
 export interface BuildContextOptions {
   task?: string | null;
   budget?: number;
+  /** When true (default), try ADCE_ML_URL /v1/pack after local brief. */
+  pack?: boolean;
+  mlUrl?: string | null;
 }
 
 export const buildProjectContext = async (
@@ -311,6 +315,25 @@ export const buildProjectContext = async (
       "Use brief.mustRead first; treat brief.caution as trust blockers until reviewed.",
     );
 
+    let packedBrief = brief;
+    const wantPack = options.pack !== false;
+    const mlUrl =
+      options.mlUrl === null
+        ? undefined
+        : (options.mlUrl ?? process.env.ADCE_ML_URL);
+    if (wantPack && mlUrl) {
+      const packed = await packContextBrief(
+        { task, brief },
+        { baseUrl: mlUrl },
+      );
+      if (packed?.brief) {
+        packedBrief = packed.brief;
+        notes.push(...(packed.notes ?? ["ML packed brief applied."]));
+      } else {
+        notes.push("ML pack unavailable; using local brief order.");
+      }
+    }
+
     return {
       task,
       rootPath,
@@ -319,7 +342,7 @@ export const buildProjectContext = async (
       relationships: selectedRels,
       conflicts: selectedConflicts,
       notes,
-      brief,
+      brief: packedBrief,
     };
   } finally {
     closeDatabase(db);

@@ -133,3 +133,8 @@ export {
   type FeedbackAction,
 } from "./analyze/ml-feedback.js";
 export { checkProjectStructure } from "./structure/check-structure.js";
+export {
+  fillStructureStubs,
+  type StructureFillResult,
+} from "./structure/fill-structure.js";
+export { packContextBrief } from "./context/ml-pack.js";

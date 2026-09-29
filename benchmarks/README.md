@@ -16,16 +16,16 @@ In practice the CLI **hybrid** path is: local heuristic always, plus ML suggesti
 
 ```text
 benchmarks/
-  README.md                 ← this file
+  README.md
   ground-truth/             ← expected conflict categories per fixture
-  run-analyze-benchmark.ts  ← runner (tsx)
-  results/                  ← generated JSON (gitignored)
+  run-analyze-benchmark.ts
+  results/                  ← generated JSON (gitignored) + latest.json
+  golden/                   ← ML-up snapshot when hybrid produces ML suggestions
 ```
 
 ## Prerequisites
 
 ```powershell
-# from repo root
 pnpm install
 
 # optional — for ML / hybrid arms:
@@ -37,33 +37,33 @@ uvicorn adce_ml.server:app --host 127.0.0.1 --port 8000
 ## Run
 
 ```powershell
-# rule-only + hybrid-if-ML-up (from repo root)
 pnpm bench:analyze
 
-# force ML URL
 $env:ADCE_ML_URL = "http://127.0.0.1:8000"
 pnpm bench:analyze
 ```
 
-Writes `benchmarks/results/analyze-<timestamp>.json` and prints a markdown-friendly table.
+Writes:
+
+- `benchmarks/results/analyze-<timestamp>.json`
+- `benchmarks/results/latest.json`
+- `benchmarks/golden/analyze-hybrid-latest.json` (only when ML URL set and ML suggestions > 0)
 
 ## Metrics
 
 | Metric | Meaning |
 |--------|---------|
 | `categoryRecall` | Fraction of ground-truth categories detected after scan |
-| `suggestionCount` | Analyze suggestions produced in that mode |
-| `mlSuggestionCount` | Suggestions with `source === "ml"` |
-| `heuristicSuggestionCount` | Suggestions with `source === "heuristic"` |
+| `categoryPrecision` | Fraction of detected categories that were expected |
+| `mlLift` | Hybrid ML suggestion count − rule ML count |
+| `briefCautionCoverage` | Fraction of open conflicts present in context caution |
+| `suggestionCount` / `ml*` / `heuristic*` | Analyze suggestion mix |
 | `engine` | `heuristic` or `hybrid` |
 | `elapsedMs` | Wall time for analyze |
 
-Ground truth is **category-level** (not individual conflict IDs), so fixtures stay stable when IDs change.
-
 ## Academic framing
 
-Use the result JSON in your report to show:
-
 1. Deterministic detectors recover expected mismatch classes without ML.  
-2. MiniLM/LinUCB add semantic suggestions when the server is up.  
-3. Offline / `--skip-ml` still returns a complete heuristic engine.
+2. MiniLM/LinUCB add semantic / confidence suggestions when the server is up (`mlLift > 0`).  
+3. Offline / `--skip-ml` still returns a complete heuristic engine.  
+4. Brief caution coverage proxies agent-facing conflict visibility.

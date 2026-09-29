@@ -10,15 +10,16 @@ Last updated: 2026-09-29
 | v0.4 deterministic conflicts | ~100% |
 | v0.5 context engine | ~100% |
 | v0.5 structure profiles | ~100% (check-only; `--fix` deferred) |
-| v0.6 ML integration | ~95% (MiniLM + feedback + LinUCB; packing optional) |
-| v0.7 research benchmark | ~40% (scaffold + rule/hybrid runner; richer metrics later) |
-| Full roadmap (v0.1–v0.7) | ~90% |
+| v0.6 ML integration | ~98% (MiniLM + feedback + LinUCB + /v1/pack) |
+| v0.7 research benchmark | ~70% (metrics + golden; more eval corpora later) |
+| Full roadmap (v0.1–v0.7) | ~94% |
+| Dashboard | scaffold (`apps/dashboard`) |
 
-**Local CLI + hybrid ML** complete through MiniLM, feedback, LinUCB, and multi-lang structure (`typescript-lib` / `generic` / `python` / `go`). **v0.7** ablation runner lives under `benchmarks/` (`pnpm bench:analyze`).
+**Local CLI + hybrid ML** complete through MiniLM, feedback, LinUCB, `/v1/pack`, multi-lang structure (+ `typescript-api`, `--fill`), v0.7 metrics runner, and a thin dashboard UI.
 
-## Current milestone: v0.7 evaluation depth
+## Current milestone: polish & faculty packaging
 
-CLI + MiniLM hybrid path are shipped. Next optional work: richer benchmark metrics, context packing, structure `--fix`.
+Core product shipped. Extend golden corpora, dashboard views, and optional packing quality.
 
 ## v0.2 ✓
 
@@ -309,20 +310,28 @@ adce analyze [conflict-id] [--deep] [--format json]
 - [x] Init writes always-apply Cursor rule `.cursor/rules/adce.mdc`
 - [x] Vitest: doctor checks + nudge content + Cursor rule repair
 
-## v0.7 (scaffold)
+## v0.7 (scaffold + metrics)
 
 - [x] `benchmarks/` layout + README
 - [x] Ground truth JSON for `parser-conflicts`, `conflicting-api`, `basic-typescript`
 - [x] Runner: rule (`--skip-ml`) vs hybrid (`ADCE_ML_URL` HTTP MiniLM) ablation
-- [x] `pnpm bench:analyze` → table + `benchmarks/results/*.json` (gitignored)
-- [ ] Optional: ML-up smoke in CI / recorded golden results with server
-- [ ] Optional: ranking / brief-adherence metrics beyond category recall
+- [x] `pnpm bench:analyze` → table + `results/latest.json` + golden when ML-up
+- [x] Metrics: categoryRecall / categoryPrecision / mlLift / briefCautionCoverage
+- [ ] Optional: larger fixture corpora / CI ML-up job
+
+## Polish
+
+- [x] `adce structure --fill` concrete stubs
+- [x] `typescript-api` profile (OpenAPI required)
+- [x] Feedback `score` field (CLI confidence → LinUCB context)
+- [x] `/v1/pack` + context auto-pack when `ADCE_ML_URL` set
+- [x] Dashboard scaffold (`pnpm dashboard`)
 
 ## Next steps
 
-1. Run `pnpm bench:analyze` with `ADCE_ML_URL` when demoing ML arms (MiniLM suggestions + LinUCB after feedback).
-2. Optional: context-packing endpoint (`/v1/pack` enriching MUST READ / CAUTION / TRUST).
-3. Optional polish: `structure --fix`, `typescript-api` profile; store `score` on feedback events.
+1. Expand golden fixtures / faculty write-up from `benchmarks/golden/`.
+2. Grow dashboard (live status JSON, conflict explorer).
+3. Optional packing quality (embeddings over brief item texts).
 
 ## Roadmap reminder
 

@@ -37,6 +37,7 @@ describe("v0.6 analyze", () => {
 
     const report = await analyzeProject(root, {
       mlScript: null,
+      mlUrl: null,
       useCache: true,
     });
     expect(report.engine).toBe("heuristic");
@@ -48,6 +49,7 @@ describe("v0.6 analyze", () => {
 
     const cached = await analyzeProject(root, {
       mlScript: null,
+      mlUrl: null,
       useCache: true,
       apply: false,
     });
@@ -71,6 +73,7 @@ describe("v0.6 analyze", () => {
     const report = await analyzeProject(root, {
       conflictId: conflict!.id.slice(0, 8),
       mlScript: null,
+      mlUrl: null,
       useCache: false,
     });
 

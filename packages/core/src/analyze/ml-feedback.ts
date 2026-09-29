@@ -10,6 +10,8 @@ export interface ConflictFeedbackPayload {
   sourceArtifactId?: string | null;
   targetArtifactId?: string | null;
   projectHash?: string | null;
+  /** Optional 0–1 score from last ML suggestion (LinUCB context). */
+  score?: number | null;
 }
 
 export const postConflictFeedback = async (

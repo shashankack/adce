@@ -241,8 +241,10 @@ A mid-size **Python or Go** repo can `init → scan → structure → conflicts 
 - [x] Feedback logging for ranking / bandit research (`POST /v1/feedback` + CLI conflict actions)
 - [x] LinUCB contextual bandit re-ranks analyze suggestions from feedback rewards
 - [x] v0.7 benchmark scaffold (`pnpm bench:analyze`: rule vs hybrid HTTP MiniLM)
-- [ ] Context packing endpoint (optional enrichment of agent brief)
-- [ ] v0.7 richer metrics (ranking quality / brief adherence; golden runs with ML up)
+- [x] Context packing endpoint (`POST /v1/pack`) + core client on `buildProjectContext`
+- [x] v0.7 richer metrics (precision, mlLift, briefCautionCoverage; golden on ML-up)
+- [x] Structure `--fill` + `typescript-api` profile + feedback `score`
+- [x] Dashboard scaffold (`apps/dashboard`)
 
 ---
 

@@ -59,13 +59,15 @@ def cosine(a: list[float], b: list[float]) -> float:
 
 
 def artifact_text(art: dict[str, Any]) -> str:
-    return " ".join(
-        [
-            str(art.get("type") or ""),
-            str(art.get("path") or ""),
-            str(art.get("name") or ""),
-        ]
-    )
+    parts = [
+        str(art.get("type") or ""),
+        str(art.get("path") or ""),
+        str(art.get("name") or ""),
+    ]
+    excerpt = art.get("excerpt")
+    if excerpt:
+        parts.append(str(excerpt)[:800])
+    return " ".join(p for p in parts if p)
 
 
 @lru_cache(maxsize=1)

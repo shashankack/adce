@@ -1,19 +1,37 @@
 import {
   AdceNotInitializedError,
   checkProjectStructure,
+  fillStructureStubs,
 } from "@adce/core";
 import { resolveAdceRoot } from "../project-root.js";
 import { log } from "../ui/logger.js";
 
 export const runStructure = async (
-  options: { profile?: string; format?: "text" | "json" } = {},
+  options: {
+    profile?: string;
+    format?: "text" | "json";
+    fill?: boolean;
+  } = {},
   cwd = process.cwd(),
 ): Promise<void> => {
   try {
     const rootPath = await resolveAdceRoot(cwd);
-    const report = await checkProjectStructure(rootPath, {
+    let report = await checkProjectStructure(rootPath, {
       profileId: options.profile,
     });
+
+    if (options.fill) {
+      const filled = await fillStructureStubs(rootPath, report);
+      if (filled.created.length > 0) {
+        log.ok(`Created stubs: ${filled.created.join(", ")}`);
+      }
+      if (filled.skipped.length > 0) {
+        log.step(`Skipped (wildcard or exists): ${filled.skipped.join(", ")}`);
+      }
+      report = await checkProjectStructure(rootPath, {
+        profileId: options.profile,
+      });
+    }
 
     if (options.format === "json") {
       console.log(JSON.stringify(report, null, 2));
@@ -42,7 +60,10 @@ export const runStructure = async (
       log.error(error.message);
       return;
     }
-    if (error instanceof Error && error.message.startsWith("Unknown structure profile")) {
+    if (
+      error instanceof Error &&
+      error.message.startsWith("Unknown structure profile")
+    ) {
       log.error(error.message);
       return;
     }

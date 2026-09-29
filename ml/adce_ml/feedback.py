@@ -28,6 +28,13 @@ def append_feedback(event: dict[str, Any]) -> dict[str, Any]:
     if action not in ALLOWED_ACTIONS:
         raise ValueError(f"Action must be one of {sorted(ALLOWED_ACTIONS)}")
 
+    score = event.get("score")
+    if score is not None:
+        try:
+            score = float(score)
+        except (TypeError, ValueError):
+            score = None
+
     record = {
         "ts": datetime.now(timezone.utc).isoformat(),
         "action": action,
@@ -42,6 +49,7 @@ def append_feedback(event: dict[str, Any]) -> dict[str, Any]:
         "targetArtifactId": event.get("targetArtifactId"),
         "projectHash": event.get("projectHash"),
         "embedder": event.get("embedder"),
+        "score": score,
     }
 
     path = feedback_log_path()

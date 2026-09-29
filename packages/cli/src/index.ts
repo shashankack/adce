@@ -363,14 +363,16 @@ program
   .description("Check project against a recommended artifact structure")
   .option(
     "-p, --profile <id>",
-    "Profile id (typescript-lib | generic | python | go)",
+    "Profile id (typescript-lib | typescript-api | generic | python | go)",
     "typescript-lib",
   )
   .option("--format <format>", "text or json", "text")
+  .option("--fill", "Create stub files for concrete MISSING/SUGGESTED paths")
   .action(async (opts) => {
     await runStructure({
       profile: opts.profile,
       format: opts.format === "json" ? "json" : "text",
+      fill: Boolean(opts.fill),
     });
   });
 
