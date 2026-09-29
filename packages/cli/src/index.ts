@@ -363,7 +363,7 @@ program
   .description("Check project against a recommended artifact structure")
   .option(
     "-p, --profile <id>",
-    "Profile id (typescript-lib | generic | python)",
+    "Profile id (typescript-lib | generic | python | go)",
     "typescript-lib",
   )
   .option("--format <format>", "text or json", "text")

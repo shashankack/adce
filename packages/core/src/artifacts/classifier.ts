@@ -16,6 +16,9 @@ export function classifyArtifact(relativePath: string): ArtifactType {
     base.endsWith(".spec.ts") ||
     base.endsWith(".spec.tsx") ||
     base.endsWith(".spec.js") ||
+    base.endsWith("_test.go") ||
+    (base.startsWith("test_") && base.endsWith(".py")) ||
+    base.endsWith("_test.py") ||
     parts.includes("__tests__") ||
     parts.includes("tests") ||
     parts.includes("test")

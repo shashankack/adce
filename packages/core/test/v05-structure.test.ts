@@ -92,6 +92,22 @@ describe("v0.5 structure check", () => {
     ).toBe(true);
   });
 
+  it("reports present rules on basic-go with go profile", async () => {
+    const root = await copyFixture("basic-go");
+    await initializeProject(root);
+    await scanProject({ rootPath: root });
+
+    const report = await checkProjectStructure(root, { profileId: "go" });
+    expect(report.profileId).toBe("go");
+    expect(report.summary.missing).toBe(0);
+    expect(
+      report.findings.some((f) => f.ruleId === "tests" && f.status === "PRESENT"),
+    ).toBe(true);
+    expect(
+      report.findings.find((f) => f.ruleId === "source")?.evidence,
+    ).not.toMatch(/_test\.go/);
+  });
+
   it("rejects unknown profile ids", async () => {
     const root = await copyFixture("empty-project");
     await initializeProject(root);

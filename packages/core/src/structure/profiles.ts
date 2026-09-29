@@ -98,7 +98,50 @@ export const PROFILES: Record<string, StructureProfile> = {
       },
     ],
   },
-
+  go: {
+    id: "go",
+    name: "Go module",
+    description: "go.mod, packages, *_test.go",
+    rules: [
+      {
+        id: "manifest",
+        level: "required",
+        type: "DEPENDENCY_MANIFEST",
+        pathGlob: "go.mod",
+        description: "go.mod present",
+      },
+      {
+        id: "readme",
+        level: "required",
+        type: "DOCUMENTATION",
+        pathGlob: "README.md",
+        description: "Top-level README",
+      },
+      {
+        id: "source",
+        level: "required",
+        type: "SOURCE",
+        pathGlob: "**/*.go",
+        minCount: 1,
+        description: "At least one Go source file",
+      },
+      {
+        id: "tests",
+        level: "required",
+        type: "TEST",
+        pathGlob: "**/*_test.go",
+        minCount: 1,
+        description: "At least one *_test.go file",
+      },
+      {
+        id: "agents",
+        level: "recommended",
+        type: "DOCUMENTATION",
+        pathGlob: "AGENTS.md",
+        description: "Agent onboarding file",
+      },
+    ],
+  },
   python: {
     id: "python",
     name: "Python project",
