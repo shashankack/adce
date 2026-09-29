@@ -361,7 +361,11 @@ program
 program
   .command("structure")
   .description("Check project against a recommended artifact structure")
-  .option("-p, --profile <id>", "Profile id", "typescript-lib")
+  .option(
+    "-p, --profile <id>",
+    "Profile id (typescript-lib | generic | python)",
+    "typescript-lib",
+  )
   .option("--format <format>", "text or json", "text")
   .action(async (opts) => {
     await runStructure({

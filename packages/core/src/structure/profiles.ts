@@ -61,6 +61,88 @@ export const PROFILES: Record<string, StructureProfile> = {
       },
     ],
   },
+  generic: {
+    id: "generic",
+    name: "Generic project",
+    description: "README, source, and tests — language-light",
+    rules: [
+      {
+        id: "readme",
+        level: "required",
+        type: "DOCUMENTATION",
+        pathGlob: "README.md",
+        description: "Top-level README",
+      },
+      {
+        id: "source",
+        level: "required",
+        type: "SOURCE",
+        pathGlob: "**/*.{ts,tsx,js,jsx,py,go,rs,java}",
+        minCount: 1,
+        description: "At least one source file",
+      },
+      {
+        id: "tests",
+        level: "required",
+        type: "TEST",
+        pathGlob: "**/*.{test,spec}.{ts,tsx,js,jsx}",
+        minCount: 1,
+        description: "At least one JS/TS-style test file",
+      },
+      {
+        id: "agents",
+        level: "recommended",
+        type: "DOCUMENTATION",
+        pathGlob: "AGENTS.md",
+        description: "Agent onboarding file",
+      },
+    ],
+  },
+
+  python: {
+    id: "python",
+    name: "Python project",
+    description: "pyproject/requirements, package code, pytest-style tests",
+    rules: [
+      {
+        id: "manifest",
+        level: "required",
+        type: "DEPENDENCY_MANIFEST",
+        pathGlob: "{pyproject.toml,requirements.txt}",
+        description: "pyproject.toml or requirements.txt",
+      },
+      {
+        id: "readme",
+        level: "required",
+        type: "DOCUMENTATION",
+        pathGlob: "README.md",
+        description: "Top-level README",
+      },
+      {
+        id: "source",
+        level: "required",
+        type: "SOURCE",
+        pathGlob: "**/*.py",
+        minCount: 1,
+        description: "At least one Python source file",
+      },
+      {
+        id: "tests",
+        level: "required",
+        type: "TEST",
+        pathGlob: "{**/test_*.py,**/*_test.py,tests/**/*.py}",
+        minCount: 1,
+        description: "At least one pytest-style test",
+      },
+      {
+        id: "agents",
+        level: "recommended",
+        type: "DOCUMENTATION",
+        pathGlob: "AGENTS.md",
+        description: "Agent onboarding file",
+      },
+    ],
+  },
 };
 
 export const DEFAULT_PROFILE_ID = "typescript-lib";

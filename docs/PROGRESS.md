@@ -13,7 +13,7 @@ Last updated: 2026-09-28
 | v0.6 ML integration | ~85% |
 | Full roadmap (v0.1–v0.7) | ~80% |
 
-**Local CLI complete** through context brief, JSON status/conflicts, `adce structure`, mid-session nudge, and `adce doctor`. **Next:** Python ML HTTP service (`ADCE_ML_URL`) + multi-lang depth (Architecture Lock §8b); then **v0.7** benchmarks.
+**Local CLI complete** through context brief, structure (`typescript-lib` / `generic` / `python`), doctor, and hybrid ML HTTP. **Next:** richer ML (embeddings) and/or `go` profile; then **v0.7** benchmarks.
 
 ## Current milestone: full ML server (after local CLI)
 
@@ -288,7 +288,9 @@ adce analyze [conflict-id] [--deep] [--format json]
 ### Structure profiles (complete — check only)
 
 - [x] Shared structure profile / finding / report types
-- [x] Built-in `typescript-lib` profile (required + recommended rules)
+- [x] Built-in profiles: `typescript-lib`, `generic`, `python`
+- [x] `matchGlob` brace alternatives convert embedded `**`/`*` (pytest-style globs)
+- [x] Fixture `basic-python` + Vitest for python profile
 - [x] `matchGlob` + `checkProjectStructure` (PRESENT / MISSING / SUGGESTED / WEAK)
 - [x] Relationship checks (`test-naming-sibling`)
 - [x] CLI: `adce structure` / `--profile` / `--format json`
@@ -316,9 +318,9 @@ adce analyze [conflict-id] [--deep] [--format json]
 
 ## Next steps
 
-1. **v0.6 finish — Python ML HTTP:** FastAPI service + `ADCE_ML_URL` TypeScript client + privacy filter (local Python `cli.py` remains the offline stand-in).
-2. **Multi-lang depth (Lock §8b):** structure profiles `generic` / `python` / `go` + richer classifiers — depth on 2–3 stacks, not shallow markers for six.
-3. Optional: `structure --fix`, `typescript-api` profile; richer embeddings / context packing on the ML server.
+1. Optional: `go` structure profile; richer classifiers.
+2. Extend ML HTTP: embeddings + context-packing + feedback hooks.
+3. Optional: `structure --fix`, `typescript-api` profile.
 4. Then **v0.7** research benchmark (rule vs ML vs hybrid) on mixed-language fixtures.
 5. Bandits / RL ranking — after feedback volume exists.
 

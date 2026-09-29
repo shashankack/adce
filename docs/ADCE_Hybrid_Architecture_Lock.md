@@ -219,7 +219,7 @@ A mid-size **Python or Go** repo can `init → scan → structure → conflicts 
 - [ ] CLI client via `ADCE_ML_URL` (fallback to local Python script / heuristic if unreachable)
 - [ ] Privacy filter on outbound analyze/context-enrich payloads
 - [ ] Feedback logging for ranking research
-- [ ] Multi-lang structure profiles (python / go / generic)
+- [x] Multi-lang structure profiles (`generic`, `python`; `go` later)
 - [ ] v0.7 benchmark scenarios and ablations
 
 ---

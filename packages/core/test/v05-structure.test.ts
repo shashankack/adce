@@ -35,6 +35,16 @@ describe("structure matchGlob", () => {
     expect(matchGlob("README.md", "README.md")).toBe(true);
     expect(matchGlob("docs/overview.md", "README.md")).toBe(false);
   });
+
+  it("converts globs inside brace alternatives", () => {
+    const pyTests = "{**/test_*.py,**/*_test.py,tests/**/*.py}";
+    expect(matchGlob("tests/test_hello.py", pyTests)).toBe(true);
+    expect(matchGlob("pkg/foo_test.py", pyTests)).toBe(true);
+    expect(matchGlob("src/hello.py", pyTests)).toBe(false);
+    expect(
+      matchGlob("pyproject.toml", "{pyproject.toml,requirements.txt}"),
+    ).toBe(true);
+  });
 });
 
 describe("v0.5 structure check", () => {
@@ -63,18 +73,30 @@ describe("v0.5 structure check", () => {
     expect(report.summary.missing).toBe(0);
   });
 
-  it("reports missing required rules on empty-project", async () => {
-    const root = await copyFixture("empty-project");
+  it("reports present rules on basic-python with python profile", async () => {
+    const root = await copyFixture("basic-python");
     await initializeProject(root);
     await scanProject({ rootPath: root });
 
-    const report = await checkProjectStructure(root, {
-      profileId: "typescript-lib",
-    });
-
-    expect(report.summary.missing).toBeGreaterThan(0);
+    const report = await checkProjectStructure(root, { profileId: "python" });
+    expect(report.profileId).toBe("python");
+    expect(report.summary.missing).toBe(0);
     expect(
-      report.findings.some((f) => f.ruleId === "source" && f.status === "MISSING"),
+      report.findings.some((f) => f.ruleId === "manifest" && f.status === "PRESENT"),
     ).toBe(true);
+    expect(
+      report.findings.some((f) => f.ruleId === "source" && f.status === "PRESENT"),
+    ).toBe(true);
+    expect(
+      report.findings.some((f) => f.ruleId === "tests" && f.status === "PRESENT"),
+    ).toBe(true);
+  });
+
+  it("rejects unknown profile ids", async () => {
+    const root = await copyFixture("empty-project");
+    await initializeProject(root);
+    await expect(
+      checkProjectStructure(root, { profileId: "nope" }),
+    ).rejects.toThrow(/Unknown structure profile/);
   });
 });
