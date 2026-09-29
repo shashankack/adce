@@ -16,3 +16,5 @@ benchmarks/results/
 
 .DS_Store
 Thumbs.db
+
+ml/data/

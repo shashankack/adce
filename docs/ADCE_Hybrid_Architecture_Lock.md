@@ -238,7 +238,7 @@ A mid-size **Python or Go** repo can `init → scan → structure → conflicts 
 - [x] ML HTTP service (FastAPI `/health`, `/v1/analyze`) + `ADCE_ML_URL` client + privacy filter
 - [x] Multi-lang structure profiles (`generic`, `python`, `go`)
 - [ ] **Primary model: MiniLM (`all-MiniLM-L6-v2`)** with hashing/Jaccard fallback
-- [ ] Feedback logging for ranking / bandit research
+- [x] Feedback logging for ranking / bandit research (`POST /v1/feedback` + CLI conflict actions)
 - [ ] Context packing endpoint (optional enrichment of agent brief)
 - [ ] v0.7 benchmark scenarios and ablations (rule vs MiniLM vs hybrid)
 

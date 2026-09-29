@@ -125,6 +125,11 @@ export {
 export { runProjectAnalyze } from "./analyze/run-analyze.js";
 export { runHeuristicAnalyze } from "./analyze/heuristic.js";
 export { runMlAnalyze } from "./analyze/ml-client.js";
-export { checkProjectStructure } from "./structure/check-structure.js";
 export { runMlHttpAnalyze } from "./analyze/ml-http.js";
 export { filterAnalyzeRequestForMl } from "./analyze/privacy.js";
+export {
+  postConflictFeedback,
+  type ConflictFeedbackPayload,
+  type FeedbackAction,
+} from "./analyze/ml-feedback.js";
+export { checkProjectStructure } from "./structure/check-structure.js";

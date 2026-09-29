@@ -6,9 +6,12 @@ import {
   getProjectConflict,
   ignoreProjectConflict,
   listProjectConflicts,
+  postConflictFeedback,
   rejectProjectConflict,
   resolveProjectConflict,
+  type FeedbackAction,
 } from "@adce/core";
+import type { ConflictRecord } from "@adce/shared";
 import { resolveAdceRoot } from "../project-root.js";
 import { log } from "../ui/logger.js";
 
@@ -22,6 +25,22 @@ const handleConflictError = (error: unknown): boolean => {
     return true;
   }
   return false;
+};
+
+/** Best-effort ML feedback; never fails the CLI command. */
+const sendFeedback = (action: FeedbackAction, c: ConflictRecord): void => {
+  void postConflictFeedback({
+    action,
+    conflictId: c.id,
+    category: c.category,
+    severity: c.severity,
+    confidence: c.confidence,
+    summary: c.summary,
+    sourceArtifactId: c.sourceArtifactId,
+    targetArtifactId: c.targetArtifactId,
+  }).then((ok) => {
+    if (ok) log.step(`ML feedback logged (${action}).`);
+  });
 };
 
 export const runConflicts = async (
@@ -111,6 +130,7 @@ export const runConflictReject = async (
     const c = await rejectProjectConflict(rootPath, id);
     log.ok(`Conflict rejected: ${c.id}`);
     console.log(`Lifecycle: ${c.lifecycle}`);
+    sendFeedback("reject", c);
   } catch (error) {
     if (handleConflictError(error)) return;
     throw error;
@@ -126,6 +146,7 @@ export const runConflictIgnore = async (
     const c = await ignoreProjectConflict(rootPath, id);
     log.ok(`Conflict ignored: ${c.id}`);
     console.log(`Lifecycle: ${c.lifecycle}`);
+    sendFeedback("ignore", c);
   } catch (error) {
     if (handleConflictError(error)) return;
     throw error;
@@ -141,6 +162,7 @@ export const runConflictConfirm = async (
     const c = await confirmProjectConflict(rootPath, id);
     log.ok(`Conflict confirmed: ${c.id}`);
     console.log(`Lifecycle: ${c.lifecycle}`);
+    sendFeedback("confirm", c);
   } catch (error) {
     if (handleConflictError(error)) return;
     throw error;
@@ -156,6 +178,7 @@ export const runConflictResolve = async (
     const c = await resolveProjectConflict(rootPath, id);
     log.ok(`Conflict resolved: ${c.id}`);
     console.log(`Lifecycle: ${c.lifecycle}`);
+    sendFeedback("resolve", c);
   } catch (error) {
     if (handleConflictError(error)) return;
     throw error;

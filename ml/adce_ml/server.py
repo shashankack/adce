@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from adce_ml.analyze import analyze_request
 from adce_ml.embedder import get_embedder
+from adce_ml.feedback import ALLOWED_ACTIONS, append_feedback
 
 app = FastAPI(
     title="ADCE ML",
@@ -53,3 +54,28 @@ def analyze(body: dict[str, Any]) -> AnalyzeHttpResponse:
         ],
         engine="ml",
     )
+
+
+class FeedbackRequest(BaseModel):
+    action: str
+    conflictId: str
+    category: str | None = None
+    severity: str | None = None
+    confidence: str | None = None
+    summary: str | None = None
+    sourceArtifactId: str | None = None
+    targetArtifactId: str | None = None
+    projectHash: str | None = None
+
+
+@app.post("/v1/feedback")
+def feedback(body: FeedbackRequest) -> dict:
+    if body.action.lower() not in ALLOWED_ACTIONS:
+        raise HTTPException(
+            400, detail=f"action must be one of {sorted(ALLOWED_ACTIONS)}"
+        )
+    try:
+        record = append_feedback({**body.model_dump(), "embedder": get_embedder().name})
+    except ValueError as e:
+        raise HTTPException(400, detail=str(e)) from e
+    return {"ok": True, "record": record}
