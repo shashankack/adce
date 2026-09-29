@@ -244,7 +244,7 @@ A mid-size **Python or Go** repo can `init → scan → structure → conflicts 
 - [x] Context packing endpoint (`POST /v1/pack`) + core client on `buildProjectContext`
 - [x] v0.7 richer metrics (precision, mlLift, briefCautionCoverage; golden on ML-up)
 - [x] Structure `--fill` + `typescript-api` profile + feedback `score`
-- [x] Dashboard scaffold (`apps/dashboard`)
+- [ ] Dashboard UI (deferred — not required for core thesis)
 
 ---
 

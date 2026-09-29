@@ -13,13 +13,13 @@ Last updated: 2026-09-29
 | v0.6 ML integration | ~98% (MiniLM + feedback + LinUCB + /v1/pack) |
 | v0.7 research benchmark | ~70% (metrics + golden; more eval corpora later) |
 | Full roadmap (v0.1–v0.7) | ~94% |
-| Dashboard | scaffold (`apps/dashboard`) |
+| Dashboard | deferred |
 
-**Local CLI + hybrid ML** complete through MiniLM, feedback, LinUCB, `/v1/pack`, multi-lang structure (+ `typescript-api`, `--fill`), v0.7 metrics runner, and a thin dashboard UI.
+**Local CLI + hybrid ML** complete through MiniLM, feedback, LinUCB, `/v1/pack`, multi-lang structure (+ `typescript-api`, `--fill`), and the v0.7 metrics runner. Dashboard stays deferred.
 
-## Current milestone: polish & faculty packaging
+## Current milestone: evaluation depth & packing quality
 
-Core product shipped. Extend golden corpora, dashboard views, and optional packing quality.
+Core product shipped. Dashboard deferred. Extend golden corpora and packing quality next.
 
 ## v0.2 ✓
 
@@ -325,13 +325,13 @@ adce analyze [conflict-id] [--deep] [--format json]
 - [x] `typescript-api` profile (OpenAPI required)
 - [x] Feedback `score` field (CLI confidence → LinUCB context)
 - [x] `/v1/pack` + context auto-pack when `ADCE_ML_URL` set
-- [x] Dashboard scaffold (`pnpm dashboard`)
+- [ ] Dashboard (deferred)
 
 ## Next steps
 
 1. Expand golden fixtures / faculty write-up from `benchmarks/golden/`.
-2. Grow dashboard (live status JSON, conflict explorer).
-3. Optional packing quality (embeddings over brief item texts).
+2. Optional packing quality (embeddings over brief item texts).
+3. Dashboard only if product need returns.
 
 ## Roadmap reminder
 
