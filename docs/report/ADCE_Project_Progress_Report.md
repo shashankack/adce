@@ -8,8 +8,8 @@
 | Report date | 29 September 2026 (updated) |
 | Audience | Faculty / project review |
 | Roadmap scope | v0.1 – v0.7 (+ dashboard deferred) |
-| **Overall completion** | **≈ 85–87%** of planned v0.1–v0.7 roadmap |
-| Automated tests | **58** Vitest cases in `@adce/core` (passing) |
+| **Overall completion** | **≈ 90–92%** of planned v0.1–v0.7 roadmap |
+| Automated tests | Vitest in `@adce/core` (passing) + `pnpm bench:analyze` ablation |
 | Primary references | `docs/ADCE_Technical_Specification.md`, `docs/ADCE_Hybrid_Architecture_Lock.md`, `docs/PROGRESS.md`, `docs/AGENTS.md` |
 
 ---
@@ -28,23 +28,23 @@ ADCE is a **repository intelligence layer** for AI coding agents: it scans a pro
 | **v0.2** | Artifact management | **Done** | 100% |
 | **v0.3** | Relationships + temporal history | **Done** | 100% |
 | **v0.4** | Deterministic conflict detection | **Done** | ~100% |
-| **v0.5** | Context engine + structure profiles | **Done** (+ multi-lang profiles) | ~100% |
-| **v0.6** | ML integration (hybrid) | **Mostly done** | ~90% |
-| **v0.7** | Research benchmark / evaluation | **Not started** | 0% |
+| **v0.5** | Context engine + structure profiles | **Done** (TS / Python / Go / generic) | ~100% |
+| **v0.6** | ML integration (hybrid) | **Done** (MiniLM + feedback + LinUCB) | ~95% |
+| **v0.7** | Research benchmark / evaluation | **Scaffold** | ~40% |
 | Dashboard | UI (post-core roadmap) | Deferred | — |
 
 ### How the overall % was estimated
 
 ```text
 v0.1–v0.5  ≈ 5 equal milestones at 100%
-v0.6       ≈ 90% (FastAPI HTTP + ADCE_ML_URL + privacy + heuristic;
-                 embeddings / packing / feedback still thin)
-v0.7       = 0%
+v0.6       ≈ 95% (FastAPI + MiniLM + privacy + feedback + LinUCB;
+                 optional context packing remains)
+v0.7       ≈ 40% (runner + ground truth + category recall; richer metrics later)
 
-Blended roadmap estimate for v0.1–v0.7:  ≈ 85–87%
+Blended roadmap estimate for v0.1–v0.7:  ≈ 90–92%
 ```
 
-**Local CLI and hybrid ML HTTP path work end-to-end** (including offline fallback). Remaining product depth is richer ML (embeddings) and **v0.7** academic evaluation; optional `go` profile continues multi-lang depth.
+**Local CLI and hybrid ML path work end-to-end** (offline heuristic; MiniLM when `ADCE_ML_URL` is up). Remaining academic depth is richer v0.7 metrics and optional context packing.
 
 ---
 
@@ -128,16 +128,14 @@ Still thin / next
 
 | Priority | Item | Version |
 |----------|------|---------|
-| **1** | Embeddings + stronger semantic ML on the Python server | v0.6 depth |
-| **2** | Optional `go` structure profile (+ richer classifiers) | Multi-lang §8b |
+| **1** | Richer v0.7 metrics (ranking / brief adherence; ML-up golden runs) | **v0.7** |
+| **2** | Optional: context-packing endpoint (`/v1/pack`) | v0.6 polish |
 | **3** | Optional: `structure --fix`, `typescript-api` | Polish |
-| **4** | Research benchmark: rule vs ML vs hybrid | **v0.7** |
-| **5** | Bandits / RL for ranking (after feedback volume) | Later |
-| **6** | Dashboard UI | After core roadmap |
+| **4** | Dashboard UI | After core roadmap |
 
 ### Multi-language note (for faculty)
 
-Root markers ≠ first-class support. Depth strategy: TypeScript → Python → Go, via local structure profiles; ML upgrades judgment and does not replace those facts. **TS + Python profiles are implemented;** Go is the natural next profile.
+Root markers ≠ first-class support. Depth strategy: TypeScript → Python → Go, via local structure profiles; ML upgrades judgment and does not replace those facts. **TS + Python + Go profiles are implemented.**
 
 ---
 
@@ -153,16 +151,17 @@ adce graph | link | unlink | history
 adce conflicts | conflict show|confirm|resolve|reject|ignore
 adce context --task "…" --format markdown
 adce authority set|clear
-adce structure -p typescript-lib|generic|python [--format json]
+adce structure -p typescript-lib|generic|python|go [--format json]
 adce analyze [--deep] [--skip-ml] [--skip-cache] …
 # with server: ADCE_ML_URL=http://127.0.0.1:8000 adce analyze --skip-cache
+pnpm bench:analyze   # v0.7 rule vs hybrid ablation on fixtures
 ```
 
 ---
 
-## 7. Evaluation & academic framing (planned)
+## 7. Evaluation & academic framing (v0.7 scaffold)
 
-v0.7 will compare rule-based vs ML-assisted vs hybrid ADCE (precision/recall, ranking, agent brief adherence). Not started.
+`benchmarks/` runs **rule-only** (`skipMl`) vs **hybrid** (`ADCE_ML_URL` → MiniLM + LinUCB when feedback exists). Ground-truth category recall on fixtures (e.g. `parser-conflicts` recovers STRUCTURAL / SCHEMA / CONFIGURATION). Results JSON under `benchmarks/results/` (gitignored). Deeper ranking / agent-brief metrics still optional.
 
 ---
 
@@ -172,10 +171,11 @@ v0.7 will compare rule-based vs ML-assisted vs hybrid ADCE (precision/recall, ra
 |----------|--------|
 | Is there a working product CLI? | **Yes** |
 | Does it work without ML / Git? | **Yes** |
-| Is hybrid ML HTTP wired? | **Yes** (token-similarity MVP; embeddings next) |
-| Multi-lang structure? | **TS + Python (+ generic)**; Go optional next |
-| Main remaining gaps | **MiniLM embeddings (locked) + v0.7 evaluation**; bandits after feedback |
-| Overall roadmap progress | **≈ 85–87%** |
+| Is hybrid ML HTTP wired? | **Yes** (MiniLM primary; hashing fallback) |
+| Multi-lang structure? | **TS + Python + Go (+ generic)** |
+| Feedback / ranking research? | **Yes** (`/v1/feedback` + LinUCB) |
+| Main remaining gaps | **Richer v0.7 metrics**; optional context packing |
+| Overall roadmap progress | **≈ 90–92%** |
 
 ---
 

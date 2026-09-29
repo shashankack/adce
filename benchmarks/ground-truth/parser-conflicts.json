@@ -1,0 +1,10 @@
+{
+  "fixture": "parser-conflicts",
+  "profile": "typescript-lib",
+  "description": "Parser-based STRUCTURAL / SCHEMA / CONFIGURATION mismatches",
+  "expectedConflictCategories": [
+    "STRUCTURAL_MISMATCH",
+    "SCHEMA_MISMATCH",
+    "CONFIGURATION_MISMATCH"
+  ]
+}

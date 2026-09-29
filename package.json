@@ -8,7 +8,8 @@
     "test": "pnpm -r --if-present test",
     "test:core": "pnpm --filter @adce/core test",
     "typecheck": "pnpm -r typecheck",
-    "dev": "pnpm --filter @adce/cli dev"
+    "dev": "pnpm --filter @adce/cli dev",
+    "bench:analyze": "tsx benchmarks/run-analyze-benchmark.ts"
   },
   "engines": {
     "node": ">=22"

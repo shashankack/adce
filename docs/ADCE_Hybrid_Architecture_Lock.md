@@ -215,12 +215,12 @@ Prefer **first-class on 2–3 widely used stacks** over shallow markers for six 
 ### Build order
 
 ```text
-1. Structure profiles: generic + python (+ go)
-2. Richer multi-lang classifiers (tests, manifests, entrypoints)
-3. Language-agnostic conflict detectors that fire often
-4. Full ML HTTP in Python (embeddings + ranking + packing)  ← current v0.6 finish line
-5. v0.7 benchmark: rule vs ML vs hybrid on mixed-language fixtures
-6. Bandits / RL for ranking — last
+1. Structure profiles: generic + python (+ go)                    ✓
+2. Richer multi-lang classifiers (tests, manifests, entrypoints) ✓
+3. Language-agnostic conflict detectors that fire often          ✓
+4. Full ML HTTP in Python (embeddings + ranking)                 ✓ MiniLM + LinUCB
+5. v0.7 benchmark: rule vs ML vs hybrid on fixtures              ✓ scaffold
+6. Context packing / richer metrics — optional next
 ```
 
 ### Done when
@@ -237,10 +237,12 @@ A mid-size **Python or Go** repo can `init → scan → structure → conflicts 
 - [x] Decision-ready context buckets in agent-facing output
 - [x] ML HTTP service (FastAPI `/health`, `/v1/analyze`) + `ADCE_ML_URL` client + privacy filter
 - [x] Multi-lang structure profiles (`generic`, `python`, `go`)
-- [ ] **Primary model: MiniLM (`all-MiniLM-L6-v2`)** with hashing/Jaccard fallback
+- [x] **Primary model: MiniLM (`all-MiniLM-L6-v2`)** with hashing fallback
 - [x] Feedback logging for ranking / bandit research (`POST /v1/feedback` + CLI conflict actions)
+- [x] LinUCB contextual bandit re-ranks analyze suggestions from feedback rewards
+- [x] v0.7 benchmark scaffold (`pnpm bench:analyze`: rule vs hybrid HTTP MiniLM)
 - [ ] Context packing endpoint (optional enrichment of agent brief)
-- [ ] v0.7 benchmark scenarios and ablations (rule vs MiniLM vs hybrid)
+- [ ] v0.7 richer metrics (ranking quality / brief adherence; golden runs with ML up)
 
 ---
 

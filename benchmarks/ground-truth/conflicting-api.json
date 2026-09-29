@@ -1,0 +1,6 @@
+{
+  "fixture": "conflicting-api",
+  "profile": "typescript-lib",
+  "description": "OpenAPI vs implementation drift; may yield temporal/doc signals after scan",
+  "expectedConflictCategories": []
+}

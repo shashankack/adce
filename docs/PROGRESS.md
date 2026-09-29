@@ -1,6 +1,6 @@
 # ADCE Progress
 
-Last updated: 2026-09-28
+Last updated: 2026-09-29
 
 ## Summary
 
@@ -10,22 +10,15 @@ Last updated: 2026-09-28
 | v0.4 deterministic conflicts | ~100% |
 | v0.5 context engine | ~100% |
 | v0.5 structure profiles | ~100% (check-only; `--fix` deferred) |
-| v0.6 ML integration | ~85% |
-| Full roadmap (v0.1–v0.7) | ~80% |
+| v0.6 ML integration | ~95% (MiniLM + feedback + LinUCB; packing optional) |
+| v0.7 research benchmark | ~40% (scaffold + rule/hybrid runner; richer metrics later) |
+| Full roadmap (v0.1–v0.7) | ~90% |
 
-**Local CLI complete** through context brief, structure (`typescript-lib` / `generic` / `python`), doctor, and hybrid ML HTTP. **Next:** richer ML (embeddings) and/or `go` profile; then **v0.7** benchmarks.
+**Local CLI + hybrid ML** complete through MiniLM, feedback, LinUCB, and multi-lang structure (`typescript-lib` / `generic` / `python` / `go`). **v0.7** ablation runner lives under `benchmarks/` (`pnpm bench:analyze`).
 
-## Current milestone: full ML server (after local CLI)
+## Current milestone: v0.7 evaluation depth
 
-Target flow:
-
-```text
-adce status --format json
-adce conflicts --format json
-adce context --task "…" --format markdown
-adce structure [--profile typescript-lib] [--format json]
-adce analyze …   # heuristic now; HTTP ML next
-```
+CLI + MiniLM hybrid path are shipped. Next optional work: richer benchmark metrics, context packing, structure `--fix`.
 
 ## v0.2 ✓
 
@@ -316,13 +309,20 @@ adce analyze [conflict-id] [--deep] [--format json]
 - [x] Init writes always-apply Cursor rule `.cursor/rules/adce.mdc`
 - [x] Vitest: doctor checks + nudge content + Cursor rule repair
 
+## v0.7 (scaffold)
+
+- [x] `benchmarks/` layout + README
+- [x] Ground truth JSON for `parser-conflicts`, `conflicting-api`, `basic-typescript`
+- [x] Runner: rule (`--skip-ml`) vs hybrid (`ADCE_ML_URL` HTTP MiniLM) ablation
+- [x] `pnpm bench:analyze` → table + `benchmarks/results/*.json` (gitignored)
+- [ ] Optional: ML-up smoke in CI / recorded golden results with server
+- [ ] Optional: ranking / brief-adherence metrics beyond category recall
+
 ## Next steps
 
-1. **Locked:** wire `all-MiniLM-L6-v2` on ML server (hashing/Jaccard fallback).
-2. Then: feedback API + optional contextual bandit (not full RL first).
-3. Optional: `structure --fix`, `typescript-api` profile.
-4. Then **v0.7** research benchmark (rule vs MiniLM vs hybrid).
-5. Bandits / RL ranking — after feedback volume exists.
+1. Run `pnpm bench:analyze` with `ADCE_ML_URL` when demoing ML arms (MiniLM suggestions + LinUCB after feedback).
+2. Optional: context-packing endpoint (`/v1/pack` enriching MUST READ / CAUTION / TRUST).
+3. Optional polish: `structure --fix`, `typescript-api` profile; store `score` on feedback events.
 
 ## Roadmap reminder
 
@@ -332,8 +332,8 @@ v0.2  Artifact management     ✓
 v0.3  Relationships + temporal  ✓
 v0.4  Deterministic conflicts   ✓
 v0.5  Context + structure       ✓
-v0.6  ML integration            ✓ MVP (~85%) — HTTP server pending
-v0.7  Research benchmark        ← next after ML server
+v0.6  ML integration            ✓ MiniLM + feedback + LinUCB
+v0.7  Research benchmark        ✓ scaffold (metrics depth next)
       Dashboard (later)
 ```
 

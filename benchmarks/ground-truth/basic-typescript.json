@@ -1,0 +1,6 @@
+{
+  "fixture": "basic-typescript",
+  "profile": "typescript-lib",
+  "description": "Healthy small library — structure present; conflicts optional",
+  "expectedConflictCategories": []
+}
