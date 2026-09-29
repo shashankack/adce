@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
-"""ADCE optional ML analyzer — stdin AnalyzeRequest JSON → stdout suggestions JSON."""
+"""Shared suggestion logic for HTTP and (later) stdin CLI."""
 
 from __future__ import annotations
 
-import json
 import re
-import sys
 from typing import Any
 
 
@@ -23,8 +20,8 @@ def label(art: dict[str, Any]) -> str:
     return art.get("path") or art.get("name") or ""
 
 
-def main() -> None:
-    req = json.load(sys.stdin)
+def analyze_request(req: dict[str, Any]) -> list[dict[str, Any]]:
+    """Accept AnalyzeRequest-shaped JSON; return suggestion dicts."""
     arts = {a["id"]: a for a in req.get("artifacts", [])}
     suggestions: list[dict[str, Any]] = []
 
@@ -78,8 +75,4 @@ def main() -> None:
                         }
                     )
 
-    json.dump({"suggestions": suggestions}, sys.stdout)
-
-
-if __name__ == "__main__":
-    main()
+    return suggestions

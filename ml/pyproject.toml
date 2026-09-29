@@ -1,9 +1,21 @@
 [project]
 name = "adce-ml"
 version = "0.1.0"
-description = "Optional lightweight ML helpers for ADCE analyze"
+description = "ADCE ML HTTP service (Python / FastAPI)"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+]
 
-[project.scripts]
-adce-ml = "adce_ml.cli:main"
+[project.optional-dependencies]
+dev = [
+  "httpx>=0.27.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["adce_ml*"]

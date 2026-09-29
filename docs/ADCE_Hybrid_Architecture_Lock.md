@@ -165,15 +165,61 @@ Metrics may include precision/recall on conflict usefulness, ranking quality, an
 
 ---
 
+## 8b. Multi-language first-class strategy (locked guidance)
+
+**Root markers ≠ first-class support.** Discovering `go.mod` / `pyproject.toml` / etc. only helps `adce init` find a root. Usable inventory ≠ language-native intelligence.
+
+### Layers
+
+| Layer | Role |
+|-------|------|
+| **Local facts** | Classifiers, structure profiles, 1–2 deterministic detectors per ecosystem |
+| **Shared graph** | Docs↔source↔tests, temporal staleness, manifest/env mismatches (language-light) |
+| **ML (+ later RL)** | Semantic similarity, ranking, brief packing; RL/bandits only after feedback volume |
+
+ML and RL **do not** replace structure profiles or parsers. Offline / `--skip-ml` must still feel solid.
+
+**ML stack is Python** (FastAPI HTTP service on your infra). The TypeScript CLI only owns a thin HTTP client + local privacy filter + heuristic fallback — never the model server.
+
+### Depth before breadth (priority)
+
+```text
+1. TypeScript / Node   (current default — deepen)
+2. Python
+3. Go  (or Java/Gradle — pick one for thesis depth)
+4. Rust / PHP only if audience demands
+```
+
+Prefer **first-class on 2–3 widely used stacks** over shallow markers for six languages.
+
+### Build order
+
+```text
+1. Structure profiles: generic + python (+ go)
+2. Richer multi-lang classifiers (tests, manifests, entrypoints)
+3. Language-agnostic conflict detectors that fire often
+4. Full ML HTTP in Python (embeddings + ranking + packing)  ← current v0.6 finish line
+5. v0.7 benchmark: rule vs ML vs hybrid on mixed-language fixtures
+6. Bandits / RL for ranking — last
+```
+
+### Done when
+
+A mid-size **Python or Go** repo can `init → scan → structure → conflicts → context` with real signal **with ML down**. ML then upgrades judgment.
+
+---
+
 ## 9. Implementation checklist (do not drop)
 
 - [x] Local CLI through context + deterministic conflicts (v0.1–v0.5)
 - [x] Local analyze heuristic + optional local ML script stand-in (v0.6 MVP)
-- [ ] **Full ML HTTP service** (embeddings + ranking + agent brief)
-- [ ] CLI client via `ADCE_ML_URL` (fallback to heuristic if unreachable)
+- [x] Mid-session agent nudge + `adce doctor` + Cursor rule on init
+- [x] Decision-ready context buckets in agent-facing output
+- [ ] **Full ML HTTP service in Python** (FastAPI; embeddings + ranking + agent brief)
+- [ ] CLI client via `ADCE_ML_URL` (fallback to local Python script / heuristic if unreachable)
 - [ ] Privacy filter on outbound analyze/context-enrich payloads
-- [ ] Decision-ready context buckets in agent-facing output
 - [ ] Feedback logging for ranking research
+- [ ] Multi-lang structure profiles (python / go / generic)
 - [ ] v0.7 benchmark scenarios and ablations
 
 ---

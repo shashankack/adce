@@ -831,11 +831,13 @@ Build:
 Build:
 
 - hybrid analyze (`adce analyze`) with local heuristic fallback
-- **full ML HTTP service** (not CLI-only end state): embeddings, semantic conflicts, ranking, context packing
-- CLI client to ML API (`ADCE_ML_URL`) with privacy-filtered payloads
+- **full ML HTTP service in Python** (FastAPI; not CLI-only end state): embeddings, semantic conflicts, ranking, context packing
+- TypeScript CLI client to ML API (`ADCE_ML_URL`) with privacy-filtered payloads
 - caching (local + server)
 - never auto-CONFIRMED from ML; never silent authority overwrite
-- local Python subprocess allowed only as a temporary stand-in
+- local Python subprocess (`ml/adce_ml/cli.py`) allowed only as a temporary stand-in
+
+**Ecosystem depth (not ML-owned):** first-class support needs local classifiers + structure profiles + detectors. Prefer depth on TypeScript → Python → Go (or Java) over shallow multi-marker “support.” See Architecture Lock §8b.
 
 See `docs/ADCE_Hybrid_Architecture_Lock.md`.
 

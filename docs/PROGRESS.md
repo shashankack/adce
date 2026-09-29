@@ -13,7 +13,7 @@ Last updated: 2026-09-28
 | v0.6 ML integration | ~85% |
 | Full roadmap (v0.1–v0.7) | ~80% |
 
-**Local CLI complete** through context brief, JSON status/conflicts, `adce structure`, mid-session nudge, and `adce doctor`. **v0.6** full ML HTTP service is next; then **v0.7** benchmarks.
+**Local CLI complete** through context brief, JSON status/conflicts, `adce structure`, mid-session nudge, and `adce doctor`. **Next:** Python ML HTTP service (`ADCE_ML_URL`) + multi-lang depth (Architecture Lock §8b); then **v0.7** benchmarks.
 
 ## Current milestone: full ML server (after local CLI)
 
@@ -316,10 +316,11 @@ adce analyze [conflict-id] [--deep] [--format json]
 
 ## Next steps
 
-1. Commit local CLI polish (structure + doctor/nudge) if not yet committed.
-2. **Build full ML HTTP service** + `ADCE_ML_URL` client (Architecture Lock).
-3. Optional: `structure --fix`, more profiles (`typescript-api`).
-4. Then **v0.7** research benchmark (rule vs ML vs hybrid).
+1. **v0.6 finish — Python ML HTTP:** FastAPI service + `ADCE_ML_URL` TypeScript client + privacy filter (local Python `cli.py` remains the offline stand-in).
+2. **Multi-lang depth (Lock §8b):** structure profiles `generic` / `python` / `go` + richer classifiers — depth on 2–3 stacks, not shallow markers for six.
+3. Optional: `structure --fix`, `typescript-api` profile; richer embeddings / context packing on the ML server.
+4. Then **v0.7** research benchmark (rule vs ML vs hybrid) on mixed-language fixtures.
+5. Bandits / RL ranking — after feedback volume exists.
 
 ## Roadmap reminder
 
@@ -335,3 +336,5 @@ v0.7  Research benchmark        ← next after ML server
 ```
 
 Sources of truth: `docs/AGENTS.md`, `docs/ADCE_Technical_Specification.md`, **`docs/ADCE_Hybrid_Architecture_Lock.md`** (hybrid / ML decisions — do not steer away).
+
+**Professor-facing progress report:** `docs/report/ADCE_Project_Progress_Report.md`

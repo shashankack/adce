@@ -382,8 +382,11 @@ If ML is unreachable → heuristic analyze + local context (no hard failure).
 ```text
 CLI-only is NOT the end architecture.
 Ship a full ML HTTP service (embeddings, semantic conflicts, ranking, agent brief packing).
-Local Python CLI script = temporary stand-in only; prefer ADCE_ML_URL → your server.
+Local Python CLI script = temporary stand-in only; prefer ADCE_ML_URL → your Python FastAPI server.
 Heavy models run on the server, not on every user machine.
+
+Multi-language: root markers ≠ first-class. Depth on TS → Python → Go (or Java),
+with local profiles/parsers first; ML upgrades judgment. See Architecture Lock §8b.
 ```
 
 ### ML server may handle
