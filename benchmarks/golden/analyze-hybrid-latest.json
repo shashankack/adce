@@ -1,0 +1,149 @@
+{
+  "generatedAt": "2026-09-29T14:08:38.527Z",
+  "mlUrl": "http://127.0.0.1:8000",
+  "lock": "rule vs hybrid (heuristic+ML when ADCE_ML_URL reachable)",
+  "metrics": [
+    "categoryRecall",
+    "categoryPrecision",
+    "mlLift",
+    "briefCautionCoverage",
+    "elapsedMs"
+  ],
+  "scenarios": [
+    {
+      "fixture": "basic-typescript",
+      "description": "Healthy small library — structure present; conflicts optional",
+      "expectedConflictCategories": [],
+      "modes": {
+        "rule": {
+          "mode": "rule",
+          "engine": "heuristic",
+          "elapsedMs": 4,
+          "suggestionCount": 0,
+          "mlSuggestionCount": 0,
+          "heuristicSuggestionCount": 0,
+          "notes": [
+            "ML unavailable or skipped; heuristic-only analysis."
+          ],
+          "categoryRecall": null,
+          "categoryPrecision": null,
+          "detectedCategories": [],
+          "structureMissing": 0,
+          "briefCautionCoverage": 1,
+          "mlLift": null
+        },
+        "hybrid": {
+          "mode": "hybrid",
+          "engine": "hybrid",
+          "elapsedMs": 13027,
+          "suggestionCount": 0,
+          "mlSuggestionCount": 0,
+          "heuristicSuggestionCount": 0,
+          "notes": [
+            "Hybrid: heuristic + ML HTTP. Review before applying."
+          ],
+          "categoryRecall": null,
+          "categoryPrecision": null,
+          "detectedCategories": [],
+          "structureMissing": 0,
+          "briefCautionCoverage": 1,
+          "mlLift": 0
+        }
+      }
+    },
+    {
+      "fixture": "conflicting-api",
+      "description": "OpenAPI vs implementation drift; may yield temporal/doc signals after scan",
+      "expectedConflictCategories": [],
+      "modes": {
+        "rule": {
+          "mode": "rule",
+          "engine": "heuristic",
+          "elapsedMs": 5,
+          "suggestionCount": 0,
+          "mlSuggestionCount": 0,
+          "heuristicSuggestionCount": 0,
+          "notes": [
+            "ML unavailable or skipped; heuristic-only analysis."
+          ],
+          "categoryRecall": null,
+          "categoryPrecision": null,
+          "detectedCategories": [],
+          "structureMissing": 0,
+          "briefCautionCoverage": 1,
+          "mlLift": null
+        },
+        "hybrid": {
+          "mode": "hybrid",
+          "engine": "hybrid",
+          "elapsedMs": 8,
+          "suggestionCount": 0,
+          "mlSuggestionCount": 0,
+          "heuristicSuggestionCount": 0,
+          "notes": [
+            "Hybrid: heuristic + ML HTTP. Review before applying."
+          ],
+          "categoryRecall": null,
+          "categoryPrecision": null,
+          "detectedCategories": [],
+          "structureMissing": 0,
+          "briefCautionCoverage": 1,
+          "mlLift": 0
+        }
+      }
+    },
+    {
+      "fixture": "parser-conflicts",
+      "description": "Parser-based STRUCTURAL / SCHEMA / CONFIGURATION mismatches",
+      "expectedConflictCategories": [
+        "STRUCTURAL_MISMATCH",
+        "SCHEMA_MISMATCH",
+        "CONFIGURATION_MISMATCH"
+      ],
+      "modes": {
+        "rule": {
+          "mode": "rule",
+          "engine": "heuristic",
+          "elapsedMs": 5,
+          "suggestionCount": 2,
+          "mlSuggestionCount": 0,
+          "heuristicSuggestionCount": 2,
+          "notes": [
+            "ML unavailable or skipped; heuristic-only analysis."
+          ],
+          "categoryRecall": 1,
+          "categoryPrecision": 1,
+          "detectedCategories": [
+            "CONFIGURATION_MISMATCH",
+            "SCHEMA_MISMATCH",
+            "STRUCTURAL_MISMATCH"
+          ],
+          "structureMissing": 0,
+          "briefCautionCoverage": 1,
+          "mlLift": null
+        },
+        "hybrid": {
+          "mode": "hybrid",
+          "engine": "hybrid",
+          "elapsedMs": 189,
+          "suggestionCount": 6,
+          "mlSuggestionCount": 4,
+          "heuristicSuggestionCount": 2,
+          "notes": [
+            "Hybrid: heuristic + ML HTTP. Review before applying."
+          ],
+          "categoryRecall": 1,
+          "categoryPrecision": 1,
+          "detectedCategories": [
+            "CONFIGURATION_MISMATCH",
+            "SCHEMA_MISMATCH",
+            "STRUCTURAL_MISMATCH"
+          ],
+          "structureMissing": 0,
+          "briefCautionCoverage": 1,
+          "mlLift": 4
+        }
+      }
+    }
+  ]
+}

@@ -281,8 +281,14 @@ program
   .option("-t, --task <task>", "Task description to bias ranking")
   .option("--budget <n>", "Max primary artifacts", (v) => Number(v), 12)
   .option("--format <format>", "text, json, or markdown", "text")
+  .option("--skip-pack", "Skip ML /v1/pack even if ADCE_ML_URL is set", false)
   .action(
-    async (options: { task?: string; budget?: number; format?: string }) => {
+    async (options: {
+      task?: string;
+      budget?: number;
+      format?: string;
+      skipPack?: boolean;
+    }) => {
       const format =
         options.format === "json"
           ? "json"
@@ -293,6 +299,7 @@ program
         task: options.task,
         budget: options.budget,
         format,
+        skipPack: Boolean(options.skipPack),
       });
     },
   );

@@ -9,17 +9,17 @@ Last updated: 2026-09-29
 | v0.1–v0.3 | 100% |
 | v0.4 deterministic conflicts | ~100% |
 | v0.5 context engine | ~100% |
-| v0.5 structure profiles | ~100% (check-only; `--fix` deferred) |
-| v0.6 ML integration | ~98% (MiniLM + feedback + LinUCB + /v1/pack) |
-| v0.7 research benchmark | ~70% (metrics + golden; more eval corpora later) |
-| Full roadmap (v0.1–v0.7) | ~94% |
+| v0.5 structure profiles | ~100% (`--fill` for concrete stubs; wildcard dirs manual) |
+| v0.6 ML integration | ~98% (MiniLM + feedback + LinUCB + embed-aware `/v1/pack`) |
+| v0.7 research benchmark | ~75% (metrics + golden path; larger corpora optional) |
+| Full roadmap (v0.1–v0.7) | ~95% |
 | Dashboard | deferred |
 
-**Local CLI + hybrid ML** complete through MiniLM, feedback, LinUCB, `/v1/pack`, multi-lang structure (+ `typescript-api`, `--fill`), and the v0.7 metrics runner. Dashboard stays deferred.
+**Local CLI + hybrid ML** complete through MiniLM, feedback, LinUCB, embed-aware `/v1/pack`, multi-lang structure (+ `typescript-api`, `--fill`), and the v0.7 metrics/golden runner. Dashboard stays deferred.
 
-## Current milestone: evaluation depth & packing quality
+## Current milestone: complete (core thesis)
 
-Core product shipped. Dashboard deferred. Extend golden corpora and packing quality next.
+Product + hybrid ML + v0.7 ablation shipped. Optional later: larger corpora, dashboard.
 
 ## v0.2 ✓
 
@@ -282,15 +282,15 @@ adce analyze [conflict-id] [--deep] [--format json]
 ### Structure profiles (complete — check only)
 
 - [x] Shared structure profile / finding / report types
-- [x] Built-in profiles: `typescript-lib`, `generic`, `python`
+- [x] Built-in profiles: `typescript-lib`, `typescript-api`, `generic`, `python`, `go`
 - [x] `matchGlob` brace alternatives convert embedded `**`/`*` (pytest-style globs)
 - [x] Fixture `basic-python` + Vitest for python profile
 - [x] `matchGlob` + `checkProjectStructure` (PRESENT / MISSING / SUGGESTED / WEAK)
 - [x] Relationship checks (`test-naming-sibling`)
-- [x] CLI: `adce structure` / `--profile` / `--format json`
+- [x] CLI: `adce structure` / `--profile` / `--format json` / `--fill`
 - [x] AGENTS.md mentions `adce structure`
 - [x] Vitest: glob matching; basic-typescript present; empty-project missing
-- [ ] Optional later: `adce structure --fix` stubs
+- [x] `adce structure --fill` concrete stubs (wildcards still manual)
 
 ## v0.6 (MVP complete)
 
@@ -310,28 +310,28 @@ adce analyze [conflict-id] [--deep] [--format json]
 - [x] Init writes always-apply Cursor rule `.cursor/rules/adce.mdc`
 - [x] Vitest: doctor checks + nudge content + Cursor rule repair
 
-## v0.7 (scaffold + metrics)
+## v0.7 (complete for thesis scaffold)
 
 - [x] `benchmarks/` layout + README
 - [x] Ground truth JSON for `parser-conflicts`, `conflicting-api`, `basic-typescript`
 - [x] Runner: rule (`--skip-ml`) vs hybrid (`ADCE_ML_URL` HTTP MiniLM) ablation
 - [x] `pnpm bench:analyze` → table + `results/latest.json` + golden when ML-up
 - [x] Metrics: categoryRecall / categoryPrecision / mlLift / briefCautionCoverage
-- [ ] Optional: larger fixture corpora / CI ML-up job
+- [x] `benchmarks/golden/README.md` regeneration instructions
+- [ ] Optional later: larger fixture corpora / CI ML-up job
 
 ## Polish
 
 - [x] `adce structure --fill` concrete stubs
 - [x] `typescript-api` profile (OpenAPI required)
 - [x] Feedback `score` field (CLI confidence → LinUCB context)
-- [x] `/v1/pack` + context auto-pack when `ADCE_ML_URL` set
+- [x] `/v1/pack` embed-aware packing + `adce context --skip-pack`
 - [ ] Dashboard (deferred)
 
-## Next steps
+## Next steps (optional / out of iteration)
 
-1. Expand golden fixtures / faculty write-up from `benchmarks/golden/`.
-2. Optional packing quality (embeddings over brief item texts).
-3. Dashboard only if product need returns.
+1. Larger golden corpora if faculty asks for more repos.
+2. Dashboard only if product need returns.
 
 ## Roadmap reminder
 
@@ -342,8 +342,8 @@ v0.3  Relationships + temporal  ✓
 v0.4  Deterministic conflicts   ✓
 v0.5  Context + structure       ✓
 v0.6  ML integration            ✓ MiniLM + feedback + LinUCB
-v0.7  Research benchmark        ✓ scaffold (metrics depth next)
-      Dashboard (later)
+v0.7  Research benchmark        ✓ metrics + golden path
+      Dashboard (deferred)
 ```
 
 Sources of truth: `docs/AGENTS.md`, `docs/ADCE_Technical_Specification.md`, **`docs/ADCE_Hybrid_Architecture_Lock.md`** (hybrid / ML decisions — do not steer away).

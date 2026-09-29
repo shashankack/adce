@@ -7,6 +7,8 @@ export interface RunContextOptions {
   task?: string;
   budget?: number;
   format?: "text" | "json" | "markdown";
+  /** When true, skip ADCE_ML_URL /v1/pack enrichment. */
+  skipPack?: boolean;
 }
 
 const loc = (path: string | null, name: string) => path ?? name;
@@ -140,6 +142,7 @@ export const runContext = async (
     const bundle = await buildProjectContext(rootPath, {
       task: options.task,
       budget: options.budget,
+      pack: options.skipPack ? false : undefined,
     });
 
     if (options.format === "json") {
