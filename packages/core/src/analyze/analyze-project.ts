@@ -64,7 +64,11 @@ export interface AnalyzeProjectOptions {
   useCache?: boolean;
   /** Explicit script path; `null` disables ML even if default exists. */
   mlScript?: string | null;
+  /** Explicit ML URL; `null` disables ML even if default exists. */
+  mlUrl?: string | null;
   /** Persist ANALYZED + safe confidence bumps (default true). */
+  /** Skip ML even if default exists. */
+  skipMl?: boolean;
   apply?: boolean;
 }
 
@@ -126,14 +130,22 @@ export const analyzeProject = async (
       })),
     };
 
+    const skipMl = Boolean(options.skipMl);
     const mlScript =
-      options.mlScript === null
+      skipMl || options.mlScript === null
         ? undefined
         : (options.mlScript ?? (await findDefaultMlScript()));
+
+    const mlUrl =
+      skipMl || options.mlUrl === null || options.mlUrl === ""
+        ? undefined
+        : (options.mlUrl ?? process.env.ADCE_ML_URL);
 
     const report = await runProjectAnalyze(req, {
       useCache: options.useCache,
       mlScript,
+      mlUrl,
+      skipMl,
     });
 
     if (options.apply !== false) {

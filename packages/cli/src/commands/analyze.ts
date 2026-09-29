@@ -21,7 +21,9 @@ export interface RunAnalyzeOptions {
 
 const printText = (report: AnalyzeReport): void => {
   console.log(`Analyze for ${report.rootPath}`);
-  console.log(`Mode: ${report.mode}  Engine: ${report.engine}  Cached: ${report.cached}`);
+  console.log(
+    `Mode: ${report.mode}  Engine: ${report.engine}  Cached: ${report.cached}`,
+  );
   console.log(`Generated: ${report.generatedAt}`);
   console.log("");
 
@@ -42,14 +44,12 @@ const printText = (report: AnalyzeReport): void => {
       : s.artifactId
         ? `artifact ${s.artifactId.slice(0, 8)}`
         : "(general)";
-    const score =
-      s.score != null ? ` score=${s.score.toFixed(2)}` : "";
-    console.log(
-      `  [${s.source}] ${s.kind.padEnd(20)} ${target}${score}`,
-    );
+    const score = s.score != null ? ` score=${s.score.toFixed(2)}` : "";
+    console.log(`  [${s.source}] ${s.kind.padEnd(20)} ${target}${score}`);
     console.log(`       ${s.reason}`);
     if (s.confidence) console.log(`       → confidence ${s.confidence}`);
-    if (s.authority) console.log(`       → authority ${s.authority} (not auto-applied)`);
+    if (s.authority)
+      console.log(`       → authority ${s.authority} (not auto-applied)`);
     if (s.summary) console.log(`       → ${s.summary}`);
   }
 };
@@ -65,6 +65,7 @@ export const runAnalyze = async (
       all: options.all,
       deep: options.deep,
       useCache: !options.noCache,
+      skipMl: options.noMl,
       mlScript: options.noMl ? null : options.mlScript,
       apply: !options.noApply,
     });
