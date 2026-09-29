@@ -1,14 +1,11 @@
 {
-  "name": "adce-fixture-basic-typescript",
+  "name": "adce-fixture-no-documentation",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Tiny library fixture for ADCE scans and context tests",
+  "description": "Source + tests only — intentionally no README or docs/",
   "main": "src/index.ts",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit"
-  },
-  "engines": {
-    "node": ">=20"
   }
 }

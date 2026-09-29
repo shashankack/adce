@@ -1,0 +1,11 @@
+{
+  "name": "adce-fixture-manual-artifacts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "App shell for demonstrating adce artifact add (virtual POLICY/REQUIREMENT)",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "node --experimental-strip-types src/index.ts"
+  }
+}

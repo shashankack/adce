@@ -1,8 +1,15 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UserConfig",
   "type": "object",
   "properties": {
-    "email": { "type": "string" },
-    "role": { "type": "string" }
+    "email": { "type": "string", "format": "email" },
+    "displayName": { "type": "string" },
+    "role": {
+      "type": "string",
+      "enum": ["admin", "member", "viewer"]
+    }
   },
-  "required": ["email", "role"]
+  "required": ["email", "role"],
+  "additionalProperties": false
 }

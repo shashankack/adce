@@ -1,0 +1,11 @@
+{
+  "name": "adce-fixture-conflicting-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OpenAPI vs implementation mismatch demo",
+  "main": "src/server.ts",
+  "engines": {
+    "node": ">=20"
+  }
+}

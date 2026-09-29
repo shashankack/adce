@@ -1,7 +1,9 @@
 {
   "name": "parser-conflicts-fixture",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
+  "description": "Intentional STRUCTURAL / SCHEMA / CONFIG mismatches",
   "engines": {
     "node": ">=22"
   }

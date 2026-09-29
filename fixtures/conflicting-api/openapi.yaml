@@ -1,0 +1,62 @@
+openapi: 3.0.3
+info:
+  title: Users API (fixture)
+  version: 0.1.0
+  description: Intentionally out of sync with src/users.ts
+servers:
+  - url: http://localhost:3000
+paths:
+  /users/{id}:
+    get:
+      operationId: getUser
+      summary: Fetch a user by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+  /users:
+    post:
+      operationId: createUser
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewUser"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+components:
+  schemas:
+    User:
+      type: object
+      required: [id, email]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+    NewUser:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
