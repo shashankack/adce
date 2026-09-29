@@ -328,9 +328,9 @@ program
   .option("--all", "Include closed conflicts as analysis input", false)
   .option("--deep", "Deeper heuristic / ML feature set", false)
   .option("--format <format>", "text or json", "text")
-  .option("--no-cache", "Bypass analyze cache", false)
+  .option("--skip-cache", "Bypass analyze cache", false)
   .option("--skip-ml", "Skip Python / ML even if available", false)
-  .option("--no-apply", "Do not mark conflicts ANALYZED", false)
+  .option("--skip-apply", "Do not mark conflicts ANALYZED", false)
   .option("--ml-script <path>", "Path to Python ML CLI script")
   .action(
     async (
@@ -339,9 +339,9 @@ program
         all?: boolean;
         deep?: boolean;
         format?: string;
-        noCache?: boolean;
+        skipCache?: boolean;
         skipMl?: boolean;
-        noApply?: boolean;
+        skipApply?: boolean;
         mlScript?: string;
       },
     ) => {
@@ -350,9 +350,9 @@ program
         all: options.all,
         deep: options.deep,
         format: options.format === "json" ? "json" : "text",
-        noCache: options.noCache,
+        noCache: options.skipCache,
         noMl: options.skipMl,
-        noApply: options.noApply,
+        noApply: options.skipApply,
         mlScript: options.mlScript,
       });
     },

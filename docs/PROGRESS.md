@@ -133,7 +133,7 @@ adce init → adce scan → adce status
 pnpm test          → all workspace packages with a test script
 pnpm test:core     → @adce/core only (preferred)
 
-Current: 53+ passed (v01–v06 + structure + agents merge + doctor/nudge)
+Current: 56 passed (v01–v06 + structure + agents merge + doctor/nudge + ML HTTP privacy)
 ```
 
 ### Dev environment notes (Windows)
@@ -304,7 +304,7 @@ adce analyze [conflict-id] [--deep] [--format json]
 - [x] Analyze cache under `.adce/cache/analyze-*.json`
 - [x] `analyzeProject` builds features from DB; marks open conflicts `ANALYZED`
 - [x] Caps confidence — never auto-`CONFIRMED`; authority suggestions not auto-applied
-- [x] CLI: `adce analyze` / `[id]` / `--all` / `--deep` / `--format` / `--no-ml` / `--no-cache`
+- [x] CLI: `adce analyze` / `[id]` / `--all` / `--deep` / `--format` / `--skip-ml` / `--skip-cache` / `--skip-apply`
 - [x] Vitest: heuristic engine, ANALYZED lifecycle, cache hit
 
 ### Mid-project agent awareness (complete)
