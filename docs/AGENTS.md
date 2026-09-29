@@ -392,14 +392,15 @@ with local profiles/parsers first; ML upgrades judgment. See Architecture Lock �
 ### ML server may handle
 
 ```text
-Semantic artifact similarity
+Semantic artifact similarity via local MiniLM (all-MiniLM-L6-v2) — locked primary model
 Relationship prediction
 Semantic conflict detection
 Authority ranking assistance
 Conflict ranking
 Confidence scoring
 Context packing / agent brief enrichment
-Optional later: bandit or RL ranking using human feedback rewards
+Optional later: bandit or preference learning using human feedback rewards
+  (after MiniLM + feedback logging — not full RL first)
 ```
 
 ### ML must not own

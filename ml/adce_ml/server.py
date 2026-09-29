@@ -11,6 +11,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from adce_ml.analyze import analyze_request
+from adce_ml.embedder import get_embedder
 
 app = FastAPI(
     title="ADCE ML",
@@ -21,7 +22,7 @@ app = FastAPI(
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "service": "adce-ml"}
+    return {"status": "ok", "service": "adce-ml", "embedder": get_embedder().name}
 
 
 class AnalyzeHttpResponse(BaseModel):
@@ -44,8 +45,11 @@ def analyze(body: dict[str, Any]) -> AnalyzeHttpResponse:
             detail="Full repository payloads are forbidden",
         )
 
+    emb = get_embedder()
     return AnalyzeHttpResponse(
         suggestions=analyze_request(body),
-        notes=["ML HTTP: token-similarity MVP. Review before applying."],
+        notes=[
+            f"ML HTTP: {emb.name} embeddings. Review before applying.",
+        ],
         engine="ml",
     )

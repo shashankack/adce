@@ -102,6 +102,24 @@ Feedback logging hooks (confirm/reject/resolve) for later ranking / bandit / RL 
 
 **Local Python subprocess** (`ml/adce_ml/cli.py`) is an acceptable **dev stand-in**. End architecture replaces/extends it with **`ADCE_ML_URL` → your ML API**. Heavy models live on **your server**, not on every developer laptop.
 
+### Primary ML model (locked — 2026-09-29)
+
+```text
+Default judgment model: sentence-transformers all-MiniLM-L6-v2
+  - Local inference on the ML server (not required on every developer laptop)
+  - Used for semantic similarity (conflict confidence, doc↔source relatedness)
+  - Exposed behind a small Embedder interface in ml/adce_ml/
+
+Fallback (offline / missing deps): deterministic hashing embedder or token Jaccard
+  - Same API shape; never crash the CLI if MiniLM weights are unavailable
+
+Explicitly deferred (not a substitute for MiniLM):
+  - Full deep RL / PPO as the first ML story
+  - Cloud-only embedding APIs as the default path
+```
+
+Academic claim: **pretrained local sentence embeddings** for semantic repository judgment, hybrid-merged with deterministic ADCE. Bandits / preference learning may come **after** feedback logging exists.
+
 ### Explicitly out of default scope
 
 ```text
@@ -129,9 +147,11 @@ Do **not** use RL as the first substitute for:
 
 ```text
 Deterministic detectors
-Embedding similarity
+Embedding similarity (MiniLM — locked primary model)
 Straightforward confidence classifiers
 ```
+
+**Order locked:** MiniLM embeddings → feedback logging → contextual bandit / preference learning. Do not pitch end-to-end RL before those exist.
 
 ---
 
@@ -215,12 +235,12 @@ A mid-size **Python or Go** repo can `init → scan → structure → conflicts 
 - [x] Local analyze heuristic + optional local ML script stand-in (v0.6 MVP)
 - [x] Mid-session agent nudge + `adce doctor` + Cursor rule on init
 - [x] Decision-ready context buckets in agent-facing output
-- [ ] **Full ML HTTP service in Python** (FastAPI; embeddings + ranking + agent brief)
-- [ ] CLI client via `ADCE_ML_URL` (fallback to local Python script / heuristic if unreachable)
-- [ ] Privacy filter on outbound analyze/context-enrich payloads
-- [ ] Feedback logging for ranking research
+- [x] ML HTTP service (FastAPI `/health`, `/v1/analyze`) + `ADCE_ML_URL` client + privacy filter
 - [x] Multi-lang structure profiles (`generic`, `python`, `go`)
-- [ ] v0.7 benchmark scenarios and ablations
+- [ ] **Primary model: MiniLM (`all-MiniLM-L6-v2`)** with hashing/Jaccard fallback
+- [ ] Feedback logging for ranking / bandit research
+- [ ] Context packing endpoint (optional enrichment of agent brief)
+- [ ] v0.7 benchmark scenarios and ablations (rule vs MiniLM vs hybrid)
 
 ---
 

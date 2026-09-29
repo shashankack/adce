@@ -116,11 +116,11 @@ CLI foundation, artifact management, relationships + temporal history, determini
 - CLI: `--skip-ml`, `--skip-cache`, `--skip-apply` (Commander-safe; avoid broken `--no-*`)  
 - Vitest for privacy + mocked HTTP  
 
-**Still thin / next**
+Still thin / next
 
-- Real **embeddings**, richer semantic ranking, context packing  
-- Feedback logging for bandits / RL  
-- Optional **`go`** structure profile  
+- **Locked primary model:** `sentence-transformers` **`all-MiniLM-L6-v2`** on the ML server  
+- Hashing embedder / Jaccard only as fallback if MiniLM unavailable  
+- Feedback logging + contextual bandit **after** MiniLM (not full RL first)  
 
 ---
 
@@ -174,7 +174,7 @@ v0.7 will compare rule-based vs ML-assisted vs hybrid ADCE (precision/recall, ra
 | Does it work without ML / Git? | **Yes** |
 | Is hybrid ML HTTP wired? | **Yes** (token-similarity MVP; embeddings next) |
 | Multi-lang structure? | **TS + Python (+ generic)**; Go optional next |
-| Main remaining gaps | **Embeddings / packing + v0.7 evaluation** |
+| Main remaining gaps | **MiniLM embeddings (locked) + v0.7 evaluation**; bandits after feedback |
 | Overall roadmap progress | **≈ 85–87%** |
 
 ---

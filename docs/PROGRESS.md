@@ -318,10 +318,10 @@ adce analyze [conflict-id] [--deep] [--format json]
 
 ## Next steps
 
-1. Optional: `go` structure profile; richer classifiers.
-2. Extend ML HTTP: embeddings + context-packing + feedback hooks.
+1. **Locked:** wire `all-MiniLM-L6-v2` on ML server (hashing/Jaccard fallback).
+2. Then: feedback API + optional contextual bandit (not full RL first).
 3. Optional: `structure --fix`, `typescript-api` profile.
-4. Then **v0.7** research benchmark (rule vs ML vs hybrid) on mixed-language fixtures.
+4. Then **v0.7** research benchmark (rule vs MiniLM vs hybrid).
 5. Bandits / RL ranking — after feedback volume exists.
 
 ## Roadmap reminder

@@ -1,4 +1,10 @@
+README.md
 pyproject.toml
+adce_ml/__init__.py
+adce_ml/analyze.py
+adce_ml/cli.py
+adce_ml/embedder.py
+adce_ml/server.py
 adce_ml.egg-info/PKG-INFO
 adce_ml.egg-info/SOURCES.txt
 adce_ml.egg-info/dependency_links.txt
