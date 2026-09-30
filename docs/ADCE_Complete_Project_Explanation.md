@@ -1,6 +1,8 @@
 # ADCE — Artifact-Driven Context Engine
 ## Temporal and Conflict-Aware Context Management for AI Coding Agents
 
+> **Implementation status (2026-09-30):** Core thesis path **v0.1–v0.7 ~95–96% complete**. Local CLI, hybrid MiniLM ML (analyze / feedback / LinUCB / pack), structure profiles, and research ablation (`pnpm bench:analyze`) are shipped. Dashboard deferred. See `docs/report/ADCE_Project_Progress_Report.md` and root `README.md`.
+
 ---
 
 # 1. Project Overview

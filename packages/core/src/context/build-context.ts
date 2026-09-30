@@ -19,6 +19,8 @@ import {
 import { AdceNotInitializedError } from "../artifacts/query.js";
 import { adceDir, dbPath } from "../project/paths.js";
 import { packContextBrief } from "./ml-pack.js";
+import { compactBrief, estimateBriefTokens } from "./token-budget.js";
+import { appendContextTokenMetric } from "./token-metrics-log.js";
 
 const exists = async (p: string): Promise<boolean> => {
   try {
@@ -144,6 +146,11 @@ export interface BuildContextOptions {
   /** When true (default), try ADCE_ML_URL /v1/pack after local brief. */
   pack?: boolean;
   mlUrl?: string | null;
+  /**
+   * Shrink agent-facing brief (fewer MUST READ / TRUST items, no ALSO RELEVANT).
+   * Prefer for token savings after trust ordering is computed.
+   */
+  compact?: boolean;
 }
 
 export const buildProjectContext = async (
@@ -316,6 +323,7 @@ export const buildProjectContext = async (
     );
 
     let packedBrief = brief;
+    let packApplied = false;
     const wantPack = options.pack !== false;
     const mlUrl =
       options.mlUrl === null
@@ -328,10 +336,58 @@ export const buildProjectContext = async (
       );
       if (packed?.brief) {
         packedBrief = packed.brief;
+        packApplied = true;
         notes.push(...(packed.notes ?? ["ML packed brief applied."]));
       } else {
         notes.push("ML pack unavailable; using local brief order.");
       }
+    }
+
+    const beforeTokens = estimateBriefTokens(packedBrief);
+    const compactPreview = compactBrief(packedBrief);
+    const compactTokens = estimateBriefTokens(compactPreview);
+
+    if (options.compact) {
+      packedBrief = compactPreview;
+      notes.push(
+        `Compact mode: ~${beforeTokens} → ~${compactTokens} tokens (est.); ALSO RELEVANT omitted.`,
+      );
+    } else {
+      const potential = Math.max(0, beforeTokens - compactTokens);
+      notes.push(
+        `Brief size ≈ ${beforeTokens} tokens (est.); --compact ≈ ${compactTokens} (save ~${potential}).`,
+      );
+    }
+
+    const delivered = estimateBriefTokens(packedBrief);
+    const saved = Math.max(0, beforeTokens - delivered);
+    const savingsPercent =
+      beforeTokens > 0 ? Math.round((saved / beforeTokens) * 1000) / 10 : 0;
+    const potentialSaved = Math.max(0, beforeTokens - compactTokens);
+    const potentialPercent =
+      beforeTokens > 0
+        ? Math.round((potentialSaved / beforeTokens) * 1000) / 10
+        : 0;
+
+    const logPath = await appendContextTokenMetric(rootPath, {
+      task,
+      compact: Boolean(options.compact),
+      packUsed: packApplied,
+      mlUrlSet: Boolean(mlUrl),
+      tokensFull: beforeTokens,
+      tokensDelivered: delivered,
+      tokensSaved: saved,
+      savingsPercent,
+      tokensIfCompact: compactTokens,
+      potentialSaved,
+      potentialPercent,
+      mustRead: packedBrief.mustRead.length,
+      caution: packedBrief.caution.length,
+      trustOrder: packedBrief.trustOrder.length,
+      alsoRelevant: packedBrief.alsoRelevant.length,
+    });
+    if (logPath) {
+      notes.push(`Token metrics logged → .adce/metrics/context-tokens.jsonl`);
     }
 
     return {
@@ -343,6 +399,7 @@ export const buildProjectContext = async (
       conflicts: selectedConflicts,
       notes,
       brief: packedBrief,
+      tokenEstimate: delivered,
     };
   } finally {
     closeDatabase(db);

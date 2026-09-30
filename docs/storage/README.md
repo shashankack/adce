@@ -2,7 +2,7 @@
 
 SQLite persistence for ADCE. This package owns the on-disk database (`.adce/state.db`) and the repository functions that read and write it. Business logic stays in `@adce/core`; CLI stays thin.
 
-**Current scope:** v0.1 — project meta, detected file artifacts, and scan summaries.
+**Scope:** Full persistence for artifacts, scans, relationships, temporal snapshots, conflicts, and analysis updates (v0.1–v0.6).
 
 ## Layout
 
@@ -11,11 +11,14 @@ packages/storage/
 ├── package.json
 ├── tsconfig.json
 └── src/
-    ├── index.ts              public exports
+    ├── index.ts
     ├── database.ts           open / close / meta
     ├── schema.ts             Drizzle table definitions
     ├── artifact-repository.ts
-    └── scan-repository.ts
+    ├── scan-repository.ts
+    ├── relationship-repository.ts
+    ├── conflict-repository.ts
+    └── …                     (see package exports)
 ```
 
 ## Stack

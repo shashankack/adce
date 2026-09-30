@@ -119,6 +119,15 @@ export {
   type BuildContextOptions,
 } from "./context/build-context.js";
 export {
+  compactBrief,
+  estimateBriefTokens,
+} from "./context/token-budget.js";
+export {
+  appendContextTokenMetric,
+  contextTokenLogPath,
+  type ContextTokenMetricEvent,
+} from "./context/token-metrics-log.js";
+export {
   analyzeProject,
   type AnalyzeProjectOptions,
 } from "./analyze/analyze-project.js";

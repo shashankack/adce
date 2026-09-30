@@ -16,23 +16,25 @@ Treat `ADCE_Technical_Specification.md` as the primary technical source of truth
 
 ## Current Development Priority
 
-The implementation order is:
+**Core thesis path (v0.1–v0.7) is complete.** Prefer documentation, demos, and optional depth over new product surfaces.
+
+Ship order (historical):
 
 ```text
-1. CLI foundation
-2. Local deterministic engine
-3. Artifact management
-4. Relationships
-5. Temporal engine
-6. Deterministic conflict detection
-7. Context engine
-8. ML layer
-9. Research benchmark
-10. Cloud hardening
-11. Analytics dashboard
+1. CLI foundation                         ✓
+2. Local deterministic engine             ✓
+3. Artifact management                    ✓
+4. Relationships                          ✓
+5. Temporal engine                        ✓
+6. Deterministic conflict detection       ✓
+7. Context engine + structure profiles    ✓
+8. ML layer (MiniLM + LinUCB + pack)      ✓
+9. Research benchmark                     ✓
+10. Cloud hardening                       optional
+11. Analytics dashboard                   deferred
 ```
 
-Do not prioritize the dashboard before the CLI, local engine, ML layer, and research pipeline are stable.
+Do not prioritize the dashboard before faculty documentation and demos are solid.
 
 ---
 

@@ -241,6 +241,8 @@ export interface ContextBundle {
   conflicts: ConflictRecord[];
   notes: string[];
   brief: ContextBrief;
+  /** Approx token count of agent-facing brief (chars/4). */
+  tokenEstimate?: number;
 }
 
 export interface AnalyzeArtifactFeature {

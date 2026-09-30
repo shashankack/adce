@@ -9,6 +9,8 @@ export interface RunContextOptions {
   format?: "text" | "json" | "markdown";
   /** When true, skip ADCE_ML_URL /v1/pack enrichment. */
   skipPack?: boolean;
+  /** Shrink brief for lower agent token usage. */
+  compact?: boolean;
 }
 
 const loc = (path: string | null, name: string) => path ?? name;
@@ -20,6 +22,9 @@ const formatMarkdown = (bundle: ContextBundle): string => {
   lines.push(`- **Root:** \`${bundle.rootPath}\``);
   if (bundle.task) lines.push(`- **Task:** ${bundle.task}`);
   lines.push(`- **Generated:** ${bundle.generatedAt}`);
+  if (bundle.tokenEstimate != null) {
+    lines.push(`- **Token estimate:** ~${bundle.tokenEstimate}`);
+  }
   lines.push("");
 
   for (const note of bundle.notes) {
@@ -82,6 +87,9 @@ const formatText = (bundle: ContextBundle): void => {
   console.log(`Context for ${bundle.rootPath}`);
   if (bundle.task) console.log(`Task: ${bundle.task}`);
   console.log(`Generated: ${bundle.generatedAt}`);
+  if (bundle.tokenEstimate != null) {
+    console.log(`Token estimate: ~${bundle.tokenEstimate}`);
+  }
   console.log("");
 
   for (const note of bundle.notes) {
@@ -143,6 +151,7 @@ export const runContext = async (
       task: options.task,
       budget: options.budget,
       pack: options.skipPack ? false : undefined,
+      compact: options.compact,
     });
 
     if (options.format === "json") {

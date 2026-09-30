@@ -5,11 +5,11 @@
 | Field | Value |
 |-------|--------|
 | Project | ADCE — Artifact-Driven Context Engine |
-| Document date | 2026-09-19 |
-| Scope covered | v0.1 – v0.6 (implemented); v0.7 (planned) |
-| Overall roadmap progress | ~75% of v0.1–v0.7 |
-| Test baseline | 39 automated Vitest cases (`pnpm test:core` + `@adce/parsers`) |
-| Primary sources | `docs/PROGRESS.md`, `docs/ADCE_Technical_Specification.md`, `docs/AGENTS.md`, git history |
+| Document date | 2026-09-30 |
+| Scope covered | v0.1 – v0.7 (core thesis); dashboard deferred |
+| Overall roadmap progress | ≈ 95–96% of v0.1–v0.7 |
+| Test baseline | 62 automated Vitest cases in `@adce/core` (`pnpm test:core`) + bench ablation |
+| Primary sources | `docs/PROGRESS.md`, `docs/ADCE_Hybrid_Architecture_Lock.md`, `docs/ADCE_Technical_Specification.md`, `docs/AGENTS.md` |
 
 ---
 
@@ -44,9 +44,11 @@ ADCE is a **temporal and conflict-aware context layer for AI coding agents**. It
 | Fixture | Purpose |
 |---------|---------|
 | `fixtures/no-git` | Non-Git project smoke |
-| `fixtures/basic-typescript` | Relationships, temporal, context |
-| `fixtures/empty-project` | Edge / empty tree |
-| `fixtures/parser-conflicts` | STRUCTURAL / SCHEMA / CONFIGURATION mismatches |
+| `fixtures/basic-typescript` | Relationships, temporal, context, structure |
+| `fixtures/basic-python` / `basic-go` | Multi-lang structure profiles |
+| `fixtures/empty-project` | Edge / empty tree / `--fill` |
+| `fixtures/parser-conflicts` | STRUCTURAL / SCHEMA / CONFIGURATION + ML lift |
+| `fixtures/conflicting-api` | OpenAPI vs implementation (`typescript-api`) |
 
 ---
 
@@ -58,9 +60,9 @@ ADCE is a **temporal and conflict-aware context layer for AI coding agents**. It
 | v0.2 | Artifact management | Complete | 100% |
 | v0.3 | Relationships + temporal | Complete | 100% |
 | v0.4 | Deterministic conflicts | Complete | ~100% |
-| v0.5 | Context engine | Complete (MVP+) | ~95% |
-| v0.6 | ML integration | Complete (MVP) | ~85% |
-| v0.7 | Research benchmark | Not started | 0% |
+| v0.5 | Context + structure | Complete | ~100% |
+| v0.6 | ML integration (hybrid) | Complete | ~98% |
+| v0.7 | Research benchmark | Complete (thesis scaffold) | ~75% |
 | Dashboard | UI (post-roadmap) | Deferred | — |
 
 **CLI surface implemented:**
@@ -68,16 +70,17 @@ ADCE is a **temporal and conflict-aware context layer for AI coding agents**. It
 ```text
 adce init [-y] [--repair]
 adce scan [--full]
-adce status
-adce artifacts [--type …]
-adce artifacts review
+adce status [--format json]
+adce doctor [--format json] [--nudge]
+adce artifacts [--type …] | artifacts review
 adce artifact show|verify|reject|ignore|edit|add
-adce graph | link | unlink
-adce history
-adce conflicts [--all]
-adce conflict show|reject|ignore|confirm|resolve
-adce context [--task] [--budget] [--format text|json|markdown]
+adce graph | link | unlink | history
+adce conflicts [--all] | conflict show|reject|ignore|confirm|resolve
+adce context [--task] [--budget] [--format] [--skip-pack]
 adce authority set|clear
+adce structure -p typescript-lib|typescript-api|generic|python|go [--fill] [--format]
+adce analyze [id] [--deep] [--skip-ml] [--skip-cache] [--skip-apply] [--format]
+pnpm bench:analyze
 ```
 
 ---
@@ -378,47 +381,59 @@ adce authority clear <id>
 
 ---
 
-## 8. v0.6 — ML integration (MVP implemented)
+## 8. v0.6 — ML integration (complete)
 
 ### Goal
 
-Optional hybrid analysis on top of deterministic conflicts: heuristic always works; Python ML is optional. Never auto-confirm or silently rewrite human authority.
+Optional hybrid analysis on top of deterministic conflicts: heuristic always works; ML upgrades judgment when `ADCE_ML_URL` is reachable. Never auto-confirm or silently rewrite human authority.
 
 ### Features delivered
 
-- `adce analyze` / `[conflict-id]` / `--all` / `--deep` / `--format json`
-- `--no-ml`, `--ml-script`, `--no-cache`, `--no-apply`
-- Heuristic suggestions (structural/schema strength, weak temporal notes, deep name-overlap notes)
-- Optional `ml/adce_ml/cli.py` (token Jaccard similarity)
+- `adce analyze` / `[conflict-id]` / `--all` / `--deep` / `--format`
+- `--skip-ml`, `--skip-cache`, `--skip-apply` (Commander-safe; not `--no-*`)
+- Heuristic suggestions always available offline
+- FastAPI ML service: MiniLM embeddings (hashing fallback), `/v1/analyze`
+- Feedback logging (`POST /v1/feedback`) from conflict confirm/reject/resolve/ignore + `score`
+- LinUCB contextual bandit re-ranks ML suggestions from feedback rewards
+- Context packing (`POST /v1/pack`) — task-similarity reorder of MUST READ / CAUTION / TRUST
+- Privacy filter strips secrets / full-repo dumps before HTTP
 - Cache under `.adce/cache/analyze-*.json`
-- Open conflicts marked `ANALYZED`; confidence capped (no auto-`CONFIRMED`)
-- Authority suggestions are advisory only
+- Confidence capped (no auto-`CONFIRMED`); authority suggestions advisory only
+- Mid-session nudge + `adce doctor` + Cursor rule on init
 
 ### Coded units
 
 | Layer | Units |
 |-------|--------|
-| Shared | `AnalyzeRequest`, `AnalyzeSuggestion`, `AnalyzeReport` |
-| Core | `heuristic.ts`, `ml-client.ts`, `run-analyze.ts`, `analyze-project.ts` |
-| Storage | `updateConflictAnalysis` |
-| CLI | `commands/analyze.ts` |
-| Python | `ml/adce_ml/cli.py` |
+| Shared | `AnalyzeRequest`, `AnalyzeSuggestion`, `AnalyzeReport`, context brief types |
+| Core | `heuristic.ts`, `ml-http.ts`, `ml-client.ts`, `ml-feedback.ts`, `ml-pack.ts`, `run-analyze.ts`, `analyze-project.ts`, `privacy.ts` |
+| CLI | `commands/analyze.ts`, feedback on conflict actions, `context --skip-pack` |
+| Python | `server.py`, `analyze.py`, `embedder.py`, `bandit.py`, `feedback.py`, `pack.py` |
 | Tests | `v06-analyze.test.ts` |
 
 ---
 
-## 9. Planned — v0.7 research evaluation (not implemented)
+## 9. v0.7 — Research evaluation (thesis scaffold complete)
 
-### Intended features
+### Features delivered
 
-- Benchmark pipeline under `benchmarks/`
-- Controlled scenarios (stale docs/tests, API/schema conflicts, controls)
-- Ground truth + evaluation harness
-- Ablations: rule-based vs ML-assisted vs hybrid
+- `benchmarks/` runner: rule vs hybrid ablation on fixtures
+- Ground truth JSON (`parser-conflicts`, `conflicting-api`, `basic-typescript`)
+- Metrics: category recall/precision, `mlLift`, brief caution coverage, latency
+- Outputs: `benchmarks/results/latest.json` (gitignored) + `benchmarks/golden/analyze-hybrid-latest.json`
+- Demo signal: `parser-conflicts` hybrid **2/4/6** (ML lift 4) vs rule **2/0/2**; recall/prec/brief **1.00**
 
-### Dashboard
+### Optional later
 
-Product UI is **explicitly later**, after the CLI research path.
+- Larger corpora / CI ML-up job
+- Dashboard UI (explicitly deferred)
+
+### CLI / scripts
+
+```text
+pnpm bench:analyze
+$env:ADCE_ML_URL = "http://127.0.0.1:8000"; pnpm bench:analyze
+```
 
 ---
 
@@ -465,13 +480,17 @@ discover files
 | `packages/core/test/v04-conflicts.test.ts` | Temporal mismatches, reject survives rescan |
 | `packages/core/test/v04-parser-conflicts.test.ts` | STRUCTURAL / SCHEMA / CONFIGURATION |
 | `packages/core/test/v05-context.test.ts` | Ranking, task bias, authority, AGENTS.md |
+| `packages/core/test/v05-structure.test.ts` | Profiles, `--fill`, typescript-api |
+| `packages/core/test/v06-analyze.test.ts` | Heuristic analyze, ANALYZED, cache |
 | `packages/parsers/test/parsers.test.ts` | Symbol / schema / engines helpers |
+| `pnpm bench:analyze` | Rule vs hybrid ablation + golden |
 
 **Commands:**
 
 ```text
 pnpm test          # all packages with tests
 pnpm test:core     # @adce/core (primary)
+pnpm bench:analyze # v0.7 research ablation
 ```
 
 **Manual smoke:** WSL helper `~/smoke.sh` targeting Windows-path suite under `/mnt/c/crucifer/tmp/adce-smoke-tests` (Windows Node + repo `tsx`).
@@ -506,18 +525,19 @@ pnpm test:core     # @adce/core (primary)
 
 Suggested framing:
 
-> ADCE was implemented incrementally as a TypeScript monorepo CLI. Versions **v0.1–v0.5** deliver a complete deterministic pipeline from repository initialization through artifact modeling, relationship inference, temporal history, conflict detection (temporal and parser-based), and ranked agent context with human authority controls. **v0.6–v0.7** remain planned for optional ML assistance and formal research evaluation.
+> ADCE was implemented incrementally as a TypeScript monorepo CLI. Versions **v0.1–v0.5** deliver a complete deterministic pipeline from repository initialization through artifact modeling, relationship inference, temporal history, conflict detection, structure profiles, and ranked agent context with human authority controls. **v0.6** adds optional hybrid MiniLM ML (analyze, feedback, LinUCB, context pack). **v0.7** provides a reproducible rule-vs-hybrid research ablation with golden results. The dashboard remains deferred.
 
 Suggested metrics table for reports:
 
-| Metric | Value (2026-09-19) |
+| Metric | Value (2026-09-30) |
 |--------|---------------------|
-| Roadmap versions complete | 5 / 7 (v0.1–v0.5) |
-| Overall v0.1–v0.7 estimate | ~65% |
-| Automated tests | 37 |
-| CLI command families | init/scan/status, artifacts, graph/link, history, conflicts, context, authority |
-| Works without Git | Yes |
+| Roadmap versions complete | 7 / 7 core (v0.1–v0.7 thesis path); dashboard deferred |
+| Overall v0.1–v0.7 estimate | ≈ 95–96% |
+| Automated tests | 62 (`@adce/core`) |
+| CLI command families | init/scan/status/doctor, artifacts, graph/link, history, conflicts, context, authority, structure, analyze |
+| Works without Git / ML | Yes |
 | ML required for core | No |
+| Golden ablation signal | `parser-conflicts` hybrid 2/4/6 (mlLift 4) |
 
 ---
 

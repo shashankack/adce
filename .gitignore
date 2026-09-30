@@ -18,3 +18,5 @@ benchmarks/results/
 Thumbs.db
 
 ml/data/
+*.pdf
+/docs/report/

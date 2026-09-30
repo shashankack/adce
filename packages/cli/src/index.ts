@@ -282,12 +282,18 @@ program
   .option("--budget <n>", "Max primary artifacts", (v) => Number(v), 12)
   .option("--format <format>", "text, json, or markdown", "text")
   .option("--skip-pack", "Skip ML /v1/pack even if ADCE_ML_URL is set", false)
+  .option(
+    "--compact",
+    "Shrink brief for lower agent token usage (drop ALSO RELEVANT, cap lists)",
+    false,
+  )
   .action(
     async (options: {
       task?: string;
       budget?: number;
       format?: string;
       skipPack?: boolean;
+      compact?: boolean;
     }) => {
       const format =
         options.format === "json"
@@ -300,6 +306,7 @@ program
         budget: options.budget,
         format,
         skipPack: Boolean(options.skipPack),
+        compact: Boolean(options.compact),
       });
     },
   );

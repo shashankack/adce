@@ -1,8 +1,8 @@
 # ADCE Hybrid Architecture Lock
 
 **Status:** Binding project requirements (do not steer away without an explicit decision to change this document).  
-**Updated:** 2026-09-24  
-**Also reflected in:** `docs/ADCE_Technical_Specification.md`, `docs/AGENTS.md`
+**Updated:** 2026-09-30  
+**Also reflected in:** `docs/ADCE_Technical_Specification.md`, `docs/AGENTS.md`, `docs/PROGRESS.md`
 
 This file records architecture decisions reached during v0.5–v0.6 planning so future work stays aligned for implementation **and** academic evaluation.
 

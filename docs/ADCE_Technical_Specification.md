@@ -828,29 +828,28 @@ Build:
 
 ### v0.6
 
-Build:
+**As-built (complete):**
 
 - hybrid analyze (`adce analyze`) with local heuristic fallback
-- **full ML HTTP service in Python** (FastAPI; not CLI-only end state): embeddings, semantic conflicts, ranking, context packing
-- TypeScript CLI client to ML API (`ADCE_ML_URL`) with privacy-filtered payloads
-- caching (local + server)
+- FastAPI ML service: MiniLM embeddings (hashing fallback), semantic/confidence suggestions, LinUCB ranking, `/v1/pack` context packing
+- TypeScript client via `ADCE_ML_URL` with privacy-filtered payloads; feedback from conflict actions
+- caching (local analyze cache)
 - never auto-CONFIRMED from ML; never silent authority overwrite
-- local Python subprocess (`ml/adce_ml/cli.py`) allowed only as a temporary stand-in
+- local Python subprocess (`ml/adce_ml/cli.py`) retained as optional offline stand-in (HTTP is primary)
 
-**Ecosystem depth (not ML-owned):** first-class support needs local classifiers + structure profiles + detectors. Prefer depth on TypeScript → Python → Go (or Java) over shallow multi-marker “support.” See Architecture Lock §8b.
+**Ecosystem depth:** structure profiles `typescript-lib` / `typescript-api` / `python` / `go` / `generic`. See Architecture Lock §8b.
 
 See `docs/ADCE_Hybrid_Architecture_Lock.md`.
 
 ### v0.7
 
-Build:
+**As-built (thesis scaffold):**
 
-- benchmark pipeline
-- controlled scenarios
-- evaluation
-- ablation studies
+- `pnpm bench:analyze` — rule vs hybrid ablation
+- ground-truth fixtures + metrics (recall, precision, mlLift, brief coverage)
+- golden ML-up snapshot under `benchmarks/golden/`
 
-Dashboard work comes after these.
+Dashboard work remains deferred.
 
 ---
 
