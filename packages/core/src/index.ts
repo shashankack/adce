@@ -63,6 +63,11 @@ export {
   ensureCursorAdceRule,
   type CursorRuleAction,
 } from "./project/cursor-rule.js";
+export {
+  ensureGitignoreAdce,
+  gitignoreHasAdce,
+  type GitignoreAdceAction,
+} from "./project/gitignore-adce.js";
 
 export {
   addManualArtifact,

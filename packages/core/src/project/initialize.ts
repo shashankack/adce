@@ -15,6 +15,10 @@ import {
   ensureCursorAdceRule,
   type CursorRuleAction,
 } from "./cursor-rule.js";
+import {
+  ensureGitignoreAdce,
+  type GitignoreAdceAction,
+} from "./gitignore-adce.js";
 import { isAdceInitialized } from "./is-initialized.js";
 import {
   adceDir,
@@ -36,6 +40,7 @@ export interface InitResult {
   repaired: boolean;
   agentsMdAction: AgentsMdAction;
   cursorRuleAction: CursorRuleAction;
+  gitignoreAdceAction: GitignoreAdceAction;
   created: {
     adceDir: boolean;
     config: boolean;
@@ -143,6 +148,7 @@ export async function initializeProject(
 
   const agentsMdAction = await ensureAgentsMd(rootPath);
   const cursorRuleAction = await ensureCursorAdceRule(rootPath);
+  const gitignoreAdceAction = await ensureGitignoreAdce(rootPath);
 
   return {
     rootPath,
@@ -150,6 +156,7 @@ export async function initializeProject(
     repaired: Boolean(options.repair && dirExists),
     agentsMdAction,
     cursorRuleAction,
+    gitignoreAdceAction,
     created: {
       adceDir: !dirExists,
       config: createdConfig,

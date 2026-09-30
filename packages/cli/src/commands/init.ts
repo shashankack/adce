@@ -71,6 +71,14 @@ export const runInit = async (
     log.step("Cursor rule `.cursor/rules/adce.mdc` already up to date.");
   }
 
+  if (result.gitignoreAdceAction === "appended") {
+    log.ok("Appended `.adce/` to `.gitignore`.");
+  } else if (result.gitignoreAdceAction === "unchanged") {
+    log.step("`.gitignore` already ignores `.adce/`.");
+  } else {
+    log.step("No `.gitignore` found — skipped (did not create one).");
+  }
+
   console.log("");
   log.step("Next: run `adce scan`, then use context/structure/conflicts as needed.");
   printAgentSessionNudge();
