@@ -19,4 +19,7 @@ Thumbs.db
 
 ml/data/
 *.pdf
-/docs/report/
+*.docx
+
+# Academic / internal docs — keep local; do not publish to origin
+/docs/
