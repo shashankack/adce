@@ -5,6 +5,7 @@ coverage/
 .env
 .env.*
 *.log
+.editorconfig
 
 ml/.venv/
 __pycache__/
