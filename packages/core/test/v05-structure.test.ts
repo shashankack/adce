@@ -134,7 +134,7 @@ describe("v0.5 structure check", () => {
 
   it("structure --fill creates concrete stubs", async () => {
     const root = await copyFixture("empty-project");
-    await initializeProject(root);
+    await initializeProject(root, { fillStructure: false });
     const before = await checkProjectStructure(root, {
       profileId: "typescript-lib",
     });
@@ -143,5 +143,71 @@ describe("v0.5 structure check", () => {
     expect(filled.created).toEqual(
       expect.arrayContaining(["README.md", "package.json"]),
     );
+  });
+
+  it("defaults to software-eng when profileId is omitted", async () => {
+    const root = await copyFixture("empty-project");
+    await initializeProject(root, { fillStructure: false });
+    await scanProject({ rootPath: root, full: true });
+    const report = await checkProjectStructure(root);
+    expect(report.profileId).toBe("software-eng");
+  });
+
+  it("software-eng profile suggests ADCE knowledge artifacts and fills stubs", async () => {
+    const root = await copyFixture("empty-project");
+    await initializeProject(root, { fillStructure: false });
+    await scanProject({ rootPath: root, full: true });
+
+    const before = await checkProjectStructure(root, {
+      profileId: "software-eng",
+    });
+    expect(before.profileId).toBe("software-eng");
+    const suggested = before.findings.filter((f) => f.status === "SUGGESTED");
+    expect(suggested.map((f) => f.ruleId)).toEqual(
+      expect.arrayContaining([
+        "requirements",
+        "design",
+        "architecture",
+        "decisions",
+        "security",
+        "schemas",
+        "api-spec",
+        "testing-strategy",
+      ]),
+    );
+
+    const filled = await fillStructureStubs(root, before);
+    expect(filled.created).toEqual(
+      expect.arrayContaining([
+        "requirements/overview.md",
+        "design/overview.md",
+        "architecture/overview.md",
+        "decisions/0001-record-architecture-decisions.md",
+        "security/policy.md",
+        "schemas/example.schema.json",
+        "docs/testing/strategy.md",
+        "openapi.yaml",
+      ]),
+    );
+
+    await scanProject({ rootPath: root, full: true });
+    const after = await checkProjectStructure(root, {
+      profileId: "software-eng",
+    });
+    for (const id of [
+      "requirements",
+      "design",
+      "architecture",
+      "decisions",
+      "security",
+      "schemas",
+      "api-spec",
+      "testing-strategy",
+    ]) {
+      expect(
+        after.findings.find((f) => f.ruleId === id)?.status,
+        id,
+      ).toBe("PRESENT");
+    }
   });
 });

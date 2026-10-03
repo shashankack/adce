@@ -18,6 +18,8 @@ import { runArtifactsReview } from "./commands/artifacts-review.js";
 import { runGraph } from "./commands/graph.js";
 import { runLink } from "./commands/link.js";
 import { runUnlink } from "./commands/unlink.js";
+import { runRelate } from "./commands/relate.js";
+import { runAnalyticsPush } from "./commands/analytics.js";
 import { runHistory } from "./commands/history.js";
 import {
   runConflictConfirm,
@@ -227,6 +229,38 @@ program
   });
 
 program
+  .command("relate")
+  .description(
+    "Suggest relationships (MiniLM + heuristics) and accept/reject interactively",
+  )
+  .option("-n, --limit <n>", "Max suggestions", (v) => Number(v), 24)
+  .option("--list", "Print suggestions without prompting", false)
+  .option("--skip-ml", "Heuristics only (no MiniLM / ADCE_ML_URL)", false)
+  .option(
+    "--reset",
+    "Hard-delete all relationships (including REJECTED tombstones)",
+    false,
+  )
+  .option("-y, --yes", "Skip confirmation for --reset", false)
+  .action(
+    async (options: {
+      limit?: number;
+      list?: boolean;
+      skipMl?: boolean;
+      reset?: boolean;
+      yes?: boolean;
+    }) => {
+      await runRelate(process.cwd(), {
+        limit: options.limit,
+        list: options.list,
+        skipMl: options.skipMl,
+        reset: options.reset,
+        yes: options.yes,
+      });
+    },
+  );
+
+program
   .command("history")
   .description("Show temporal history for an artifact")
   .argument("<id>", "Artifact id or unique prefix")
@@ -392,8 +426,8 @@ program
   .description("Check project against a recommended artifact structure")
   .option(
     "-p, --profile <id>",
-    "Profile id (typescript-lib | typescript-api | generic | python | go)",
-    "typescript-lib",
+    "Profile id (software-eng | typescript-lib | typescript-api | generic | python | go)",
+    "software-eng",
   )
   .option("--format <format>", "text or json", "text")
   .option("--fill", "Create stub files for concrete MISSING/SUGGESTED paths")
@@ -404,6 +438,34 @@ program
       fill: Boolean(opts.fill),
     });
   });
+
+const analytics = program
+  .command("analytics")
+  .description(
+    "Opt-in privacy-locked analytics sync to the ML server (dashboard / LinUCB)",
+  );
+
+analytics
+  .command("push")
+  .description(
+    "Push sanitized metrics, feedback, and conflict events (no code / no raw paths)",
+  )
+  .option("--dry-run", "Build and validate bundle without sending", false)
+  .option(
+    "--force",
+    "Push even if analytics.enabled is false in .adce/config.yaml",
+    false,
+  )
+  .option("--url <url>", "ML server base URL (default: ADCE_ML_URL)")
+  .action(
+    async (options: { dryRun?: boolean; force?: boolean; url?: string }) => {
+      await runAnalyticsPush({
+        dryRun: options.dryRun,
+        force: options.force,
+        url: options.url,
+      });
+    },
+  );
 
 program.parseAsync(process.argv).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);

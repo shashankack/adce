@@ -21,6 +21,16 @@ const STUB_BODIES: Record<string, string> = {
   "pyproject.toml":
     '[project]\nname = "project"\nversion = "0.0.0"\nrequires-python = ">=3.11"\n',
   "requirements.txt": "# stub\n",
+  "overview.md":
+    "# Overview\n\nStub created by `adce structure --fill` (software-eng profile).\n\nReplace with real project knowledge (write it yourself, or prompt your coding agent to draft from the repo/task, then review).\n",
+  "0001-record-architecture-decisions.md":
+    "# 1. Record architecture decisions\n\nStatus: Proposed\n\n## Context\n\nStub ADR from `adce structure --fill`.\n\n## Decision\n\nTBD\n\n## Consequences\n\nTBD\n",
+  "policy.md":
+    "# Security / policy\n\nStub created by `adce structure --fill`.\n\nDocument auth, secrets handling, and threat notes here.\n",
+  "strategy.md":
+    "# Testing strategy\n\nStub created by `adce structure --fill`.\n\nCover unit / integration / e2e expectations.\n",
+  "example.schema.json":
+    '{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "title": "Example",\n  "type": "object",\n  "properties": {}\n}\n',
 };
 
 /** Map a simple pathGlob (no wildcards / braces) to a stub relative path. */
@@ -36,6 +46,14 @@ const RULE_STUB_PATHS: Record<string, string> = {
   tsconfig: "tsconfig.json",
   manifest: "package.json",
   openapi: "openapi.yaml",
+  "api-spec": "openapi.yaml",
+  requirements: "requirements/overview.md",
+  design: "design/overview.md",
+  architecture: "architecture/overview.md",
+  decisions: "decisions/0001-record-architecture-decisions.md",
+  security: "security/policy.md",
+  schemas: "schemas/example.schema.json",
+  "testing-strategy": "docs/testing/strategy.md",
 };
 
 const writeStubIfMissing = async (
@@ -98,7 +116,7 @@ export const fillStructureStubs = async (
  */
 export const seedConcreteStructureStubs = async (
   rootPath: string,
-  profileId: string = "typescript-lib",
+  profileId: string = "software-eng",
 ): Promise<StructureFillResult> => {
   const profile = PROFILES[profileId];
   const created: string[] = [];

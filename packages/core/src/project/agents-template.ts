@@ -14,7 +14,8 @@ Before repository-level modifications:
 4. Do not trust CAUTION artifacts over TRUST ORDER / VERIFIED sources.
 5. Run \`adce conflicts\` (and \`adce analyze\` if available) when CAUTION is non-empty.
 6. Set known trust with \`adce authority set <id> -l CANONICAL|AUTHORITATIVE|SUPPORTING\`.
-7. Run \`adce structure\` and fill MISSING / SUGGESTED gaps before large changes.
+7. Run \`adce structure\` (default profile: software-eng). Replace stub content in \`requirements/\`, \`design/\`, \`architecture/\`, \`decisions/\`, \`security/\`, \`schemas/\`, \`docs/testing/\`, and API specs with real project knowledge when those files are still stubs or SUGGESTED.
+8. Developers: fill those artifacts yourself, or prompt the coding agent to draft them from the current task/codebase, then review and verify (\`adce artifact verify\`).
 `;
 
 /** Full file content when AGENTS.md does not exist yet. */
@@ -31,7 +32,8 @@ export const AGENT_SESSION_NUDGE = `ADCE is set up in this repository.
 Before further edits, run:
   adce context --task "<current task>" --format markdown
 Then follow MUST READ → CAUTION → TRUST ORDER.
-Also run \`adce conflicts\` (and \`adce analyze --skip-ml\` if useful) when CAUTION is non-empty.`;
+Also run \`adce conflicts\` (and \`adce analyze --skip-ml\` if useful) when CAUTION is non-empty.
+Run \`adce structure\` and fill (or ask the agent to draft) stub knowledge files under requirements/, design/, architecture/, decisions/, security/, schemas/, docs/testing/ — then review.`;
 
 const markedBlock = (): string =>
   `${ADCE_AGENTS_BEGIN}\n${AGENTS_SECTION_BODY.trimEnd()}\n${ADCE_AGENTS_END}`;

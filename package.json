@@ -9,7 +9,8 @@
     "test:core": "pnpm --filter @adce/core test",
     "typecheck": "pnpm -r typecheck",
     "dev": "pnpm --filter @adce/cli dev",
-    "bench:analyze": "tsx benchmarks/run-analyze-benchmark.ts"
+    "bench:analyze": "tsx benchmarks/run-analyze-benchmark.ts",
+    "reset:relationships": "tsx scripts/reset-relationships.ts"
   },
   "engines": {
     "node": ">=22"

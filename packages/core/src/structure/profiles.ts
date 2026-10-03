@@ -1,6 +1,121 @@
 import type { StructureProfile } from "@adce/shared";
 
 export const PROFILES: Record<string, StructureProfile> = {
+  /**
+   * Language-agnostic ADCE knowledge baseline.
+   * Required = minimal; recommended = "would be nice" engineering artifacts
+   * from the original ADCE vision (requirements → design → architecture → …).
+   */
+  "software-eng": {
+    id: "software-eng",
+    name: "Software engineering baseline",
+    description:
+      "Universal ADCE knowledge layout: requirements, design, architecture, decisions, security, schemas, API, testing",
+    rules: [
+      {
+        id: "readme",
+        level: "required",
+        type: "DOCUMENTATION",
+        pathGlob: "README.md",
+        description: "Top-level README",
+      },
+      {
+        id: "agents",
+        level: "recommended",
+        type: "DOCUMENTATION",
+        pathGlob: "AGENTS.md",
+        description: "Agent onboarding file",
+      },
+      {
+        id: "requirements",
+        level: "recommended",
+        type: "REQUIREMENT",
+        pathGlob: "requirements/**/*.{md,mdx}",
+        minCount: 1,
+        description: "Requirements under requirements/",
+      },
+      {
+        id: "design",
+        level: "recommended",
+        type: "DESIGN",
+        pathGlob: "design/**/*.{md,mdx}",
+        minCount: 1,
+        description: "Design notes under design/",
+      },
+      {
+        id: "architecture",
+        level: "recommended",
+        type: "ARCHITECTURE",
+        pathGlob: "architecture/**/*.{md,mdx}",
+        minCount: 1,
+        description: "Architecture docs under architecture/",
+      },
+      {
+        id: "decisions",
+        level: "recommended",
+        type: "DECISION",
+        pathGlob: "{decisions,docs/adr,adr}/**/*.{md,mdx}",
+        minCount: 1,
+        description: "Architecture Decision Records (ADR)",
+      },
+      {
+        id: "security",
+        level: "recommended",
+        type: "POLICY",
+        pathGlob: "{security,policy,policies}/**/*.{md,mdx}",
+        minCount: 1,
+        description: "Security / policy specs",
+      },
+      {
+        id: "schemas",
+        level: "recommended",
+        type: "SCHEMA",
+        pathGlob: "schemas/**/*.{json,sql,prisma}",
+        minCount: 1,
+        description: "Database / data schemas under schemas/",
+      },
+      {
+        id: "api-spec",
+        level: "recommended",
+        type: "API_SPEC",
+        pathGlob:
+          "{openapi.yaml,openapi.yml,openapi.json,swagger.yaml,swagger.yml}",
+        minCount: 1,
+        description: "API contract (OpenAPI / Swagger at repo root)",
+      },
+      {
+        id: "testing-strategy",
+        level: "recommended",
+        type: "SPECIFICATION",
+        pathGlob: "{docs/testing,testing}/**/*.{md,mdx}",
+        minCount: 1,
+        description: "Testing strategy under docs/testing/ or testing/",
+      },
+      {
+        id: "source",
+        level: "recommended",
+        type: "SOURCE",
+        minCount: 1,
+        description: "At least one source artifact",
+      },
+      {
+        id: "tests",
+        level: "recommended",
+        type: "TEST",
+        minCount: 1,
+        description: "At least one automated test artifact",
+      },
+    ],
+    relationshipRules: [
+      {
+        id: "docs-link",
+        level: "recommended",
+        relationshipType: "DOCUMENTS",
+        check: "any-documents-edge",
+        description: "Docs / specs linked to implementation",
+      },
+    ],
+  },
   "typescript-lib": {
     id: "typescript-lib",
     name: "TypeScript library",
@@ -262,4 +377,4 @@ export const PROFILES: Record<string, StructureProfile> = {
   },
 };
 
-export const DEFAULT_PROFILE_ID = "typescript-lib";
+export const DEFAULT_PROFILE_ID = "software-eng";

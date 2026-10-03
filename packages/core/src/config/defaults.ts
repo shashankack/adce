@@ -8,5 +8,8 @@ export const defaultConfig = (): AdceConfig => {
     scan: {
       followSymlinks: false,
     },
+    analytics: {
+      enabled: false,
+    },
   };
 };

@@ -11,6 +11,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from adce_ml.analyze import analyze_request
+from adce_ml.analytics_ingest import (
+    append_analytics_ingest,
+    validate_analytics_bundle,
+)
 from adce_ml.bandit import get_bandit, reload_bandit
 from adce_ml.embedder import get_embedder
 from adce_ml.feedback import ALLOWED_ACTIONS, append_feedback
@@ -100,3 +104,53 @@ def pack(body: dict[str, Any]) -> dict[str, Any]:
     if body.get("files") or body.get("repoArchive") or body.get("fullTree"):
         raise HTTPException(400, detail="Full repository payloads are forbidden")
     return pack_brief(body)
+
+
+@app.post("/v1/analytics")
+def analytics(body: dict[str, Any]) -> dict[str, Any]:
+    """Opt-in privacy-locked metrics/feedback ingest for dashboards + LinUCB."""
+    try:
+        validate_analytics_bundle(body)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    path = append_analytics_ingest(body)
+
+    bandit_n = 0
+    feedback_ok = 0
+    for row in body.get("feedback") or []:
+        if not isinstance(row, dict):
+            continue
+        action = str(row.get("action") or "").lower()
+        if action not in ALLOWED_ACTIONS:
+            continue
+        try:
+            append_feedback(
+                {
+                    "action": action,
+                    "conflictId": row.get("conflictId") or "unknown",
+                    "category": row.get("category"),
+                    "severity": row.get("severity"),
+                    "confidence": row.get("confidence"),
+                    "summary": row.get("summary"),
+                    "projectHash": body.get("projectId"),
+                    "score": row.get("score"),
+                    "embedder": row.get("embedder") or get_embedder().name,
+                }
+            )
+            feedback_ok += 1
+        except ValueError:
+            continue
+
+    if feedback_ok:
+        bandit_n = reload_bandit()
+
+    return {
+        "ok": True,
+        "stored": str(path),
+        "metrics": len(body.get("metrics") or []),
+        "feedback": feedback_ok,
+        "events": len(body.get("events") or []),
+        "banditExamples": bandit_n,
+        "note": "Ingested privacy-locked analytics. Does not fine-tune MiniLM.",
+    }

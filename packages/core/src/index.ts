@@ -88,6 +88,7 @@ export {
 export {
   linkProjectArtifacts,
   unlinkProjectRelationship,
+  resetProjectRelationships,
   type LinkProjectArtifactsInput,
 } from "./relationships/link.js";
 export { listProjectGraph, type GraphEdgeView } from "./relationships/graph.js";
@@ -96,6 +97,14 @@ export {
   persistInferredRelationships,
   type InferredEdge,
 } from "./relationships/infer.js";
+export {
+  suggestProjectRelationships,
+  acceptRelationshipSuggestion,
+  rejectRelationshipSuggestion,
+  heuristicRelationshipSuggestions,
+  type RelationshipSuggestion,
+  type SuggestRelationshipsOptions,
+} from "./relationships/suggest.js";
 export {
   InvalidRelationshipTypeError,
   RelationshipNotFoundError,
@@ -146,6 +155,26 @@ export {
   type ConflictFeedbackPayload,
   type FeedbackAction,
 } from "./analyze/ml-feedback.js";
+export {
+  hashProjectId,
+  pathPattern,
+  sanitizeConflictSummary,
+  findForbiddenKey,
+  FORBIDDEN_ANALYTICS_KEYS,
+} from "./analytics/sanitize.js";
+export {
+  buildAnalyticsBundle,
+  appendLocalFeedbackEvent,
+  localFeedbackLogPath,
+  type AnalyticsBundle,
+} from "./analytics/bundle.js";
+export {
+  pushProjectAnalytics,
+  AnalyticsDisabledError,
+  AnalyticsUrlMissingError,
+  type PushAnalyticsOptions,
+  type PushAnalyticsResult,
+} from "./analytics/push.js";
 export { checkProjectStructure } from "./structure/check-structure.js";
 export {
   fillStructureStubs,

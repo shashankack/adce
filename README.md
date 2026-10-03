@@ -14,11 +14,11 @@ ADCE models a repository as artifacts and relationships, detects conflicts, resp
 | Overall incl. planned Analytics (v0.8) | ~80–84% |
 
 ```text
-adce init → scan → conflicts → analyze (MiniLM + LinUCB) → context [--compact]
+adce init → scan → relate (y/n) → conflicts → analyze (MiniLM + LinUCB) → context [--compact]
 pnpm bench:analyze   # rule vs hybrid ablation (mlLift)
 ```
 
-**Next phase (Review-III):** Analytics Engine — opt-in sync of local metrics/feedback to a central server for multi-project proof + ML analytics.
+**Analytics (opt-in):** `adce analytics push` → `POST /v1/analytics` on the ML server. Privacy-locked metrics/feedback/events only (no code, no raw paths). Feeds your dashboard + LinUCB — does **not** train Cursor or fine-tune MiniLM.
 
 ## Quick start
 
@@ -31,9 +31,17 @@ pnpm --filter @adce/cli build
 # in a target project directory
 adce init -y
 adce scan --full
+adce relate              # interactive ML/heuristic links (y/n/s/q)
+adce relate --reset -y   # wipe all edges (or: pnpm reset:relationships -- --yes)
 adce doctor
-adce structure -p typescript-lib
+adce structure                          # default: software-eng (requirements/ design/ …)
+adce structure --fill                   # stub suggested knowledge folders
+# Fill stubs with real knowledge (or prompt the agent to draft, then review + verify)
+adce structure -p typescript-lib        # language-specific (TS) checklist
 adce conflicts
+# Opt-in analytics (set analytics.enabled: true in .adce/config.yaml first):
+# adce analytics push --dry-run
+# adce analytics push
 ```
 
 ### Hybrid ML (core path)
@@ -50,6 +58,7 @@ uvicorn adce_ml.server:app --host 127.0.0.1 --port 8000
 # other terminal — point CLI at ML
 $env:ADCE_ML_URL = "http://127.0.0.1:8000"
 adce analyze --deep --skip-cache
+adce relate                 # MiniLM deep suggestions when ADCE_ML_URL is set
 adce context --task "your task" --format markdown --compact
 pnpm bench:analyze
 ```
@@ -62,9 +71,10 @@ Details: [ml/README.md](ml/README.md). `--skip-ml` is for ablation / offline dem
 |------|------------|
 | Local engine | Artifacts, relationships, temporal evidence, deterministic conflicts |
 | Authority | Human verify / CANONICAL overrides survive rescans (**Hybrid Lock** — ML never auto-CONFIRMS) |
-| Structure | Profiles: `typescript-lib`, `typescript-api`, `python`, `go`, `generic` + `--fill` |
+| Structure | Default `software-eng` (+ `typescript-lib`, `typescript-api`, `python`, `go`, `generic`) + `--fill` |
 | Context | Ranked brief · `/v1/pack` · `--compact` · token metrics → `.adce/metrics/context-tokens.jsonl` |
 | Hybrid ML | MiniLM analyze · LinUCB (RL) from confirm/reject/resolve/ignore · privacy filter |
+| Analytics | Opt-in `adce analytics push` → `/v1/analytics` (sanitized metrics/feedback; no codebase leak) |
 | Evaluation | `pnpm bench:analyze` — recall / precision / `mlLift` / brief coverage + golden JSON |
 | Agent ritual | `AGENTS.md` · Cursor rule · `adce doctor` · `.adce/` gitignored on init |
 

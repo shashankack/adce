@@ -30,7 +30,7 @@ export const runAuthoritySet = async (
   try {
     const rootPath = await resolveAdceRoot(cwd);
     const a = await setProjectArtifactAuthority(rootPath, id, level);
-    log.success(
+    log.ok(
       `Set authority ${a.authority} on ${a.path ?? a.name} (${a.id.slice(0, 8)})`,
     );
   } catch (error) {
@@ -46,7 +46,7 @@ export const runAuthorityClear = async (
   try {
     const rootPath = await resolveAdceRoot(cwd);
     const a = await clearProjectArtifactAuthority(rootPath, id);
-    log.success(
+    log.ok(
       `Cleared authority on ${a.path ?? a.name} (${a.id.slice(0, 8)}) → UNKNOWN`,
     );
   } catch (error) {

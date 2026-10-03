@@ -83,9 +83,8 @@ export const analyzeProject = async (
   const db = openDatabase(dbPath(rootPath));
   try {
     const artifacts = listArtifacts(db);
-    const relationships = listRelationships(db).filter(
-      (r) => r.verification !== "REJECTED" && r.verification !== "IGNORED",
-    );
+    // Include REJECTED/IGNORED so deep-mode ML can suppress re-suggestions.
+    const relationships = listRelationships(db);
     let conflicts = listConflicts(db, { includeClosed: Boolean(options.all) });
 
     if (options.conflictId) {

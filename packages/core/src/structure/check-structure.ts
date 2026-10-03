@@ -25,6 +25,27 @@ const exists = async (p: string): Promise<boolean> => {
   }
 };
 
+const KNOWLEDGE_TYPES = new Set([
+  "REQUIREMENT",
+  "DESIGN",
+  "ARCHITECTURE",
+  "DECISION",
+  "POLICY",
+  "SPECIFICATION",
+  "SCHEMA",
+  "API_SPEC",
+]);
+
+const structureHint = (type: string, pathGlob?: string): string => {
+  if (type === "DOCUMENTATION" && pathGlob === "AGENTS.md") {
+    return "Run adce init (creates AGENTS.md) or add the file manually";
+  }
+  if (KNOWLEDGE_TYPES.has(type)) {
+    return `Add or fill a ${type} at ${pathGlob ?? type} (dev writes it, or prompt the agent to draft then review)`;
+  }
+  return `Add a ${type} artifact matching ${pathGlob ?? type}`;
+};
+
 const matchesRule = (
   artifacts: ArtifactRecord[],
   type: string,
@@ -84,10 +105,7 @@ export const checkProjectStructure = async (
           status: rule.level === "required" ? "MISSING" : "SUGGESTED",
           level: rule.level,
           summary: rule.description,
-          hint:
-            rule.type === "DOCUMENTATION" && rule.pathGlob === "AGENTS.md"
-              ? "Run adce init (creates AGENTS.md) or add the file manually"
-              : `Add a ${rule.type} artifact matching ${rule.pathGlob ?? rule.type}`,
+          hint: structureHint(rule.type, rule.pathGlob),
         });
       }
     }

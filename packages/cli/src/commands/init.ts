@@ -91,6 +91,9 @@ export const runInit = async (
       log.ok(
         `Structure stubs: ${result.structureFill.created.join(", ")}`,
       );
+      log.step(
+        "These are placeholders — fill them with real project knowledge (or prompt your coding agent to draft them, then review).",
+      );
     } else {
       log.step(
         "Structure stubs: nothing new (concrete profile files already present).",
@@ -100,7 +103,7 @@ export const runInit = async (
 
   console.log("");
   log.step(
-    "Next: run `adce scan` (loads real files into state.db), then context/conflicts.",
+    "Next: `adce scan --full` → fill knowledge stubs → `adce structure` → relate/context/conflicts.",
   );
   printAgentSessionNudge();
 };

@@ -284,10 +284,17 @@ export interface AnalyzeRequest {
   }>;
 }
 export interface AnalyzeSuggestion {
-  kind: "conflict_confidence" | "semantic_conflict" | "authority" | "note";
+  kind:
+    | "conflict_confidence"
+    | "semantic_conflict"
+    | "relationship"
+    | "authority"
+    | "note";
   conflictId?: string;
   artifactId?: string;
   targetArtifactId?: string;
+  /** Proposed edge type when kind === "relationship" */
+  relationshipType?: RelationshipType;
   // proposed values — never auto-applied to closed human decisions
   confidence?: "POTENTIAL" | "LIKELY" | "CONFIRMED";
   severity?: "LOW" | "MEDIUM" | "HIGH";

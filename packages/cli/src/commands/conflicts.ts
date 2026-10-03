@@ -2,6 +2,7 @@ import {
   AdceNotInitializedError,
   AmbiguousConflictIdError,
   ConflictNotFoundError,
+  appendLocalFeedbackEvent,
   confirmProjectConflict,
   getProjectConflict,
   ignoreProjectConflict,
@@ -43,8 +44,12 @@ const confidenceToScore = (confidence: string | undefined): number => {
   }
 };
 
-const sendFeedback = (action: FeedbackAction, c: ConflictRecord): void => {
-  void postConflictFeedback({
+const sendFeedback = (
+  rootPath: string,
+  action: FeedbackAction,
+  c: ConflictRecord,
+): void => {
+  const payload = {
     action,
     conflictId: c.id,
     category: c.category,
@@ -54,7 +59,9 @@ const sendFeedback = (action: FeedbackAction, c: ConflictRecord): void => {
     sourceArtifactId: c.sourceArtifactId,
     targetArtifactId: c.targetArtifactId,
     score: confidenceToScore(c.confidence),
-  }).then((ok) => {
+  };
+  void appendLocalFeedbackEvent(rootPath, payload);
+  void postConflictFeedback(payload).then((ok) => {
     if (ok) log.step(`ML feedback logged (${action}).`);
   });
 };
@@ -146,7 +153,7 @@ export const runConflictReject = async (
     const c = await rejectProjectConflict(rootPath, id);
     log.ok(`Conflict rejected: ${c.id}`);
     console.log(`Lifecycle: ${c.lifecycle}`);
-    sendFeedback("reject", c);
+    sendFeedback(rootPath, "reject", c);
   } catch (error) {
     if (handleConflictError(error)) return;
     throw error;
@@ -162,7 +169,7 @@ export const runConflictIgnore = async (
     const c = await ignoreProjectConflict(rootPath, id);
     log.ok(`Conflict ignored: ${c.id}`);
     console.log(`Lifecycle: ${c.lifecycle}`);
-    sendFeedback("ignore", c);
+    sendFeedback(rootPath, "ignore", c);
   } catch (error) {
     if (handleConflictError(error)) return;
     throw error;
@@ -178,7 +185,7 @@ export const runConflictConfirm = async (
     const c = await confirmProjectConflict(rootPath, id);
     log.ok(`Conflict confirmed: ${c.id}`);
     console.log(`Lifecycle: ${c.lifecycle}`);
-    sendFeedback("confirm", c);
+    sendFeedback(rootPath, "confirm", c);
   } catch (error) {
     if (handleConflictError(error)) return;
     throw error;
@@ -194,7 +201,7 @@ export const runConflictResolve = async (
     const c = await resolveProjectConflict(rootPath, id);
     log.ok(`Conflict resolved: ${c.id}`);
     console.log(`Lifecycle: ${c.lifecycle}`);
-    sendFeedback("resolve", c);
+    sendFeedback(rootPath, "resolve", c);
   } catch (error) {
     if (handleConflictError(error)) return;
     throw error;

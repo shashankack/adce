@@ -127,6 +127,14 @@ export const deleteRelationshipById = (db: AdceDb, id: string): boolean => {
   return result.changes > 0;
 };
 
+/** Hard-delete every relationship row. Returns count removed. */
+export const deleteAllRelationships = (db: AdceDb): number => {
+  const before = countRelationships(db);
+  if (before === 0) return 0;
+  db.delete(relationships).run();
+  return before;
+};
+
 export const countRelationships = (db: AdceDb): number =>
   db.select().from(relationships).all().length;
 

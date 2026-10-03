@@ -3,6 +3,7 @@ import type { RelationshipRecord, RelationshipType } from "@adce/shared";
 import { RelationshipTypes } from "@adce/shared";
 import {
   closeDatabase,
+  deleteAllRelationships,
   findRelationshipByEdge,
   insertManualRelationship,
   openDatabase,
@@ -95,6 +96,21 @@ export const unlinkProjectRelationship = async (
       throw new RelationshipNotFoundError(resolved.id);
     }
     return updated;
+  } finally {
+    closeDatabase(db);
+  }
+};
+
+/** Hard-delete all relationships (including REJECTED tombstones). */
+export const resetProjectRelationships = async (
+  rootPath: string,
+): Promise<number> => {
+  if (!(await exists(adceDir(rootPath)))) {
+    throw new AdceNotInitializedError(rootPath);
+  }
+  const db = openDatabase(dbPath(rootPath));
+  try {
+    return deleteAllRelationships(db);
   } finally {
     closeDatabase(db);
   }

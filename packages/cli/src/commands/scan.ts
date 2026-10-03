@@ -23,6 +23,7 @@ export async function runScan(
     log.step(`Unchanged: ${result.unchanged}`);
     log.step(`Removed: ${result.removed}`);
     log.step(`Git detected: ${result.gitDetected ? "yes" : "no"}`);
+    log.step("Next: adce relate   # ML/heuristic relationship suggestions (y/n)");
   } catch (error) {
     if (
       error instanceof AdceNotInitializedError ||

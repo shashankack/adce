@@ -44,7 +44,7 @@ export interface InitOptions {
    * Default true. Skips paths that already exist.
    */
   fillStructure?: boolean;
-  /** Structure profile for `--fill` seeding (default typescript-lib). */
+  /** Structure profile for `--fill` seeding (default software-eng). */
   structureProfileId?: string;
 }
 

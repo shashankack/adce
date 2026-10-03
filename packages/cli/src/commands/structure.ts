@@ -55,6 +55,13 @@ export const runStructure = async (
       }
       console.log("");
     }
+
+    if (report.summary.missing + report.summary.suggested > 0) {
+      log.step(
+        "Fill gaps yourself, or prompt the agent: “Draft real content for ADCE software-eng stubs from this repo, then I’ll review.”",
+      );
+      log.step("Then: adce scan --full && adce artifact verify <id>");
+    }
   } catch (error) {
     if (error instanceof AdceNotInitializedError) {
       log.error(error.message);
