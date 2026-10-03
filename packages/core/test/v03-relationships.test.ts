@@ -7,6 +7,7 @@ import {
   InvalidRelationshipTypeError,
   RelationshipExistsError,
   RelationshipSelfLinkError,
+  inferRelationshipCandidates,
   initializeProject,
   linkProjectArtifacts,
   listProjectArtifacts,
@@ -15,6 +16,7 @@ import {
   scanProject,
   unlinkProjectRelationship,
 } from "@adce/core";
+import type { ArtifactRecord } from "@adce/shared";
 
 const repoRoot = fileURLToPath(new URL("../../..", import.meta.url));
 const temps: string[] = [];
@@ -138,6 +140,62 @@ describe("v0.3 relationships", () => {
     const after = await listProjectRelationships(root);
     const row = after.find((r) => r.id === rel.id);
     expect(row?.verification).toBe("REJECTED");
+  });
+
+  it("does not fan out DOCUMENTS from meta docs or all sources", () => {
+    const mk = (
+      id: string,
+      p: string,
+      type: ArtifactRecord["type"],
+    ): ArtifactRecord =>
+      ({
+        id,
+        path: p,
+        name: p.split("/").pop()!,
+        type,
+        origin: "DETECTED",
+        verification: "UNREVIEWED",
+        health: "HEALTHY",
+        authority: "NORMAL",
+        contentHash: null,
+        sizeBytes: null,
+        mtimeMs: null,
+        createdAt: "t",
+        updatedAt: "t",
+      }) as ArtifactRecord;
+
+    const artifacts = [
+      mk("d1", "AGENTS.md", "DOCUMENTATION"),
+      mk("d2", "CLAUDE.md", "DOCUMENTATION"),
+      mk("d3", "README.md", "DOCUMENTATION"),
+      mk("d4", "docs/schedule.md", "DOCUMENTATION"),
+      mk("s1", "src/app/page.tsx", "SOURCE"),
+      mk("s2", "src/lib/schedule.ts", "SOURCE"),
+      mk("s3", "src/components/login-form.tsx", "SOURCE"),
+    ];
+
+    const edges = inferRelationshipCandidates(artifacts).filter(
+      (e) => e.type === "DOCUMENTS",
+    );
+
+    expect(edges.every((e) => e.sourceArtifactId !== "d1")).toBe(true);
+    expect(edges.every((e) => e.sourceArtifactId !== "d2")).toBe(true);
+    expect(edges.length).toBeLessThan(artifacts.length);
+    expect(
+      edges.some(
+        (e) => e.sourceArtifactId === "d3" && e.targetArtifactId === "s1",
+      ),
+    ).toBe(true);
+    expect(
+      edges.some(
+        (e) => e.sourceArtifactId === "d4" && e.targetArtifactId === "s2",
+      ),
+    ).toBe(true);
+    expect(
+      edges.some(
+        (e) => e.sourceArtifactId === "d4" && e.targetArtifactId === "s3",
+      ),
+    ).toBe(false);
   });
 
   it("infers DOCUMENTS and TESTS on basic-typescript scan", async () => {

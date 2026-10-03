@@ -48,9 +48,24 @@ program
     "Repair an incomplete .adce (rewrite missing meta / layout)",
     false,
   )
-  .action(async (option: { yes?: boolean; repair?: boolean }) => {
-    await runInit(process.cwd(), { yes: option.yes, repair: option.repair });
-  });
+  .option(
+    "--no-fill-structure",
+    "Skip seeding concrete structure stubs (README/tsconfig/…)",
+  )
+  .action(
+    async (option: {
+      yes?: boolean;
+      repair?: boolean;
+      fillStructure?: boolean;
+    }) => {
+      await runInit(process.cwd(), {
+        yes: option.yes,
+        repair: option.repair,
+        // Commander: default true; --no-fill-structure → false
+        fillStructure: option.fillStructure,
+      });
+    },
+  );
 
 program
   .command("scan")

@@ -38,6 +38,23 @@ const RULE_STUB_PATHS: Record<string, string> = {
   openapi: "openapi.yaml",
 };
 
+const writeStubIfMissing = async (
+  rootPath: string,
+  rel: string,
+  ruleId: string,
+): Promise<"created" | "exists"> => {
+  const abs = path.join(rootPath, ...rel.split("/"));
+  await mkdir(path.dirname(abs), { recursive: true });
+  const body =
+    STUB_BODIES[path.posix.basename(rel)] ?? `# Stub for ${ruleId}\n`;
+  try {
+    await writeFile(abs, body, { flag: "wx" });
+    return "created";
+  } catch {
+    return "exists";
+  }
+};
+
 /**
  * Create minimal stub files for MISSING/SUGGESTED findings with concrete paths.
  * Skips wildcard rules (src/**, tests, …) — those need real content.
@@ -67,17 +84,37 @@ export const fillStructureStubs = async (
       skipped.push(finding.ruleId);
       continue;
     }
-    const abs = path.join(rootPath, ...rel.split("/"));
-    await mkdir(path.dirname(abs), { recursive: true });
-    const body =
-      STUB_BODIES[path.posix.basename(rel)] ??
-      `# Stub for ${finding.ruleId}\n`;
-    try {
-      await writeFile(abs, body, { flag: "wx" });
-      created.push(rel);
-    } catch {
-      skipped.push(`${finding.ruleId} (exists)`);
+    const result = await writeStubIfMissing(rootPath, rel, finding.ruleId);
+    if (result === "created") created.push(rel);
+    else skipped.push(`${finding.ruleId} (exists)`);
+  }
+
+  return { created, skipped };
+};
+
+/**
+ * Seed concrete structure stubs from a profile using the filesystem only
+ * (no scan / DB required). Used by `adce init`.
+ */
+export const seedConcreteStructureStubs = async (
+  rootPath: string,
+  profileId: string = "typescript-lib",
+): Promise<StructureFillResult> => {
+  const profile = PROFILES[profileId];
+  const created: string[] = [];
+  const skipped: string[] = [];
+  if (!profile) return { created, skipped };
+
+  for (const rule of profile.rules) {
+    const rel =
+      concreteStubPath(rule.pathGlob) ?? RULE_STUB_PATHS[rule.id] ?? null;
+    if (!rel) {
+      skipped.push(rule.id);
+      continue;
     }
+    const result = await writeStubIfMissing(rootPath, rel, rule.id);
+    if (result === "created") created.push(rel);
+    else skipped.push(`${rule.id} (exists)`);
   }
 
   return { created, skipped };

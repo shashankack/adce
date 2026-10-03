@@ -19,3 +19,6 @@ export function cacheDir(rootPath: string): string {
 export function logsDir(rootPath: string): string {
   return path.join(rootPath, ADCE_DIR, "logs");
 }
+export function metricsDir(rootPath: string): string {
+  return path.join(rootPath, ADCE_DIR, "metrics");
+}

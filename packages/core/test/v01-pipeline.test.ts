@@ -61,6 +61,12 @@ describe("v0.1 init → scan → status", () => {
     expect(await exists(path.join(root, ADCE_DIR, ADCE_CONFIG_FILE))).toBe(true);
     expect(await exists(path.join(root, ADCE_DIR, ADCE_DB_FILE))).toBe(true);
     expect(await exists(path.join(root, ADCE_AGENTS_FILE))).toBe(true);
+    expect(await exists(path.join(root, ADCE_DIR, "artifacts", "README.md"))).toBe(
+      true,
+    );
+    expect(await exists(path.join(root, ADCE_DIR, "metrics"))).toBe(true);
+    expect(result.created.artifactsReadme).toBe(true);
+    expect(result.structureFill?.created.length).toBeGreaterThan(0);
 
     const scan = await scanProject({ rootPath: root });
     expect(scan.mode).toBe("full");

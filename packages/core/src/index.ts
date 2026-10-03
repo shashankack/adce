@@ -149,6 +149,7 @@ export {
 export { checkProjectStructure } from "./structure/check-structure.js";
 export {
   fillStructureStubs,
+  seedConcreteStructureStubs,
   type StructureFillResult,
 } from "./structure/fill-structure.js";
 export { packContextBrief } from "./context/ml-pack.js";

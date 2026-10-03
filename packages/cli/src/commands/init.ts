@@ -11,6 +11,8 @@ export interface RunInitOptions {
   yes?: boolean;
   /** Repair incomplete `.adce` (missing meta / layout). */
   repair?: boolean;
+  /** When false, skip concrete structure stub seeding. Default true. */
+  fillStructure?: boolean;
 }
 
 export const runInit = async (
@@ -46,6 +48,7 @@ export const runInit = async (
   );
   const result = await initializeProject(targetRoot, {
     repair: options.repair,
+    fillStructure: options.fillStructure,
   });
   if (result.repaired) {
     log.ok(`Repaired ADCE in ${result.rootPath}`);
@@ -79,7 +82,25 @@ export const runInit = async (
     log.step("No `.gitignore` found — skipped (did not create one).");
   }
 
+  if (result.created.artifactsReadme) {
+    log.ok("Seeded `.adce/artifacts/README.md` (virtual stub folder).");
+  }
+
+  if (result.structureFill) {
+    if (result.structureFill.created.length > 0) {
+      log.ok(
+        `Structure stubs: ${result.structureFill.created.join(", ")}`,
+      );
+    } else {
+      log.step(
+        "Structure stubs: nothing new (concrete profile files already present).",
+      );
+    }
+  }
+
   console.log("");
-  log.step("Next: run `adce scan`, then use context/structure/conflicts as needed.");
+  log.step(
+    "Next: run `adce scan` (loads real files into state.db), then context/conflicts.",
+  );
   printAgentSessionNudge();
 };
