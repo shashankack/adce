@@ -10,7 +10,11 @@ export const configSchema = z.object({
     .default({
       followSymlinks: false,
     }),
-  /** Opt-in analytics sync to the ML server (`adce analytics push`). Default off. */
+  /**
+   * Opt-in analytics sync to the ML server.
+   * When enabled (+ ADCE_ML_URL), the CLI auto-pushes after context / analyze /
+   * conflict feedback. Manual: `adce analytics push`. Default off.
+   */
   analytics: z
     .object({
       enabled: z.boolean().default(false),

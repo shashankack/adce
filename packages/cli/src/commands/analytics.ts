@@ -49,6 +49,9 @@ export const runAnalyticsPush = async (
     log.step(
       "No file contents, excerpts, or absolute paths are ever sent. Does not train Cursor — only your dashboard / LinUCB store.",
     );
+    log.step(
+      "With analytics.enabled: true, context/analyze/feedback auto-push (no manual step required).",
+    );
   } catch (error) {
     if (
       error instanceof AdceNotInitializedError ||

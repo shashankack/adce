@@ -18,6 +18,7 @@ import {
   updateConflictAnalysis,
   upsertDetectedConflict,
 } from "@adce/storage";
+import { maybeAutoPushAnalytics } from "../analytics/auto-push.js";
 import { AdceNotInitializedError } from "../artifacts/query.js";
 import { resolveConflictId } from "../conflicts/query.js";
 import { adceDir, dbPath } from "../project/paths.js";
@@ -185,6 +186,7 @@ export const analyzeProject = async (
       syncArtifactHealthFromConflicts(db);
     }
 
+    maybeAutoPushAnalytics(rootPath);
     return report;
   } finally {
     closeDatabase(db);

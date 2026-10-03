@@ -20,6 +20,7 @@ import { AdceNotInitializedError } from "../artifacts/query.js";
 import { adceDir, dbPath } from "../project/paths.js";
 import { packContextBrief } from "./ml-pack.js";
 import { compactBrief, estimateBriefTokens } from "./token-budget.js";
+import { maybeAutoPushAnalytics } from "../analytics/auto-push.js";
 import { appendContextTokenMetric } from "./token-metrics-log.js";
 
 const exists = async (p: string): Promise<boolean> => {
@@ -388,6 +389,7 @@ export const buildProjectContext = async (
     });
     if (logPath) {
       notes.push(`Token metrics logged → .adce/metrics/context-tokens.jsonl`);
+      maybeAutoPushAnalytics(rootPath);
     }
 
     return {

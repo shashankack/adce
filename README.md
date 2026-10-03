@@ -18,7 +18,7 @@ adce init → scan → relate (y/n) → conflicts → analyze (MiniLM + LinUCB) 
 pnpm bench:analyze   # rule vs hybrid ablation (mlLift)
 ```
 
-**Analytics (opt-in):** `adce analytics push` → `POST /v1/analytics` on the ML server. Privacy-locked metrics/feedback/events only (no code, no raw paths). Feeds your dashboard + LinUCB — does **not** train Cursor or fine-tune MiniLM.
+**Analytics (opt-in):** set `analytics.enabled: true` in `.adce/config.yaml` and `ADCE_ML_URL`. The CLI **auto-pushes** after `context` / `analyze` / conflict feedback (debounced). Manual: `adce analytics push`. Privacy-locked only — does **not** train Cursor or fine-tune MiniLM.
 
 ## Quick start
 
@@ -39,9 +39,9 @@ adce structure --fill                   # stub suggested knowledge folders
 # Fill stubs with real knowledge (or prompt the agent to draft, then review + verify)
 adce structure -p typescript-lib        # language-specific (TS) checklist
 adce conflicts
-# Opt-in analytics (set analytics.enabled: true in .adce/config.yaml first):
+# Opt-in analytics — enable once, then auto-syncs (or push manually):
+#   analytics: { enabled: true }   # in .adce/config.yaml
 # adce analytics push --dry-run
-# adce analytics push
 ```
 
 ### Hybrid ML (core path)

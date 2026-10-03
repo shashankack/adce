@@ -7,6 +7,7 @@ import {
   getProjectConflict,
   ignoreProjectConflict,
   listProjectConflicts,
+  maybeAutoPushAnalytics,
   postConflictFeedback,
   rejectProjectConflict,
   resolveProjectConflict,
@@ -60,7 +61,9 @@ const sendFeedback = (
     targetArtifactId: c.targetArtifactId,
     score: confidenceToScore(c.confidence),
   };
-  void appendLocalFeedbackEvent(rootPath, payload);
+  void appendLocalFeedbackEvent(rootPath, payload).then(() => {
+    maybeAutoPushAnalytics(rootPath);
+  });
   void postConflictFeedback(payload).then((ok) => {
     if (ok) log.step(`ML feedback logged (${action}).`);
   });

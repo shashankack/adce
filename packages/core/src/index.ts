@@ -175,6 +175,7 @@ export {
   type PushAnalyticsOptions,
   type PushAnalyticsResult,
 } from "./analytics/push.js";
+export { maybeAutoPushAnalytics } from "./analytics/auto-push.js";
 export { checkProjectStructure } from "./structure/check-structure.js";
 export {
   fillStructureStubs,
