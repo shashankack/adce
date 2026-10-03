@@ -5,7 +5,12 @@ Python FastAPI service for hybrid enrichment (`adce analyze`, feedback, context 
 **Locked primary model:** `sentence-transformers` / `all-MiniLM-L6-v2`  
 **Fallback:** hashing embedder (`ADCE_EMBEDDER=hashing` to force).
 
-## Setup
+## Deploy (free tier)
+
+Step-by-step: **[DEPLOY_RENDER.md](DEPLOY_RENDER.md)** (Render + Docker + hashing).  
+Local MiniLM remains for demos; cloud free tier uses hashing.
+
+## Setup (local)
 
 ```powershell
 cd ml

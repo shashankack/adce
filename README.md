@@ -74,7 +74,7 @@ adce context --task "your task" --format markdown --compact
 adce logout
 ```
 
-Details: [ml/README.md](ml/README.md). `--skip-ml` is for ablation / offline demos only.
+Details: [ml/README.md](ml/README.md). Free cloud deploy: [ml/DEPLOY_RENDER.md](ml/DEPLOY_RENDER.md). `--skip-ml` is for ablation / offline demos only.
 
 ## What ships
 

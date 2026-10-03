@@ -1,0 +1,21 @@
+# Optional Render Blueprint — or configure the same settings in the dashboard.
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: adce-ml
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ADCE_EMBEDDER
+        value: hashing
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: ADCE_JWT_SECRET
+        generateValue: true
+      - key: ADCE_ML_TOKEN
+        sync: false
