@@ -1,4 +1,5 @@
 import type { ContextBrief } from "@adce/shared";
+import { mlRequestHeaders } from "../analyze/ml-headers.js";
 
 export interface PackRequest {
   task?: string | null;
@@ -24,10 +25,7 @@ export const packContextBrief = async (
   try {
     const res = await fetchFn(`${baseUrl.replace(/\/+$/, "")}/v1/pack`, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        accept: "application/json",
-      },
+      headers: mlRequestHeaders(),
       body: JSON.stringify({
         task: payload.task ?? null,
         brief: payload.brief,

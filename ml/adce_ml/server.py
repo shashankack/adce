@@ -1,13 +1,15 @@
 """ADCE ML HTTP service.
 
-Run:
-  uvicorn adce_ml.server:app --reload --host 127.0.0.1 --port 8090
+Auth:
+  - ADCE_ML_TOKEN — admin shared secret
+  - GitHub OAuth device flow → ADCE JWT (adce login)
 """
 
 from __future__ import annotations
-from typing import Any
+from contextlib import asynccontextmanager
+from typing import Any, AsyncIterator
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from adce_ml.analyze import analyze_request
@@ -15,26 +17,66 @@ from adce_ml.analytics_ingest import (
     append_analytics_ingest,
     validate_analytics_bundle,
 )
+from adce_ml.auth import (
+    AuthPrincipal,
+    auth_enabled,
+    require_ml_auth,
+    whoami_payload,
+)
 from adce_ml.bandit import get_bandit, reload_bandit
 from adce_ml.embedder import get_embedder
 from adce_ml.feedback import ALLOWED_ACTIONS, append_feedback
+from adce_ml.oauth_github import (
+    oauth_configured,
+    poll_device_token,
+    start_device_code,
+)
 from adce_ml.pack import pack_brief
+
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    modes: list[str] = []
+    if os_env_token():
+        modes.append("ADCE_ML_TOKEN")
+    if oauth_configured():
+        modes.append("GitHub OAuth/JWT")
+    if modes:
+        print(f"ADCE ML: auth enabled ({', '.join(modes)})")
+    else:
+        print(
+            "ADCE ML: WARNING auth disabled — set ADCE_ML_TOKEN and/or "
+            "GITHUB_CLIENT_ID + ADCE_JWT_SECRET before public deploy"
+        )
+    yield
+
+
+def os_env_token() -> bool:
+    import os
+
+    return bool((os.environ.get("ADCE_ML_TOKEN") or "").strip())
+
 
 app = FastAPI(
     title="ADCE ML",
     version="0.1.0",
     description="Optional ML layer for ADCE (Architecture Lock).",
+    lifespan=_lifespan,
 )
+
+_protected = [Depends(require_ml_auth)]
 
 
 @app.get("/health")
-def health() -> dict[str, str | int]:
+def health() -> dict[str, str | int | bool]:
     b = get_bandit()
     return {
         "status": "ok",
         "service": "adce-ml",
         "embedder": get_embedder().name,
         "banditArms": len(b.arms),
+        "authRequired": auth_enabled(),
+        "oauthConfigured": oauth_configured(),
     }
 
 
@@ -44,14 +86,47 @@ class AnalyzeHttpResponse(BaseModel):
     engine: str = "ml"
 
 
-@app.post("/v1/analyze", response_model=AnalyzeHttpResponse)
+class DeviceTokenRequest(BaseModel):
+    device_code: str
+
+
+@app.post("/v1/auth/device/code")
+def auth_device_code() -> dict[str, Any]:
+    try:
+        return start_device_code()
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.post("/v1/auth/device/token")
+def auth_device_token(body: DeviceTokenRequest) -> dict[str, Any]:
+    try:
+        result = poll_device_token(body.device_code.strip())
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return result
+
+
+@app.get("/v1/auth/whoami")
+def auth_whoami(
+    principal: AuthPrincipal | None = Depends(require_ml_auth),
+) -> dict[str, Any]:
+    if principal is None:
+        return {"login": "anonymous", "provider": "none", "subject": None}
+    return whoami_payload(principal)
+
+
+@app.post(
+    "/v1/analyze",
+    response_model=AnalyzeHttpResponse,
+    dependencies=_protected,
+)
 def analyze(body: dict[str, Any]) -> AnalyzeHttpResponse:
     if "artifacts" not in body or "conflicts" not in body:
         raise HTTPException(
             status_code=400,
             detail="Expected AnalyzeRequest fields: artifacts, conflicts",
         )
-    # Privacy posture: reject accidental full-repo dumps
     if body.get("files") or body.get("repoArchive") or body.get("fullTree"):
         raise HTTPException(
             status_code=400,
@@ -78,27 +153,27 @@ class FeedbackRequest(BaseModel):
     sourceArtifactId: str | None = None
     targetArtifactId: str | None = None
     projectHash: str | None = None
-    # Optional ML suggestion score (0–1) for LinUCB context; defaults to 0.5 in bandit.
     score: float | None = None
 
 
-@app.post("/v1/feedback")
+@app.post("/v1/feedback", dependencies=_protected)
 def feedback(body: FeedbackRequest) -> dict:
     if body.action.lower() not in ALLOWED_ACTIONS:
         raise HTTPException(
             400, detail=f"action must be one of {sorted(ALLOWED_ACTIONS)}"
         )
     try:
-        record = append_feedback({**body.model_dump(), "embedder": get_embedder().name})
+        record = append_feedback(
+            {**body.model_dump(), "embedder": get_embedder().name}
+        )
     except ValueError as e:
         raise HTTPException(400, detail=str(e)) from e
     n = reload_bandit()
     return {"ok": True, "record": record, "banditExamples": n}
 
 
-@app.post("/v1/pack")
+@app.post("/v1/pack", dependencies=_protected)
 def pack(body: dict[str, Any]) -> dict[str, Any]:
-    """Reorder/annotate a local ContextBrief (MUST READ / CAUTION / TRUST)."""
     if "brief" not in body or not isinstance(body.get("brief"), dict):
         raise HTTPException(400, detail="Expected { brief: ContextBrief, task? }")
     if body.get("files") or body.get("repoArchive") or body.get("fullTree"):
@@ -106,9 +181,8 @@ def pack(body: dict[str, Any]) -> dict[str, Any]:
     return pack_brief(body)
 
 
-@app.post("/v1/analytics")
+@app.post("/v1/analytics", dependencies=_protected)
 def analytics(body: dict[str, Any]) -> dict[str, Any]:
-    """Opt-in privacy-locked metrics/feedback ingest for dashboards + LinUCB."""
     try:
         validate_analytics_bundle(body)
     except ValueError as e:

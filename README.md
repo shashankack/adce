@@ -18,30 +18,34 @@ adce init → scan → relate (y/n) → conflicts → analyze (MiniLM + LinUCB) 
 pnpm bench:analyze   # rule vs hybrid ablation (mlLift)
 ```
 
-**Analytics (opt-in):** set `analytics.enabled: true` in `.adce/config.yaml` and `ADCE_ML_URL`. The CLI **auto-pushes** after `context` / `analyze` / conflict feedback (debounced). Manual: `adce analytics push`. Privacy-locked only — does **not** train Cursor or fine-tune MiniLM.
+**Auth:** friends run `adce login` (GitHub device flow) against your ML server; you/CI can use `ADCE_ML_TOKEN`. See `adce whoami` / `adce logout`.
 
-## Quick start
+**Analytics (opt-in):** `analytics.enabled: true` + `ADCE_ML_URL` (and login or admin token). Auto-pushes after context / analyze / feedback.
 
-Requires **Node.js 22+**.
+## Install (npm — when published)
+
+```powershell
+npm install -g adce
+# or:  npx adce --help
+```
+
+Published packages: `adce` (CLI) + `@adce/core` / `@adce/shared` / `@adce/storage` / `@adce/git` / `@adce/parsers`.
+
+## Quick start (from this repo)
+
+Requires **Node.js 22+** and pnpm.
 
 ```powershell
 pnpm install
-pnpm --filter @adce/cli build
+pnpm --filter adce build
 
 # in a target project directory
 adce init -y
 adce scan --full
 adce relate              # interactive ML/heuristic links (y/n/s/q)
-adce relate --reset -y   # wipe all edges (or: pnpm reset:relationships -- --yes)
 adce doctor
-adce structure                          # default: software-eng (requirements/ design/ …)
-adce structure --fill                   # stub suggested knowledge folders
-# Fill stubs with real knowledge (or prompt the agent to draft, then review + verify)
-adce structure -p typescript-lib        # language-specific (TS) checklist
+adce structure           # default: software-eng
 adce conflicts
-# Opt-in analytics — enable once, then auto-syncs (or push manually):
-#   analytics: { enabled: true }   # in .adce/config.yaml
-# adce analytics push --dry-run
 ```
 
 ### Hybrid ML (core path)
@@ -51,16 +55,23 @@ cd ml
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev,ml]"
+# GitHub OAuth App (Device Flow on) + JWT secret — see ml/README.md
+$env:GITHUB_CLIENT_ID = "…"
+$env:GITHUB_CLIENT_SECRET = "…"
+$env:ADCE_JWT_SECRET = "long-random-string"
+$env:ADCE_ML_TOKEN = "admin-only-optional"   # CI / your smoke tests
 uvicorn adce_ml.server:app --host 127.0.0.1 --port 8000
 ```
 
 ```powershell
-# other terminal — point CLI at ML
+# friends / day-to-day
 $env:ADCE_ML_URL = "http://127.0.0.1:8000"
+adce login                 # GitHub device flow → ~/.adce/credentials.json
+adce whoami
 adce analyze --deep --skip-cache
-adce relate                 # MiniLM deep suggestions when ADCE_ML_URL is set
+adce relate
 adce context --task "your task" --format markdown --compact
-pnpm bench:analyze
+adce logout
 ```
 
 Details: [ml/README.md](ml/README.md). `--skip-ml` is for ablation / offline demos only.
@@ -73,8 +84,8 @@ Details: [ml/README.md](ml/README.md). `--skip-ml` is for ablation / offline dem
 | Authority | Human verify / CANONICAL overrides survive rescans (**Hybrid Lock** — ML never auto-CONFIRMS) |
 | Structure | Default `software-eng` (+ `typescript-lib`, `typescript-api`, `python`, `go`, `generic`) + `--fill` |
 | Context | Ranked brief · `/v1/pack` · `--compact` · token metrics → `.adce/metrics/context-tokens.jsonl` |
-| Hybrid ML | MiniLM analyze · LinUCB (RL) from confirm/reject/resolve/ignore · privacy filter |
-| Analytics | Opt-in `adce analytics push` → `/v1/analytics` (sanitized metrics/feedback; no codebase leak) |
+| Hybrid ML | MiniLM · LinUCB · `adce login` (GitHub) + optional `ADCE_ML_TOKEN` · privacy filter |
+| Analytics | Opt-in auto-push → `/v1/analytics` (sanitized; no codebase leak) |
 | Evaluation | `pnpm bench:analyze` — recall / precision / `mlLift` / brief coverage + golden JSON |
 | Agent ritual | `AGENTS.md` · Cursor rule · `adce doctor` · `.adce/` gitignored on init |
 
@@ -100,7 +111,8 @@ Academic write-ups (progress reports, literature survey, slide paste decks) live
 pnpm install
 pnpm test:core
 pnpm bench:analyze
-pnpm --filter @adce/cli dev -- --help
+pnpm --filter adce dev -- --help
+# Publish (maintainers): pnpm -r publish --access public --filter "./packages/**"
 ```
 
 ## License

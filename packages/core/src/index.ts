@@ -176,6 +176,17 @@ export {
   type PushAnalyticsResult,
 } from "./analytics/push.js";
 export { maybeAutoPushAnalytics } from "./analytics/auto-push.js";
+export {
+  readCredentials,
+  writeCredentials,
+  clearCredentials,
+  credentialsPath,
+  adceHomeDir,
+  isCredentialExpired,
+  resolveMlBearerToken,
+  type AdceCredentials,
+} from "./auth/credentials.js";
+export { mlRequestHeaders, resolveMlAuthToken } from "./analyze/ml-headers.js";
 export { checkProjectStructure } from "./structure/check-structure.js";
 export {
   fillStructureStubs,

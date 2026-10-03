@@ -1,8 +1,11 @@
 {
   "name": "@adce/storage",
   "version": "0.1.0",
-  "private": true,
+  "description": "SQLite storage layer for ADCE",
+  "license": "UNLICENSED",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -10,10 +13,14 @@
       "default": "./src/index.ts"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
     "@adce/shared": "workspace:*",
@@ -22,5 +29,17 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      }
+    }
   }
 }

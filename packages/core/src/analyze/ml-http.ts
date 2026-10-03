@@ -1,4 +1,5 @@
 import type { AnalyzeRequest, AnalyzeSuggestion } from "@adce/shared";
+import { mlRequestHeaders } from "./ml-headers.js";
 import { filterAnalyzeRequestForMl } from "./privacy.js";
 
 export const runMlHttpAnalyze = async (
@@ -19,10 +20,7 @@ export const runMlHttpAnalyze = async (
   try {
     const res = await fetchFn(url, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        accept: "application/json",
-      },
+      headers: mlRequestHeaders(),
       body: JSON.stringify(filterAnalyzeRequestForMl(req)),
       signal: controller.signal,
     });

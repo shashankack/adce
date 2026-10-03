@@ -3,10 +3,12 @@ pyproject.toml
 adce_ml/__init__.py
 adce_ml/analytics_ingest.py
 adce_ml/analyze.py
+adce_ml/auth.py
 adce_ml/bandit.py
 adce_ml/cli.py
 adce_ml/embedder.py
 adce_ml/feedback.py
+adce_ml/oauth_github.py
 adce_ml/pack.py
 adce_ml/server.py
 adce_ml.egg-info/PKG-INFO
@@ -15,4 +17,6 @@ adce_ml.egg-info/dependency_links.txt
 adce_ml.egg-info/requires.txt
 adce_ml.egg-info/top_level.txt
 tests/test_analytics_ingest.py
+tests/test_auth.py
+tests/test_oauth_jwt.py
 tests/test_pack.py

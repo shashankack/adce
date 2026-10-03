@@ -70,6 +70,8 @@ describe("ML HTTP + privacy", () => {
   });
 
   it("POSTs to /v1/analyze and merges as hybrid via HTTP", async () => {
+    const prev = process.env.ADCE_ML_TOKEN;
+    process.env.ADCE_ML_TOKEN = "unit-test-token";
     const fetchImpl = vi.fn(async () =>
       Response.json({
         suggestions: [
@@ -85,19 +87,28 @@ describe("ML HTTP + privacy", () => {
       }),
     );
 
-    const suggestions = await runMlHttpAnalyze(baseReq(), {
-      baseUrl: "http://ml.test/",
-      fetchImpl: fetchImpl as unknown as typeof fetch,
-    });
-    expect(suggestions).toHaveLength(1);
+    try {
+      const suggestions = await runMlHttpAnalyze(baseReq(), {
+        baseUrl: "http://ml.test/",
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      });
+      expect(suggestions).toHaveLength(1);
 
-    expect(fetchImpl).toHaveBeenCalledOnce();
-    const [url, init] = fetchImpl.mock.calls[0]!;
-    expect(url).toBe("http://ml.test/v1/analyze");
-    expect(init?.method).toBe("POST");
-    const body = JSON.parse(String(init?.body)) as AnalyzeRequest;
-    expect(body.artifacts.some((a) => a.path === ".env")).toBe(false);
-    expect(body.artifacts.every((a) => a.excerpt === null)).toBe(true);
+      expect(fetchImpl).toHaveBeenCalledOnce();
+      const [url, init] = fetchImpl.mock.calls[0]!;
+      expect(url).toBe("http://ml.test/v1/analyze");
+      expect(init?.method).toBe("POST");
+      const headers = init?.headers as Record<string, string>;
+      expect(headers["content-type"]).toBe("application/json");
+      expect(headers.authorization).toBe("Bearer unit-test-token");
+      expect(headers["x-adce-token"]).toBe("unit-test-token");
+      const body = JSON.parse(String(init?.body)) as AnalyzeRequest;
+      expect(body.artifacts.some((a) => a.path === ".env")).toBe(false);
+      expect(body.artifacts.every((a) => a.excerpt === null)).toBe(true);
+    } finally {
+      if (prev === undefined) delete process.env.ADCE_ML_TOKEN;
+      else process.env.ADCE_ML_TOKEN = prev;
+    }
 
     const report = await runProjectAnalyze(baseReq(), {
       useCache: false,

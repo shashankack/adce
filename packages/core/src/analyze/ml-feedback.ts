@@ -1,3 +1,5 @@
+import { mlRequestHeaders } from "./ml-headers.js";
+
 export type FeedbackAction = "confirm" | "reject" | "resolve" | "ignore";
 
 export interface ConflictFeedbackPayload {
@@ -26,10 +28,7 @@ export const postConflictFeedback = async (
   try {
     const res = await fetchFn(`${baseUrl.replace(/\/+$/, "")}/v1/feedback`, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        accept: "application/json",
-      },
+      headers: mlRequestHeaders(),
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(5_000),
     });

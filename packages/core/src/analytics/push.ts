@@ -1,3 +1,4 @@
+import { mlRequestHeaders } from "../analyze/ml-headers.js";
 import { loadConfig } from "../config/loader.js";
 import {
   buildAnalyticsBundle,
@@ -87,10 +88,7 @@ export const pushProjectAnalytics = async (
   const url = `${baseUrl!.replace(/\/+$/, "")}/v1/analytics`;
   const res = await fetchFn(url, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      accept: "application/json",
-    },
+    headers: mlRequestHeaders(),
     body: JSON.stringify(bundle satisfies AnalyticsBundle),
     signal: AbortSignal.timeout(30_000),
   });

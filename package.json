@@ -1,5 +1,5 @@
 {
-  "name": "adce",
+  "name": "adce-monorepo",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,9 +8,10 @@
     "test": "pnpm -r --if-present test",
     "test:core": "pnpm --filter @adce/core test",
     "typecheck": "pnpm -r typecheck",
-    "dev": "pnpm --filter @adce/cli dev",
+    "dev": "pnpm --filter adce dev",
     "bench:analyze": "tsx benchmarks/run-analyze-benchmark.ts",
-    "reset:relationships": "tsx scripts/reset-relationships.ts"
+    "reset:relationships": "tsx scripts/reset-relationships.ts",
+    "pack:check": "pnpm -r --filter \"./packages/**\" exec pnpm pack --dry-run"
   },
   "engines": {
     "node": ">=22"

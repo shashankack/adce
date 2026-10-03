@@ -1,6 +1,6 @@
 # ADCE ML
 
-Python FastAPI service for hybrid enrichment (`adce analyze`, feedback, context pack).
+Python FastAPI service for hybrid enrichment (`adce analyze`, feedback, context pack, analytics) with **GitHub OAuth** (device flow) and optional admin token.
 
 **Locked primary model:** `sentence-transformers` / `all-MiniLM-L6-v2`  
 **Fallback:** hashing embedder (`ADCE_EMBEDDER=hashing` to force).
@@ -12,47 +12,75 @@ cd ml
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev,ml]"
+```
+
+### GitHub OAuth App (for `adce login`)
+
+1. GitHub → **Settings → Developer settings → OAuth Apps → New OAuth App**
+2. Homepage URL: your ML host (or `http://127.0.0.1:8000`)
+3. Callback URL: `http://127.0.0.1` (unused for device flow; required by GitHub form)
+4. After create: **Enable Device Flow**
+5. Copy **Client ID** and generate a **Client secret**
+
+```powershell
+$env:GITHUB_CLIENT_ID = "Iv1.…"
+$env:GITHUB_CLIENT_SECRET = "…"
+$env:ADCE_JWT_SECRET = "long-random-string"   # signs ADCE session JWTs (~7d)
+$env:ADCE_ML_TOKEN = "admin-only-optional"    # shared secret for you/CI
 uvicorn adce_ml.server:app --reload --host 127.0.0.1 --port 8000
 ```
 
-## Point the CLI at it
+| Mode | When |
+|------|------|
+| Open (dev) | No `ADCE_ML_TOKEN` and no GitHub+JWT config |
+| Admin token | `ADCE_ML_TOKEN` set — `Authorization: Bearer …` |
+| GitHub users | `GITHUB_CLIENT_ID` + `ADCE_JWT_SECRET` — `adce login` |
+
+`/health` is always open (`authRequired`, `oauthConfigured`).
+
+## CLI (Wrangler-style)
 
 ```powershell
 $env:ADCE_ML_URL = "http://127.0.0.1:8000"
+adce login      # prints GitHub code + URL, polls, saves ~/.adce/credentials.json
+adce whoami
 adce analyze --skip-cache
-adce context --task "your task" --format markdown
-# conflict confirm|reject|resolve|ignore → POST /v1/feedback (with score)
+adce logout
+```
 
-# Opt-in analytics (CLI → this server). Enable once in .adce/config.yaml:
-#   analytics: { enabled: true }
-# Then context / analyze / conflict feedback auto-push (debounced).
-# Manual: adce analytics push [--dry-run]
+Admin override (skips credentials file):
+
+```powershell
+$env:ADCE_ML_TOKEN = "admin-only-optional"
 ```
 
 ## Endpoints
 
-| Method | Path | Notes |
-|--------|------|--------|
-| GET | `/health` | `embedder`, `banditArms` |
-| POST | `/v1/analyze` | AnalyzeRequest → suggestions (MiniLM + LinUCB rank) |
-| POST | `/v1/feedback` | confirm/reject/resolve/ignore + optional `score` |
-| POST | `/v1/pack` | Reorder/annotate ContextBrief (task similarity) |
-| POST | `/v1/analytics` | Opt-in privacy-locked metrics/feedback/events ingest |
+| Method | Path | Auth | Notes |
+|--------|------|------|--------|
+| GET | `/health` | no | status flags |
+| POST | `/v1/auth/device/code` | no | start GitHub device flow |
+| POST | `/v1/auth/device/token` | no | poll → ADCE JWT |
+| GET | `/v1/auth/whoami` | yes* | `{ login, provider }` |
+| POST | `/v1/analyze` | yes* | MiniLM + LinUCB |
+| POST | `/v1/feedback` | yes* | confirm/reject/… |
+| POST | `/v1/pack` | yes* | context pack |
+| POST | `/v1/analytics` | yes* | privacy-locked metrics |
 
-Full-repo dumps (`files` / `repoArchive` / `fullTree`) are rejected (privacy lock).  
-`/v1/analytics` also rejects forbidden keys (`content`, `excerpt`, …) and absolute/raw path leaks.  
-Analytics helps **your dashboard + LinUCB** only — it does **not** fine-tune MiniLM or train Cursor.
+\* When auth is configured.
 
 ## Layout
 
 ```text
 adce_ml/
   server.py           # FastAPI app
-  analyze.py          # suggestion logic
-  analytics_ingest.py # privacy-locked /v1/analytics
-  embedder.py         # MiniLM / hashing
-  bandit.py           # LinUCB
-  feedback.py         # JSONL log
-  pack.py             # context packing
-data/                 # feedback.jsonl + analytics/ (gitignored)
+  auth.py             # admin token + JWT
+  oauth_github.py     # device flow + JWT mint
+  analyze.py
+  analytics_ingest.py
+  embedder.py
+  bandit.py
+  feedback.py
+  pack.py
+data/                 # feedback + analytics (gitignored)
 ```

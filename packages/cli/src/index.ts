@@ -33,6 +33,12 @@ import { runContext } from "./commands/context.js";
 import { runAuthorityClear, runAuthoritySet } from "./commands/authority.js";
 import { runAnalyze } from "./commands/analyze.js";
 import { runStructure } from "./commands/structure.js";
+import {
+  handleAuthError,
+  runLogin,
+  runLogout,
+  runWhoami,
+} from "./commands/auth.js";
 
 const program = new Command();
 
@@ -437,6 +443,41 @@ program
       format: opts.format === "json" ? "json" : "text",
       fill: Boolean(opts.fill),
     });
+  });
+
+program
+  .command("login")
+  .description("Log in with GitHub (device flow) against the ML server")
+  .option("--url <url>", "ML server base URL (default: ADCE_ML_URL)")
+  .action(async (options: { url?: string }) => {
+    try {
+      await runLogin({ url: options.url });
+    } catch (error) {
+      if (!handleAuthError(error)) throw error;
+    }
+  });
+
+program
+  .command("whoami")
+  .description("Show the logged-in GitHub user (or ADCE_ML_TOKEN admin)")
+  .option("--url <url>", "ML server base URL (default: credentials / ADCE_ML_URL)")
+  .action(async (options: { url?: string }) => {
+    try {
+      await runWhoami({ url: options.url });
+    } catch (error) {
+      if (!handleAuthError(error)) throw error;
+    }
+  });
+
+program
+  .command("logout")
+  .description("Remove local ADCE credentials (~/.adce/credentials.json)")
+  .action(async () => {
+    try {
+      await runLogout();
+    } catch (error) {
+      if (!handleAuthError(error)) throw error;
+    }
   });
 
 const analytics = program

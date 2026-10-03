@@ -1,8 +1,11 @@
 {
   "name": "@adce/core",
   "version": "0.1.0",
-  "private": true,
+  "description": "Core engine for ADCE (scan, conflicts, context, analyze)",
+  "license": "UNLICENSED",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -10,10 +13,14 @@
       "default": "./src/index.ts"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {
     "vitest": "^5.0.0"
@@ -27,5 +34,17 @@
     "ignore": "^7.0.8",
     "yaml": "^2.9.0",
     "zod": "^4.5.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      }
+    }
   }
 }

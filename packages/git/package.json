@@ -1,8 +1,11 @@
 {
   "name": "@adce/git",
   "version": "0.1.0",
-  "private": true,
+  "description": "Git helpers for ADCE",
+  "license": "UNLICENSED",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -10,15 +13,31 @@
       "default": "./src/index.ts"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
     "simple-git": "^3.36.0"
   },
   "devDependencies": {
     "@types/node": "^26.4.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      }
+    }
   }
 }
